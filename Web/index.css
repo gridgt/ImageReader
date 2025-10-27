@@ -1,0 +1,11 @@
+h2{
+    text-align: center;
+    line-height: 36px;
+}
+.imgBox{
+    text-align: center;
+}
+.imgBox img{
+    width: 100px;
+    height: 100px;
+}
