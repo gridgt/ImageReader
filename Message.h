@@ -15,7 +15,7 @@ class WindowMain;
 class Message
 {
 	public:
-		Message(JsonObject&& param, ICoreWebView2* sender, WindowMain* win);
+		Message(JsonObject&& param, WindowMain* win);
 		~Message();
 		void route();
 		void resolve();
@@ -23,7 +23,6 @@ class Message
 	public:
 		JsonObject param; 
 		JsonObject result;
-		ICoreWebView2* sender;
 		WindowMain* win;
 	private:
 		void initResult();

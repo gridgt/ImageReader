@@ -47,10 +47,11 @@ class WindowMain
 		void getFilePath(Message* msg);
 	public:
 		HWND hwnd;
+		ComPtr<ICoreWebView2_22> webview;
 	protected:
 		void createWindow();
 	protected:
-		int x{ 200 }, y{ 200 }, w{ 600 }, h{600};
+		int w{ 500 }, h{500};
 		float dpr;
 		std::unordered_map<winrt::hstring, std::vector<Message*>> eventTargets;
 		ComPtr<ICoreWebView2Controller> webviewCtrl;
@@ -70,7 +71,6 @@ class WindowMain
 		HRESULT resRequested(ICoreWebView2* webview, ICoreWebView2WebResourceRequestedEventArgs* args);
 		std::wstring getContentType(const std::wstring& fileName);
 	private:
-		ComPtr<ICoreWebView2_22> webview;
 		winrt::Windows::UI::Composition::Compositor compositor{ nullptr };
 		winrt::Windows::UI::Composition::Desktop::DesktopWindowTarget winTarget{ nullptr };
 		winrt::Windows::UI::Composition::ContainerVisual rootVisual{ nullptr };

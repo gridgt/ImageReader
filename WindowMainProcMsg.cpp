@@ -47,7 +47,7 @@ void WindowMain::show(Message* msg)
 
 void WindowMain::exec(Message* msg)
 {
-    auto methodName = msg->param.GetNamedString(L"_methodName");
+    auto methodName = msg->param.GetNamedString(L"$methodName");
     if (methodName == L"minimize") {
         minimize(msg);
     }
@@ -83,27 +83,19 @@ void WindowMain::exec(Message* msg)
 
 void WindowMain::on(Message* msg)
 {
-    auto eName = msg->param.GetNamedString(L"_eventName");
+    auto eName = msg->param.GetNamedString(L"$eventName");
     eventTargets[eName].push_back(msg);
     msg->resolve();
 }
 
 void WindowMain::off(Message* msg)
 {
-    auto eName = msg->param.GetNamedString(L"_eventName");
+    auto eName = msg->param.GetNamedString(L"$eventName");
     auto itMap = eventTargets.find(eName);
     if (itMap == eventTargets.end()) {
         msg->resolve();
         return;
     }
-    auto& targets = itMap->second;
-    auto it = std::remove_if(targets.begin(), targets.end(), [msg](Message* m) {
-        if (m->sender == msg->sender) {
-            delete m;
-            return true;
-        }
-        return false;
-        });
-    targets.erase(it, targets.end());
+    eventTargets.erase(itMap, eventTargets.end());
     msg->resolve();
 }

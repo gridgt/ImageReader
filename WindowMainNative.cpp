@@ -44,6 +44,17 @@ void WindowMain::createWindow()
     wcex.lpszClassName = L"ImageReader";
     wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_WINLOGO);
     RegisterClassExW(&wcex);
+
+
+    HMONITOR hMon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = { sizeof(MONITORINFO) };
+    int x, y;
+    GetMonitorInfo(hMon, &mi);
+    RECT work = mi.rcWork;
+    int width = work.right - work.left;
+    int height = work.bottom - work.top;
+    x = work.left + (width - w) / 2;
+    y = work.top + (height - h) / 2;
     hwnd = CreateWindowEx(WS_EX_APPWINDOW, wcex.lpszClassName, wcex.lpszClassName, WS_POPUP,
         x, y, w, h, nullptr, nullptr, wcex.hInstance, nullptr);
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
@@ -63,6 +74,7 @@ void WindowMain::createWindow()
     DwmEnableBlurBehindWindow(hwnd, &bb);
     DeleteObject(region);
 
+    DragAcceptFiles(hwnd, TRUE);
     ShowWindow(hwnd, SW_SHOW);
     UpdateWindow(hwnd);
 }
@@ -82,7 +94,23 @@ LRESULT WindowMain::winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     else if (msg == WM_NCHITTEST) {
-        return 0;
+        return HTCAPTION;
+    }
+    else if (msg == WM_DROPFILES) {
+        HDROP hDrop = (HDROP)wParam;
+        UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+        for (UINT i = 0; i < fileCount; ++i) {
+            TCHAR filePath[MAX_PATH];
+            DragQueryFile(hDrop, i, filePath, MAX_PATH);
+            // 处理文件路径，例如显示 MessageBox
+            //MessageBox(hwnd, filePath, TEXT("Dropped File"), MB_OK);
+            auto& targets = self->eventTargets[L"win_reading"];
+            for (auto& msg : targets)
+            {
+                msg->resolve();
+            }
+        }
+        DragFinish(hDrop);  // 释放资源
     }
     else if (msg == WM_GETMINMAXINFO) {
         self->setMinMaxInfo((LPMINMAXINFO)lParam);

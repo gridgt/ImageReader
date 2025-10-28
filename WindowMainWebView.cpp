@@ -49,6 +49,7 @@ HRESULT WindowMain::ctrlReady(HRESULT result, ICoreWebView2CompositionController
     bindCompCtrlToHwnd();
     addRequestFilter();
     addMsgReceiver();
+    addDomLoader();
     webview->Navigate(L"https://app.localhost/index.html");
     return S_OK;
 }
@@ -175,7 +176,7 @@ void WindowMain::addMsgReceiver()
     auto msgReceivedCB = Callback<ICoreWebView2WebMessageReceivedEventHandler>(
         [this](auto wv, auto arg) {
             auto param = getParam(arg);
-            auto msg = new Message(std::move(param), wv, this);
+            auto msg = new Message(std::move(param), this);
             msg->route();
             return S_OK;
         }
@@ -201,21 +202,5 @@ JsonObject WindowMain::getParam(ICoreWebView2WebMessageReceivedEventArgs* args)
     }
     JsonObject param = JsonObject::Parse(jsonRaw);
     CoTaskMemFree(jsonRaw);
-
-    ComPtr<ICoreWebView2WebMessageReceivedEventArgs2> args2;
-    args->QueryInterface(IID_PPV_ARGS(&args2));
-    ComPtr<ICoreWebView2ObjectCollectionView> additionalObjects;
-    args2->get_AdditionalObjects(&additionalObjects);
-    UINT32 count = 0;
-    additionalObjects->get_Count(&count);
-    if (count > 0) {
-        ComPtr<ICoreWebView2File> file;
-        additionalObjects->GetValueAtIndex(0, &file);
-        PWSTR path;
-        file->get_Path(&path);
-        param.SetNamedValue(L"_additionalObjects", JsonValue::CreateStringValue(path));
-        CoTaskMemFree(path);
-    }
-
     return param;
 }

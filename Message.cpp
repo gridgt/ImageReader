@@ -1,9 +1,8 @@
 #include "Message.h"
 #include "WindowMain.h"
 
-Message::Message(JsonObject&& param, ICoreWebView2* sender, WindowMain* win):
+Message::Message(JsonObject&& param, WindowMain* win):
     param{ std::move(param) }, 
-    sender{ sender },
     win{ win },
 	mainThreadId{ GetCurrentThreadId() }
 {
@@ -12,22 +11,18 @@ Message::Message(JsonObject&& param, ICoreWebView2* sender, WindowMain* win):
 
 void Message::initResult()
 {
-    auto cbId = param.GetNamedString(L"_cbId");
-    result.SetNamedValue(L"$$cbId", JsonValue::CreateStringValue(cbId));
-    if (param.HasKey(L"_eventName"))
+    auto cbId = param.GetNamedString(L"$cbId");
+    result.SetNamedValue(L"$cbId", JsonValue::CreateStringValue(cbId));
+    if (param.HasKey(L"$eventName"))
     {
-        auto eName = param.GetNamedString(L"_eventName");
-        result.SetNamedValue(L"$$eventName", JsonValue::CreateStringValue(eName));
-    }
-    if (param.HasKey(L"_additionalObjects"))
-    {
-        result.SetNamedValue(L"_additionalObjects", param.GetNamedArray(L"_additionalObjects"));
+        auto eName = param.GetNamedString(L"$eventName");
+        result.SetNamedValue(L"$eventName", JsonValue::CreateStringValue(eName));
     }
 }
 
 void Message::route()
 {
-    auto clsName = param.GetNamedString(L"_className");
+    auto clsName = param.GetNamedString(L"$className");
     if (clsName == L"win") {
         win->exec(this);
     }
@@ -50,11 +45,11 @@ void Message::postMsgBack()
 {
     //result.SetNamedValue(L"allen", JsonValue::CreateStringValue(L"allenallen"));
     auto resultStr = result.Stringify();    
-    sender->PostWebMessageAsJson(resultStr.data());
-    if (result.HasKey(L"$$eventName"))
+    win->webview->PostWebMessageAsJson(resultStr.data());
+    if (result.HasKey(L"$eventName"))
     {
-        if (result.HasKey(L"$$cbId")) {
-			result.Remove(L"$$cbId");
+        if (result.HasKey(L"$cbId")) {
+			result.Remove(L"$cbId");
         }
     }
     else {

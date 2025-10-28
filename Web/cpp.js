@@ -3,10 +3,10 @@
   window.addEventListener("load", (event) => {
     window.chrome.webview.addEventListener("message", (event) => {
       const data = event.data;
-      if (data._cbId) {
-        eventer.emit(data._cbId, data);
-      } else if (data._eventName) {
-        eventer.emit(data._eventName, data);
+      if (data.$cbId) {
+          eventer.emit(data.$cbId, data);
+      } else if (data.$eventName) {
+          eventer.emit(data.$eventName, data);
       }
     });
   });
@@ -14,21 +14,14 @@
     return new Promise((resolve, reject) => {
       let cbId = `cb_${Math.floor(Math.random() * 1000000000)}`;
       eventer.on(cbId, (e) => {
-        delete e._cbId;
+        delete e.$cbId;
         eventer.off(cbId);
         resolve(e);
       });
-      paramData._className = className;
-      paramData._methodName = methodName;
-      paramData._cbId = cbId;
-      if (paramData._additionalObjects) {
-        let objs = paramData._additionalObjects;
-        delete paramData._additionalObjects;
-        paramData._additionalObjectsCount = objs.length;
-        window.chrome.webview.postMessageWithAdditionalObjects(paramData, objs);
-      } else {
+        paramData.$className = className;
+        paramData.$methodName = methodName;
+        paramData.$cbId = cbId;
         window.chrome.webview.postMessage(paramData);
-      }
     });
   };
   let listenEvent = (className, eventName, callback) => {
@@ -38,7 +31,7 @@
     if (flag) {
       return;
     }
-    return callCppMethod(className, "on", { _eventName: eName });
+    return callCppMethod(className, "on", { $eventName: eName });
   };
   let unlistenEvent = (className, eventName, callback) => {
     let eName = `${className}_${eventName}`;
@@ -49,7 +42,7 @@
     if (flag) {
       return;
     }
-    return callCppMethod(className, "off", { _eventName: eName });
+    return callCppMethod(className, "off", { $eventName: eName });
   };
   let win = {
     minimize: () => {

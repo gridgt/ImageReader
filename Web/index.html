@@ -8,10 +8,15 @@
     <link rel="stylesheet" href="index.css" />
 </head>
 <body>
-    <div class="content">
-        <input id="file" type="file" value="选择文件" accept="image/*" />
+    <div id="start" class="content">
         <div class="title">识别图像中的文字</div>
-        <div class="des">拖拽图像文件到本窗口试试吧</div>
+        <div class="des">拖拽图像文件到本窗口</div>
+    </div>
+    <div id="reading" class="content" style="display:none;">
+        <div class="des">正在识别图像中的文字...</div>
+    </div>
+    <div id="end" class="content" style="display:none;">
+        <div class="des">识别完成，用时：</div>
     </div>
 </body>
 </html>
