@@ -19,7 +19,18 @@
 #include <winrt/base.h>
 #include <windows.ui.composition.interop.h>
 #include <winrt/Windows.UI.Composition.Desktop.h>
+#include <winrt/Windows.Media.Ocr.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Storage.h>             
+#include <winrt/Windows.Graphics.Imaging.h>    
+#include <winrt/Windows.Storage.Streams.h>     
 
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
+
+using namespace winrt::Windows::Media::Ocr;
+using namespace winrt::Windows::Graphics::Imaging;
+using namespace winrt::Windows::Storage::Streams;
 using namespace winrt::Windows::Data::Json;
 using namespace Microsoft::WRL;
 
@@ -44,7 +55,6 @@ class WindowMain
 		virtual void exec(Message* msg);
 		void on(Message* msg);
 		void off(Message* msg);
-		void getFilePath(Message* msg);
 	public:
 		HWND hwnd;
 		ComPtr<ICoreWebView2_22> webview;
@@ -56,6 +66,9 @@ class WindowMain
 		std::unordered_map<winrt::hstring, std::vector<Message*>> eventTargets;
 		ComPtr<ICoreWebView2Controller> webviewCtrl;
 	private:
+		void onFileDrop(HDROP hDrop);
+		void createTessAPI();
+		winrt::Windows::Foundation::IAsyncAction readImg(const std::wstring path);
 		void createCompCtrl();
 
 		static LRESULT CALLBACK winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -77,5 +90,6 @@ class WindowMain
 		winrt::Windows::UI::Composition::ContainerVisual webviewVisual{ nullptr };
 		ComPtr<ICoreWebView2CompositionController> ctrlComp;
 		bool isMouseTracking{ false };
+		tesseract::TessBaseAPI* tessAPI;
 };
 

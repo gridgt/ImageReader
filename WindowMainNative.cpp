@@ -1,5 +1,4 @@
 ﻿#include <dwmapi.h>
-
 #include "WindowMain.h"
 #include "Message.h"
 #include "Environment.h"
@@ -8,12 +7,15 @@ std::unique_ptr<WindowMain> winIns;
 
 WindowMain::WindowMain()
 {
+    createTessAPI();
     createCompCtrl();
     createWindow();
 }
 
 WindowMain::~WindowMain()
 {
+    tessAPI->End();
+    delete tessAPI;
 }
 
 void WindowMain::init()
@@ -27,6 +29,11 @@ WindowMain* WindowMain::get()
     return winIns.get();
 }
 
+void WindowMain::createTessAPI()
+{
+    tessAPI = new tesseract::TessBaseAPI();
+    tessAPI->Init(nullptr, "eng+chi_sim");
+}
 
 void WindowMain::createWindow()
 {
@@ -97,20 +104,8 @@ LRESULT WindowMain::winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return HTCAPTION;
     }
     else if (msg == WM_DROPFILES) {
-        HDROP hDrop = (HDROP)wParam;
-        UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
-        for (UINT i = 0; i < fileCount; ++i) {
-            TCHAR filePath[MAX_PATH];
-            DragQueryFile(hDrop, i, filePath, MAX_PATH);
-            // 处理文件路径，例如显示 MessageBox
-            //MessageBox(hwnd, filePath, TEXT("Dropped File"), MB_OK);
-            auto& targets = self->eventTargets[L"win_reading"];
-            for (auto& msg : targets)
-            {
-                msg->resolve();
-            }
-        }
-        DragFinish(hDrop);  // 释放资源
+        self->onFileDrop((HDROP)wParam);
+        return 0;
     }
     else if (msg == WM_GETMINMAXINFO) {
         self->setMinMaxInfo((LPMINMAXINFO)lParam);
@@ -125,6 +120,73 @@ LRESULT WindowMain::winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+void WindowMain::onFileDrop(HDROP hDrop)
+{
+    UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+    for (UINT i = 0; i < fileCount; ++i) {
+        std::wstring pathStr;
+        {
+            TCHAR filePath[MAX_PATH];
+            DragQueryFile(hDrop, i, filePath, MAX_PATH);
+            pathStr = std::wstring{ filePath };
+        }
+        readImg(pathStr);
+        auto& targets = eventTargets[L"win_reading"];
+        for (auto& msg : targets)
+        {
+            msg->resolve();
+        }
+    }
+    DragFinish(hDrop);
+}
+
+winrt::Windows::Foundation::IAsyncAction WindowMain::readImg(const std::wstring path)
+{
+    co_await winrt::resume_background();
+    FILE* fp;
+    auto err = _wfopen_s(&fp,path.c_str(), L"rb");
+    if (err != 0 || !fp)
+    {
+        throw std::runtime_error("Failed to open image file.");
+    }
+    Pix* image = pixReadStream(fp, IFF_DEFAULT);
+    fclose(fp);
+    tessAPI->SetImage(image);
+    //auto outText = tessAPI->GetAltoText(0);
+    auto outText = tessAPI->GetUTF8Text();
+    int count = MultiByteToWideChar(CP_UTF8, 0, outText, -1, 0, 0);
+    std::wstring wstr(count, 0);
+    MultiByteToWideChar(CP_UTF8, 0, outText, -1, &wstr[0], count);
+    //std::cout << "OCR Result:\n" << outText << std::endl;
+    delete[] outText;
+    pixDestroy(&image);
+
+
+    //auto file = co_await winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path.data());
+    //auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read);
+    //auto decoder = co_await BitmapDecoder::CreateAsync(stream);
+    //auto softwareBitmap = co_await decoder.GetSoftwareBitmapAsync();
+    ////// 2. 转为灰度（OcrEngine 要求 B8G8R8A8 或 Gray8）
+    ////if (softwareBitmap.BitmapPixelFormat() != BitmapPixelFormat::Gray8)
+    ////{
+    ////    softwareBitmap = SoftwareBitmap::Convert(softwareBitmap, BitmapPixelFormat::Gray8);
+    ////}
+    //OcrEngine ocrEngine = OcrEngine::TryCreateFromUserProfileLanguages();
+    //OcrResult result = co_await ocrEngine.RecognizeAsync(softwareBitmap);
+    //std::wstring text;
+    //for (auto const& line : result.Lines())
+    //{
+    //    auto count = line.Words().Size();
+    //    for (OcrWord const& word : line.Words())
+    //    {
+    //        winrt::hstring text = word.Text();
+    //        winrt::Windows::Foundation::Rect wordRect = word.BoundingRect();
+    //    }
+    //    //winrt::Windows::Foundation::Rect lineRect = line.BoundingRect();
+    //    //text += line.Text() + L"\n";
+    //}
 }
 
 void WindowMain::setMinMaxInfo(LPMINMAXINFO lpMMI)

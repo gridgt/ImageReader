@@ -8,7 +8,7 @@
         end.style.display = "none";
         reading.style.display = "flex";
     })
-    cpp.win.on("end", () => {
+    cpp.win.on("end", (data) => {
         start.style.display = "none";
         reading.style.display = "none";
         end.style.display = "flex";
