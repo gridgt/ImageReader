@@ -11,11 +11,11 @@
 using namespace winrt::Windows::Data::Json;
 using namespace Microsoft::WRL;
 
-class WindowBase;
+class WindowMain;
 class Message
 {
 	public:
-		Message(JsonObject&& param, ICoreWebView2* sender, WindowBase* win);
+		Message(JsonObject&& param, ICoreWebView2* sender, WindowMain* win);
 		~Message();
 		void route();
 		void resolve();
@@ -24,7 +24,7 @@ class Message
 		JsonObject param; 
 		JsonObject result;
 		ICoreWebView2* sender;
-		WindowBase* win;
+		WindowMain* win;
 	private:
 		void initResult();
 	private:

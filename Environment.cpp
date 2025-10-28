@@ -130,7 +130,7 @@ bool Environment::initEnv()
                 ExitProcess(-1);
             }
 			this->env = env;
-            WindowMain::init();
+            WindowMain::initView(env);
             return S_OK;
         });
     auto hr = CreateCoreWebView2EnvironmentWithOptions(NULL, dataPath.data(), NULL, envReady.Get());

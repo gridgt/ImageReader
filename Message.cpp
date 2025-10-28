@@ -1,7 +1,7 @@
 #include "Message.h"
 #include "WindowMain.h"
 
-Message::Message(JsonObject&& param, ICoreWebView2* sender,WindowBase* win):
+Message::Message(JsonObject&& param, ICoreWebView2* sender, WindowMain* win):
     param{ std::move(param) }, 
     sender{ sender },
     win{ win },
@@ -18,6 +18,10 @@ void Message::initResult()
     {
         auto eName = param.GetNamedString(L"_eventName");
         result.SetNamedValue(L"$$eventName", JsonValue::CreateStringValue(eName));
+    }
+    if (param.HasKey(L"_additionalObjects"))
+    {
+        result.SetNamedValue(L"_additionalObjects", param.GetNamedArray(L"_additionalObjects"));
     }
 }
 

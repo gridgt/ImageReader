@@ -146,9 +146,9 @@
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Message.cpp" />
-    <ClCompile Include="WebView.cpp" />
-    <ClCompile Include="WindowBase.cpp" />
-    <ClCompile Include="WindowMain.cpp" />
+    <ClCompile Include="WindowMainNative.cpp" />
+    <ClCompile Include="WindowMainProcMsg.cpp" />
+    <ClCompile Include="WindowMainWebView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -163,8 +163,6 @@
   <ItemGroup>
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Message.h" />
-    <ClInclude Include="WebView.h" />
-    <ClInclude Include="WindowBase.h" />
     <ClInclude Include="WindowMain.h" />
   </ItemGroup>
   <ItemGroup>
