@@ -12,18 +12,18 @@
 using namespace winrt::Windows::Data::Json;
 using namespace Microsoft::WRL;
 
-class WindowMain;
+class WinBase;
 class Message
 {
 	public:
-		Message(JsonObject&& param, WindowMain* win);
+		Message(JsonObject&& param, WinBase* win);
 		~Message();
 		void route();
 		void resolve();
 	public:
 		JsonObject param; 
 		JsonObject result;
-		WindowMain* win;
+		WinBase* win;
 	private:
 		void initResult();
 	private:

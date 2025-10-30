@@ -1,7 +1,7 @@
 #include "Message.h"
-#include "WindowMain.h"
+#include "WinBase.h"
 
-Message::Message(JsonObject&& param, WindowMain* win):
+Message::Message(JsonObject&& param, WinBase* win):
     param{ std::move(param) }, 
     win{ win },
     uiDQ{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }

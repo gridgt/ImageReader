@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props')" />
-	<PropertyGroup>
-	  <WebView2LoaderPreference>Static</WebView2LoaderPreference>
-	</PropertyGroup>
+  <PropertyGroup>
+    <WebView2LoaderPreference>Static</WebView2LoaderPreference>
+  </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -159,24 +159,31 @@
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Message.cpp" />
-    <ClCompile Include="WindowMainNative.cpp" />
-    <ClCompile Include="WindowMainProcMsg.cpp" />
-    <ClCompile Include="WindowMainWebView.cpp" />
+    <ClCompile Include="WinBaseNative.cpp" />
+    <ClCompile Include="WinBaseProcMsg.cpp" />
+    <ClCompile Include="WinBaseWebView.cpp" />
+    <ClCompile Include="WinReader.cpp" />
+    <ClCompile Include="WinViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="packages.config" />
     <None Include="README.md" />
     <None Include="Web\cpp.js" />
-    <None Include="Web\index.css" />
-    <None Include="Web\index.html" />
-    <None Include="Web\index.js" />
+    <None Include="Web\reader.css" />
+    <None Include="Web\reader.html" />
+    <None Include="Web\reader.js" />
     <None Include="Web\mitt.umd.js" />
+    <None Include="Web\viewer.css" />
+    <None Include="Web\viewer.html" />
+    <None Include="Web\viewer.js" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Message.h" />
-    <ClInclude Include="WindowMain.h" />
+    <ClInclude Include="WinBase.h" />
+    <ClInclude Include="WinReader.h" />
+    <ClInclude Include="WinViewer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

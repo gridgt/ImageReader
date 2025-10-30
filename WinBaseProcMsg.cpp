@@ -1,51 +1,38 @@
-﻿#include "WindowMain.h"
+﻿#include "WinBase.h"
 #include "Message.h"
 
-void WindowMain::hittest(Message* msg)
+void WinBase::minimize(Message* msg)
 {
-    ReleaseCapture();
-    int val = msg->param.GetNamedNumber(L"val");
-    PostMessage(hwnd, WM_NCLBUTTONDOWN, val, 0);
-    msg->resolve();
-}
-
-void WindowMain::minimize(Message* msg)
-{
-    webviewCtrl->NotifyParentWindowPositionChanged();
-    HWND hwndWebView = FindWindowEx(hwnd, nullptr, L"Chrome_WidgetWin_0", nullptr);
-    PostMessage(hwndWebView, WM_MOUSELEAVE, 0, 0);
-    HWND hwndInner = FindWindowEx(hwndWebView, nullptr, NULL, nullptr);
-    PostMessage(hwndInner, WM_MOUSELEAVE, 0, 0);
     ShowWindow(hwnd, SW_MINIMIZE);
     msg->resolve();
 }
 
-void WindowMain::maximize(Message* msg)
+void WinBase::maximize(Message* msg)
 {
     ShowWindow(hwnd, SW_MAXIMIZE);
     msg->resolve();
 }
 
-void WindowMain::close(Message* msg)
+void WinBase::close(Message* msg)
 {
     SendMessage(hwnd, WM_CLOSE, 0, 0);
     msg->resolve();
 }
 
-void WindowMain::restore(Message* msg)
+void WinBase::restore(Message* msg)
 {
     ShowWindow(hwnd, SW_RESTORE);
     msg->resolve();
 }
 
-void WindowMain::show(Message* msg)
+void WinBase::show(Message* msg)
 {
     ShowWindow(hwnd, SW_SHOW);
     UpdateWindow(hwnd);
     msg->resolve();
 }
 
-void WindowMain::exec(Message* msg)
+void WinBase::exec(Message* msg)
 {
     auto methodName = msg->param.GetNamedString(L"$methodName");
     if (methodName == L"minimize") {
@@ -67,10 +54,6 @@ void WindowMain::exec(Message* msg)
     {
         show(msg);
     }
-    else if (methodName == L"hittest")
-    {
-        hittest(msg);
-    }
     else if (methodName == L"on")
     {
         on(msg);
@@ -81,7 +64,7 @@ void WindowMain::exec(Message* msg)
     }
 }
 
-void WindowMain::on(Message* msg)
+void WinBase::on(Message* msg)
 {
     auto eName = msg->param.GetNamedString(L"$eventName");
     if (eventTargets.contains(eName)) {
@@ -93,7 +76,7 @@ void WindowMain::on(Message* msg)
     msg->resolve();
 }
 
-void WindowMain::off(Message* msg)
+void WinBase::off(Message* msg)
 {
     auto eName = msg->param.GetNamedString(L"$eventName");
     if (eventTargets.contains(eName)) {

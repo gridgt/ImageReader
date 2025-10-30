@@ -1,7 +1,7 @@
 ﻿#include <filesystem>
 #include <shlobj.h>
 #include "Environment.h"
-#include "WindowMain.h"
+#include "WinReader.h"
 
 std::unique_ptr<Environment> envIns;
 
@@ -15,6 +15,7 @@ Environment::~Environment()
 
 bool Environment::init()
 {
+    WinReader::init();
 	auto env = new Environment();
 	envIns.reset(env);
     if (!envIns->initCOM())
@@ -130,7 +131,7 @@ bool Environment::initEnv()
                 ExitProcess(-1);
             }
 			this->env = env;
-            WindowMain::initView(env);
+            WinReader::get()->initView(env);
             return S_OK;
         });
     auto hr = CreateCoreWebView2EnvironmentWithOptions(NULL, dataPath.data(), NULL, envReady.Get());

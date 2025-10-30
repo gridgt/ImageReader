@@ -20,14 +20,11 @@
 #include <windows.ui.composition.interop.h>
 #include <winrt/Windows.UI.Composition.Desktop.h>
 #include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Storage.h>    
+#include <winrt/Windows.Storage.h>
+
 //#include <winrt/Windows.Media.Ocr.h>
 //#include <winrt/Windows.Graphics.Imaging.h>    
-//#include <winrt/Windows.Storage.Streams.h>     
-
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
-
+//#include <winrt/Windows.Storage.Streams.h>   
 //using namespace winrt::Windows::Media::Ocr;
 //using namespace winrt::Windows::Graphics::Imaging;
 //using namespace winrt::Windows::Storage::Streams;
@@ -36,15 +33,12 @@ using namespace Microsoft::WRL;
 
 class WebView;
 class Message;
-class WindowMain
+class WinBase
 {
 	public:
-		WindowMain();
-		~WindowMain();
-		static void init();
-		static void initView(ICoreWebView2Environment* env);
-		static WindowMain* get();
-		void hittest(Message* msg);
+		WinBase();
+		~WinBase();
+		void initView(ICoreWebView2Environment* env);
 		void minimize(Message* msg);
 		void maximize(Message* msg);
 		void close(Message* msg);
@@ -57,24 +51,22 @@ class WindowMain
 		HWND hwnd;
 		ComPtr<ICoreWebView2_22> webview;
 	protected:
+		void show();
 		void createWindow();
+		virtual LRESULT procMsg(UINT msg, WPARAM wParam, LPARAM lParam);
+		virtual void onViewReady() {};
 	protected:
-		int w{ 500 }, h{500};
+		int x, y,w, h;
 		float dpr;
 		std::unordered_map<winrt::hstring, Message*> eventTargets;
 		ComPtr<ICoreWebView2Controller> webviewCtrl;
 	private:
-		void onFileDrop(HDROP hDrop);
-		void createTessAPI();
-		winrt::Windows::Foundation::IAsyncAction readImg(Message* msg);
+		static LRESULT CALLBACK winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);	
 		void createCompCtrl();
-
-		static LRESULT CALLBACK winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		void setMinMaxInfo(LPMINMAXINFO lpMMI);
 		void onSize(UINT param);
 		HRESULT ctrlReady(HRESULT result, ICoreWebView2CompositionController* ctrlComp);
 		void bindCompCtrlToHwnd();
-
 		void addRequestFilter();
 		void addMsgReceiver();
 		void addDomLoader();
@@ -88,6 +80,5 @@ class WindowMain
 		winrt::Windows::UI::Composition::ContainerVisual webviewVisual{ nullptr };
 		ComPtr<ICoreWebView2CompositionController> ctrlComp;
 		bool isMouseTracking{ false };
-		tesseract::TessBaseAPI* tessAPI;
 };
 

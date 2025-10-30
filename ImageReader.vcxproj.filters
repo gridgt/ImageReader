@@ -21,16 +21,22 @@
     <ClCompile Include="Environment.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="WindowMainNative.cpp">
+    <ClCompile Include="WinBaseNative.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Message.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="WindowMainProcMsg.cpp">
+    <ClCompile Include="WinBaseProcMsg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="WindowMainWebView.cpp">
+    <ClCompile Include="WinBaseWebView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WinReader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WinViewer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -40,18 +46,27 @@
     <None Include="packages.config" />
     <None Include="Web\mitt.umd.js" />
     <None Include="Web\cpp.js" />
-    <None Include="Web\index.css" />
-    <None Include="Web\index.html" />
-    <None Include="Web\index.js" />
+    <None Include="Web\reader.css" />
+    <None Include="Web\reader.html" />
+    <None Include="Web\reader.js" />
+    <None Include="Web\viewer.html" />
+    <None Include="Web\viewer.js" />
+    <None Include="Web\viewer.css" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="WindowMain.h">
+    <ClInclude Include="WinBase.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Message.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WinReader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WinViewer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,11 +3,15 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 // 嵌入资源文件
-index.html RCDATA "Web/index.html"
-index.css RCDATA "Web/index.css"
-index.js RCDATA "Web/index.js"
 mitt.umd.js RCDATA "Web/mitt.umd.js"
 cpp.js RCDATA "Web/cpp.js"
+reader.html RCDATA "Web/reader.html"
+viewer.html RCDATA "Web/viewer.html"
+reader.css RCDATA "Web/reader.css"
+reader.js RCDATA "Web/reader.js"
+viewer.css RCDATA "Web/viewer.css"
+viewer.js RCDATA "Web/viewer.js"
+
 
 // 配置可执行文件产品信息
 VS_VERSION_INFO VERSIONINFO

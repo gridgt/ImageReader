@@ -1,30 +1,31 @@
-﻿#include "WindowMain.h"
+﻿#include "WinBase.h"
 #include "Message.h"
 
-void WindowMain::createCompCtrl()
+void WinBase::createCompCtrl()
 {
     DispatcherQueueOptions options{
-    sizeof(DispatcherQueueOptions),
-    DQTYPE_THREAD_CURRENT,
-    DQTAT_COM_ASTA
+        sizeof(DispatcherQueueOptions),
+        DQTYPE_THREAD_CURRENT,
+        DQTAT_COM_ASTA
     };
     static winrt::Windows::System::DispatcherQueueController dispatchCtrl{ nullptr };
-    CreateDispatcherQueueController(options,
-        reinterpret_cast<ABI::Windows::System::IDispatcherQueueController**>(winrt::put_abi(dispatchCtrl)));
+    if (!dispatchCtrl) {
+        CreateDispatcherQueueController(options,
+            reinterpret_cast<ABI::Windows::System::IDispatcherQueueController**>(winrt::put_abi(dispatchCtrl)));
+    }    
     compositor = winrt::Windows::UI::Composition::Compositor();
 }
 
-void WindowMain::initView(ICoreWebView2Environment* env)
+void WinBase::initView(ICoreWebView2Environment* env)
 {
-    auto ptr = WindowMain::get();
     auto ready = Callback<ICoreWebView2CreateCoreWebView2CompositionControllerCompletedHandler>(
-        ptr, &WindowMain::ctrlReady);
+        this, &WinBase::ctrlReady);
     ICoreWebView2Environment3* env3;
     env->QueryInterface(IID_PPV_ARGS(&env3));
-    env3->CreateCoreWebView2CompositionController(ptr->hwnd, ready.Get());
+    env3->CreateCoreWebView2CompositionController(hwnd, ready.Get());
 }
 
-HRESULT WindowMain::ctrlReady(HRESULT result, ICoreWebView2CompositionController* ctrlComp)
+HRESULT WinBase::ctrlReady(HRESULT result, ICoreWebView2CompositionController* ctrlComp)
 {
     if (FAILED(result))
     {
@@ -50,11 +51,11 @@ HRESULT WindowMain::ctrlReady(HRESULT result, ICoreWebView2CompositionController
     addRequestFilter();
     addMsgReceiver();
     addDomLoader();
-    webview->Navigate(L"https://app.localhost/index.html");
+    onViewReady();
     return S_OK;
 }
 
-void WindowMain::bindCompCtrlToHwnd()
+void WinBase::bindCompCtrlToHwnd()
 {
     auto interop = compositor.as<ABI::Windows::UI::Composition::Desktop::ICompositorDesktopInterop>();
     interop->CreateDesktopWindowTarget(
@@ -73,7 +74,7 @@ void WindowMain::bindCompCtrlToHwnd()
     webviewCtrl->put_Bounds(bounds);
 }
 
-HRESULT WindowMain::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequestedEventArgs* args)
+HRESULT WinBase::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequestedEventArgs* args)
 {
     ComPtr<ICoreWebView2WebResourceRequest> request;
     args->get_Request(&request);
@@ -111,7 +112,7 @@ HRESULT WindowMain::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequ
 }
 
 
-void WindowMain::addRequestFilter()
+void WinBase::addRequestFilter()
 {
     webview->AddWebResourceRequestedFilterWithRequestSourceKinds(L"*",
         COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT,
@@ -131,13 +132,13 @@ void WindowMain::addRequestFilter()
     webview->AddWebResourceRequestedFilterWithRequestSourceKinds(L"*",
         COREWEBVIEW2_WEB_RESOURCE_CONTEXT_FONT,
         COREWEBVIEW2_WEB_RESOURCE_REQUEST_SOURCE_KINDS_DOCUMENT);// 过滤 字体
-    auto resRequestedCB = Callback<ICoreWebView2WebResourceRequestedEventHandler>(this, &WindowMain::resRequested);
+    auto resRequestedCB = Callback<ICoreWebView2WebResourceRequestedEventHandler>(this, &WinBase::resRequested);
     EventRegistrationToken resRequestedToken;
     auto hr = webview->add_WebResourceRequested(resRequestedCB.Get(), &resRequestedToken);
     //webview->remove_WebResourceRequested(resRequestedToken);
 }
 
-std::wstring WindowMain::getContentType(const std::wstring& fileName)
+std::wstring WinBase::getContentType(const std::wstring& fileName)
 {
     static const std::unordered_map<std::string, std::wstring> mimeTypes = {
             {".html", L"text/html"},
@@ -170,7 +171,7 @@ std::wstring WindowMain::getContentType(const std::wstring& fileName)
     return L"application/octet-stream";
 }
 
-void WindowMain::addMsgReceiver()
+void WinBase::addMsgReceiver()
 {
     EventRegistrationToken msgReceivedToken;
     auto msgReceivedCB = Callback<ICoreWebView2WebMessageReceivedEventHandler>(
@@ -183,7 +184,7 @@ void WindowMain::addMsgReceiver()
     );
     webview->add_WebMessageReceived(msgReceivedCB.Get(), &msgReceivedToken);
 }
-void WindowMain::addDomLoader()
+void WinBase::addDomLoader()
 {
     auto domLoadedCB = Callback<ICoreWebView2DOMContentLoadedEventHandler>([this](auto wv,auto arg) {
         wv->OpenDevToolsWindow();
@@ -193,7 +194,7 @@ void WindowMain::addDomLoader()
     webview->add_DOMContentLoaded(domLoadedCB.Get(), &domLoadedToken);
 }
 
-JsonObject WindowMain::getParam(ICoreWebView2WebMessageReceivedEventArgs* args)
+JsonObject WinBase::getParam(ICoreWebView2WebMessageReceivedEventArgs* args)
 {
     PWSTR jsonRaw;
     auto hr = args->get_WebMessageAsJson(&jsonRaw);
