@@ -35,8 +35,6 @@
   };
   let unlistenEvent = (className, eventName, callback) => {
     let eName = `${className}_${eventName}`;
-    let flag = !eventer.all.has(eName) || eventer.all.get(eName)?.length < 1;
-    if (flag) return;
     eventer.off(eName, callback);
     flag = eventer.all.has(eName) && eventer.all.get(eName)?.length > 0;
     if (flag) {

@@ -19,22 +19,20 @@
 #include <winrt/base.h>
 #include <windows.ui.composition.interop.h>
 #include <winrt/Windows.UI.Composition.Desktop.h>
-#include <winrt/Windows.Media.Ocr.h>
 #include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Storage.h>             
-#include <winrt/Windows.Graphics.Imaging.h>    
-#include <winrt/Windows.Storage.Streams.h>     
+#include <winrt/Windows.Storage.h>    
+//#include <winrt/Windows.Media.Ocr.h>
+//#include <winrt/Windows.Graphics.Imaging.h>    
+//#include <winrt/Windows.Storage.Streams.h>     
 
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 
-using namespace winrt::Windows::Media::Ocr;
-using namespace winrt::Windows::Graphics::Imaging;
-using namespace winrt::Windows::Storage::Streams;
+//using namespace winrt::Windows::Media::Ocr;
+//using namespace winrt::Windows::Graphics::Imaging;
+//using namespace winrt::Windows::Storage::Streams;
 using namespace winrt::Windows::Data::Json;
 using namespace Microsoft::WRL;
-
-#define MSG_BACK_ID WM_APP + 10
 
 class WebView;
 class Message;
@@ -63,12 +61,12 @@ class WindowMain
 	protected:
 		int w{ 500 }, h{500};
 		float dpr;
-		std::unordered_map<winrt::hstring, std::vector<Message*>> eventTargets;
+		std::unordered_map<winrt::hstring, Message*> eventTargets;
 		ComPtr<ICoreWebView2Controller> webviewCtrl;
 	private:
 		void onFileDrop(HDROP hDrop);
 		void createTessAPI();
-		winrt::Windows::Foundation::IAsyncAction readImg(const std::wstring path);
+		winrt::Windows::Foundation::IAsyncAction readImg(Message* msg);
 		void createCompCtrl();
 
 		static LRESULT CALLBACK winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

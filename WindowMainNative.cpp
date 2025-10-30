@@ -92,12 +92,7 @@ LRESULT WindowMain::winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     if (!self) {
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
-    if (msg == MSG_BACK_ID) {
-        auto msg = reinterpret_cast<Message*>(lParam);
-        msg->postMsgBack();
-        return 0;
-    }
-    else if (msg == WM_ERASEBKGND) {
+    if (msg == WM_ERASEBKGND) {
         return 0;
     }
     else if (msg == WM_NCHITTEST) {
@@ -126,26 +121,23 @@ void WindowMain::onFileDrop(HDROP hDrop)
 {
     UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
     for (UINT i = 0; i < fileCount; ++i) {
-        std::wstring pathStr;
+        eventTargets[L"win_reading"]->resolve();
+        auto msg = eventTargets[L"win_end"];
         {
             TCHAR filePath[MAX_PATH];
             DragQueryFile(hDrop, i, filePath, MAX_PATH);
-            pathStr = std::wstring{ filePath };
+            msg->result.SetNamedValue(L"imgPath", JsonValue::CreateStringValue(filePath));
         }
-        readImg(pathStr);
-        auto& targets = eventTargets[L"win_reading"];
-        for (auto& msg : targets)
-        {
-            msg->resolve();
-        }
+        readImg(msg);
     }
     DragFinish(hDrop);
 }
 
-winrt::Windows::Foundation::IAsyncAction WindowMain::readImg(const std::wstring path)
+winrt::Windows::Foundation::IAsyncAction WindowMain::readImg(Message* msg)
 {
     co_await winrt::resume_background();
     FILE* fp;
+    auto path = msg->result.GetNamedString(L"imgPath");
     auto err = _wfopen_s(&fp,path.c_str(), L"rb");
     if (err != 0 || !fp)
     {
@@ -154,16 +146,45 @@ winrt::Windows::Foundation::IAsyncAction WindowMain::readImg(const std::wstring 
     Pix* image = pixReadStream(fp, IFF_DEFAULT);
     fclose(fp);
     tessAPI->SetImage(image);
-    //auto outText = tessAPI->GetAltoText(0);
-    auto outText = tessAPI->GetUTF8Text();
-    int count = MultiByteToWideChar(CP_UTF8, 0, outText, -1, 0, 0);
-    std::wstring wstr(count, 0);
-    MultiByteToWideChar(CP_UTF8, 0, outText, -1, &wstr[0], count);
-    //std::cout << "OCR Result:\n" << outText << std::endl;
-    delete[] outText;
+    tessAPI->Recognize(0);
+    JsonArray lineArr;
+    JsonArray wordArr;
+    int lineIndex{ 0 };
+    tesseract::ResultIterator* ri = tessAPI->GetIterator();
+    do {
+        if (ri->IsAtBeginningOf(tesseract::RIL_TEXTLINE)) {
+            JsonObject line;
+            const char* lineText = ri->GetUTF8Text(tesseract::RIL_TEXTLINE);
+            line.SetNamedValue(L"text", JsonValue::CreateStringValue(winrt::to_hstring(lineText)));
+            delete[] lineText;
+            int lx1, ly1, lx2, ly2;
+            ri->BoundingBox(tesseract::RIL_TEXTLINE, &lx1, &ly1, &lx2, &ly2);
+            line.SetNamedValue(L"x1", JsonValue::CreateNumberValue(lx1));
+            line.SetNamedValue(L"y1", JsonValue::CreateNumberValue(ly1));
+            line.SetNamedValue(L"x2", JsonValue::CreateNumberValue(lx2));
+            line.SetNamedValue(L"y2", JsonValue::CreateNumberValue(ly2));
+            lineArr.Append(line);
+            lineIndex += 1;
+        }
+        const char* wordText = ri->GetUTF8Text(tesseract::RIL_WORD);
+        if (wordText) {
+            JsonObject word;
+            word.SetNamedValue(L"text", JsonValue::CreateStringValue(winrt::to_hstring(wordText)));
+            delete[] wordText;
+            int wx1, wy1, wx2, wy2;
+            ri->BoundingBox(tesseract::RIL_WORD, &wx1, &wy1, &wx2, &wy2);
+            word.SetNamedValue(L"x1", JsonValue::CreateNumberValue(wx1));
+            word.SetNamedValue(L"y1", JsonValue::CreateNumberValue(wy1));
+            word.SetNamedValue(L"x2", JsonValue::CreateNumberValue(wx2));
+            word.SetNamedValue(L"y2", JsonValue::CreateNumberValue(wy2));
+            word.SetNamedValue(L"lineIndex", JsonValue::CreateNumberValue(lineIndex));
+            wordArr.Append(word);
+        }
+    } while (ri->Next(tesseract::RIL_WORD));
     pixDestroy(&image);
-
-
+    msg->result.SetNamedValue(L"lines", lineArr);
+    msg->result.SetNamedValue(L"words", wordArr);
+    msg->resolve();
     //auto file = co_await winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path.data());
     //auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read);
     //auto decoder = co_await BitmapDecoder::CreateAsync(stream);
@@ -206,17 +227,13 @@ void WindowMain::setMinMaxInfo(LPMINMAXINFO lpMMI)
 void WindowMain::onSize(UINT param)
 {
     if (param == SIZE_MAXIMIZED) {
-        auto& targets = eventTargets[L"win_maximize"];
-        for (auto& msg : targets)
-        {
-            msg->resolve();
+        if (eventTargets.contains(L"win_maximize")) {
+            eventTargets[L"win_maximize"]->resolve();
         }
     }
     else if (param == SIZE_RESTORED) {
-        auto& targets = eventTargets[L"win_restore"];
-        for (auto& msg : targets)
-        {
-            msg->resolve();
+        if (eventTargets.contains(L"win_restore")) {
+            eventTargets[L"win_restore"]->resolve();
         }
     }
     if (webviewCtrl)

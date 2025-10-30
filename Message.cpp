@@ -4,7 +4,7 @@
 Message::Message(JsonObject&& param, WindowMain* win):
     param{ std::move(param) }, 
     win{ win },
-	mainThreadId{ GetCurrentThreadId() }
+    uiDQ{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }
 {
     initResult();
 }
@@ -34,27 +34,20 @@ Message::~Message()
 
 void Message::resolve()
 {
-    if(mainThreadId == GetCurrentThreadId()) {
-        postMsgBack();
-    } else {
-        PostMessage(win->hwnd, MSG_BACK_ID, 0, (LPARAM)this);
-	}
-}
-
-void Message::postMsgBack()
-{
-    //result.SetNamedValue(L"allen", JsonValue::CreateStringValue(L"allenallen"));
-    auto resultStr = result.Stringify();    
-    win->webview->PostWebMessageAsJson(resultStr.data());
-    if (result.HasKey(L"$eventName"))
-    {
-        if (result.HasKey(L"$cbId")) {
-			result.Remove(L"$cbId");
-        }
-    }
-    else {
-        delete this;
-    }
+    uiDQ.TryEnqueue([this]()
+        {
+            auto resultStr = result.Stringify();
+            win->webview->PostWebMessageAsJson(resultStr.data());
+            if (result.HasKey(L"$eventName"))
+            {
+                if (result.HasKey(L"$cbId")) {
+                    result.Remove(L"$cbId");
+                }
+            }
+            else {
+                delete this;
+            }
+        });
 }
 
 

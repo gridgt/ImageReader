@@ -84,18 +84,21 @@ void WindowMain::exec(Message* msg)
 void WindowMain::on(Message* msg)
 {
     auto eName = msg->param.GetNamedString(L"$eventName");
-    eventTargets[eName].push_back(msg);
+    if (eventTargets.contains(eName)) {
+        msg->result.Remove(eName);
+        msg->resolve();
+        return;
+    }
+    eventTargets.insert({ eName,msg });
     msg->resolve();
 }
 
 void WindowMain::off(Message* msg)
 {
     auto eName = msg->param.GetNamedString(L"$eventName");
-    auto itMap = eventTargets.find(eName);
-    if (itMap == eventTargets.end()) {
-        msg->resolve();
-        return;
+    if (eventTargets.contains(eName)) {
+        eventTargets.erase(eName);
     }
-    eventTargets.erase(itMap, eventTargets.end());
+    msg->result.Remove(eName);
     msg->resolve();
 }

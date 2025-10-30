@@ -8,6 +8,7 @@
 #include <WebView2.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Data.Json.h>
+#include <winrt/Windows.System.h>
 using namespace winrt::Windows::Data::Json;
 using namespace Microsoft::WRL;
 
@@ -19,7 +20,6 @@ class Message
 		~Message();
 		void route();
 		void resolve();
-		void postMsgBack();
 	public:
 		JsonObject param; 
 		JsonObject result;
@@ -27,6 +27,6 @@ class Message
 	private:
 		void initResult();
 	private:
-		DWORD mainThreadId;
+		winrt::Windows::System::DispatcherQueue uiDQ;
 };
 
