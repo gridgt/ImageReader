@@ -10,7 +10,7 @@ class WinReader : public WinBase
 		static void init();
 		static WinReader* get();
 	private:
-		LRESULT procMsg(UINT msg, WPARAM wParam, LPARAM lParam) override;
+		LRESULT procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam) override;
 		void setMinMaxInfo(LPMINMAXINFO lpMMI);
 		void onFileDrop(HDROP hDrop);
 		void onSize(UINT param);

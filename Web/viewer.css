@@ -9,6 +9,7 @@ body {
     background: #fff;
     display:flex;
     flex-direction:column;
+    font-size:12px;
 }
 .titleBar {
     background: #CCD5F0;
@@ -18,13 +19,50 @@ body {
 }
 .titleLabel{
     flex:1;
+    padding-left:12px;
 }
 .winTool{
-
+    display:flex;
+    width:100px;
+    color:#999;
 }
 .winToolBtn{
-    width:32px;
+    flex:1;
+    cursor:pointer;
+    text-align:center;
 }
 .winToolBtn:hover {
     background: #F8F9FF;
+    color: #333;
+}
+.winToolBtn i{
+    font-size:12px !important;
+}
+
+.contentBox{
+    flex:1;
+    box-sizing:border-box;
+    display:flex;
+    overflow:hidden;
+}
+
+.imgBox {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    align-content:center;
+    overflow: hidden;
+    height: 100%;
+}
+.imgBox img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+} 
+.textBox{
+    width:200px;
+    height:100%;
+    background:#282828;
+    color:#fff;
 }

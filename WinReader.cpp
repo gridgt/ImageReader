@@ -58,7 +58,7 @@ void WinReader::transparentWindow()
     DragAcceptFiles(hwnd, TRUE);
 }
 
-LRESULT WinReader::procMsg(UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT WinReader::procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (msg == WM_NCHITTEST) {
         return HTCAPTION;
@@ -79,7 +79,7 @@ LRESULT WinReader::procMsg(UINT msg, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         return 0;
     }
-    return WinBase::procMsg(msg, wParam, lParam);
+    return WinBase::procNativeMsg(msg, wParam, lParam);
 }
 
 void WinReader::onFileDrop(HDROP hDrop)
@@ -87,7 +87,7 @@ void WinReader::onFileDrop(HDROP hDrop)
     UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
     for (UINT i = 0; i < fileCount; ++i) {
         eventTargets[L"win_reading"]->resolve();
-        auto msg = eventTargets[L"win_end"];
+        //auto msg = eventTargets[L"win_end"];
         {
             TCHAR filePath[MAX_PATH];
             DragQueryFile(hDrop, i, filePath, MAX_PATH);

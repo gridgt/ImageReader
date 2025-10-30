@@ -52,6 +52,7 @@
     <None Include="Web\viewer.html" />
     <None Include="Web\viewer.js" />
     <None Include="Web\viewer.css" />
+    <None Include="Web\iconfont.css" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h">
@@ -74,5 +75,8 @@
     <ResourceCompile Include="Resource.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Web\iconfont.ttf" />
   </ItemGroup>
 </Project>

@@ -62,6 +62,9 @@ void WinBase::exec(Message* msg)
     {
         off(msg);
     }
+    else {
+        procProcMsg(msg);
+    }
 }
 
 void WinBase::on(Message* msg)

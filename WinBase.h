@@ -53,17 +53,21 @@ class WinBase
 	protected:
 		void show();
 		void createWindow();
-		virtual LRESULT procMsg(UINT msg, WPARAM wParam, LPARAM lParam);
+		virtual LRESULT procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam);
+		virtual void procProcMsg(Message* msg) {};
 		virtual void onViewReady() {};
+		virtual ComPtr<IStream> procLocalRes(std::wstring& resName) { return nullptr; };
 	protected:
 		int x, y,w, h;
-		float dpr;
+		float dpi;
 		std::unordered_map<winrt::hstring, Message*> eventTargets;
 		ComPtr<ICoreWebView2Controller> webviewCtrl;
 	private:
 		static LRESULT CALLBACK winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);	
+		void routeMsgToPage(UINT msg, WPARAM wParam, LPARAM lParam);
 		void createCompCtrl();
 		void setMinMaxInfo(LPMINMAXINFO lpMMI);
+		void mouseLeave();
 		void onSize(UINT param);
 		HRESULT ctrlReady(HRESULT result, ICoreWebView2CompositionController* ctrlComp);
 		void bindCompCtrlToHwnd();

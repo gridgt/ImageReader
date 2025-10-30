@@ -27,6 +27,5 @@ class Message
 	private:
 		void initResult();
 	private:
-		winrt::Windows::System::DispatcherQueue uiDQ;
 };
 

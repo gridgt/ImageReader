@@ -1,16 +1,20 @@
 ﻿#include <filesystem>
 #include <shlobj.h>
+#include <WebView2EnvironmentOptions.h>
 #include "Environment.h"
 #include "WinReader.h"
 
 std::unique_ptr<Environment> envIns;
 
-Environment::Environment()
+Environment::Environment() :uiDQ{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }
 {
+    
 }
 
 Environment::~Environment()
 {
+    tess->End();
+    delete tess;
 }
 
 bool Environment::init()
@@ -18,6 +22,7 @@ bool Environment::init()
     WinReader::init();
 	auto env = new Environment();
 	envIns.reset(env);
+    envIns->initTess();
     if (!envIns->initCOM())
     {
         return false;
@@ -134,10 +139,18 @@ bool Environment::initEnv()
             WinReader::get()->initView(env);
             return S_OK;
         });
-    auto hr = CreateCoreWebView2EnvironmentWithOptions(NULL, dataPath.data(), NULL, envReady.Get());
+    auto options = Make<CoreWebView2EnvironmentOptions>();
+    //options->put_AdditionalBrowserArguments(L"--allow-file-access-from-files");  没用！！
+    auto hr = CreateCoreWebView2EnvironmentWithOptions(NULL, dataPath.data(), options.Get(), envReady.Get());
     if (FAILED(hr))
     {
         return false;
     }
 	return true;
+}
+
+void Environment::initTess()
+{
+    tess = new tesseract::TessBaseAPI();
+    tess->Init(nullptr, "eng+chi_sim");
 }

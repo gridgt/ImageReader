@@ -6,16 +6,31 @@
     <script src="cpp.js"></script>
     <script src="viewer.js"></script>
     <link rel="stylesheet" href="viewer.css" />
+    <link rel="stylesheet" href="iconfont.css" />
 </head>
 <body>
 <div class="titleBar">
-    <div class="titleLabel"></div>
+    <div class="titleLabel">图像识别结果</div>
     <div class="winTool">
-        <div class="winToolBtn"></div>
-        <div class="winToolBtn"></div>
-        <div class="winToolBtn"></div>
-        <div class="winToolBtn"></div>
+        <div id="minimize" class="winToolBtn">
+            <i class="ir ir-minimize"></i>
+        </div>
+        <div id="restore" class="winToolBtn restore">
+            <i class="ir ir-restore"></i>
+        </div>
+        <div id="maximize" class="winToolBtn maximize" style="display:none;">
+            <i class="ir ir-maximize"></i>
+        </div>
+        <div id="close" class="winToolBtn">
+            <i class="ir ir-close"></i>
+        </div>
     </div>
+</div>
+<div class="contentBox">
+    <div class="imgBox">
+        <img src="$$localFile.png" />
+    </div>
+    <div class="textBox"></div>
 </div>
 </body>
 </html>

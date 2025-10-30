@@ -3,8 +3,7 @@
 
 Message::Message(JsonObject&& param, WinBase* win):
     param{ std::move(param) }, 
-    win{ win },
-    uiDQ{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }
+    win{ win }
 {
     initResult();
 }
@@ -34,20 +33,18 @@ Message::~Message()
 
 void Message::resolve()
 {
-    uiDQ.TryEnqueue([this]()
-        {
-            auto resultStr = result.Stringify();
-            win->webview->PostWebMessageAsJson(resultStr.data());
-            if (result.HasKey(L"$eventName"))
-            {
-                if (result.HasKey(L"$cbId")) {
-                    result.Remove(L"$cbId");
-                }
-            }
-            else {
-                delete this;
-            }
-        });
+
+    auto resultStr = result.Stringify();
+    win->webview->PostWebMessageAsJson(resultStr.data());
+    if (result.HasKey(L"$eventName"))
+    {
+        if (result.HasKey(L"$cbId")) {
+            result.Remove(L"$cbId");
+        }
+    }
+    else {
+        delete this;
+    }
 }
 
 

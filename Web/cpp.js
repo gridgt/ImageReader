@@ -46,6 +46,15 @@
     minimize: () => {
       return callCppMethod("win", "minimize", {});
     },
+    close: () => {
+        return callCppMethod("win", "close", {});
+    },
+    restore: () => {
+        return callCppMethod("win", "restore", {});
+    },
+    maximize: () => {
+        return callCppMethod("win", "maximize", {});
+    },
     on: (eventName, callback) => {
       return listenEvent("win", eventName, callback);
     },
@@ -54,6 +63,9 @@
     },
     getFilePath: (param) => {
         return callCppMethod("win", "getFilePath", param);
+      },
+    readImg: (param) => {
+        return callCppMethod("win", "readImg", param);
     },
   };
   window.cpp = {

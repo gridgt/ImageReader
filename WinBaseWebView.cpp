@@ -86,24 +86,29 @@ HRESULT WinBase::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequest
     size_t pos0 = url.find(L".localhost/") + wcslen(L".localhost/");
     size_t pos1 = url.find(L"?", pos0);
     std::wstring resName = url.substr(pos0, pos1 == std::wstring::npos ? std::wstring::npos : pos1 - pos0);
-
+    
+    ComPtr<IStream> stream;
+    if (resName.starts_with(L"$$")) {
+        stream = procLocalRes(resName);
+    }
+    else {
+        HRSRC hRes = FindResource(NULL, resName.data(), RT_RCDATA);
+        if (!hRes) {
+            args->put_Response(nullptr);
+            return S_OK;
+        }
+        HGLOBAL hData = LoadResource(NULL, hRes);
+        if (!hData) {
+            args->put_Response(nullptr);
+            return S_OK;
+        }
+        void* pData = LockResource(hData);
+        DWORD size = SizeofResource(NULL, hRes);
+        stream = SHCreateMemStream((const BYTE*)pData, size);
+    }    
     ComPtr<ICoreWebView2WebResourceResponse> response;
-    HRSRC hRes = FindResource(NULL, resName.data(), RT_RCDATA);
-    if (!hRes) {
-        args->put_Response(nullptr);
-        return S_OK;
-    }
-    HGLOBAL hData = LoadResource(NULL, hRes);
-    if (!hData) {
-        args->put_Response(nullptr);
-        return S_OK;
-    }
-    void* pData = LockResource(hData);
-    DWORD size = SizeofResource(NULL, hRes);
-    ComPtr<IStream> stream = SHCreateMemStream((const BYTE*)pData, size);
     auto ct = getContentType(resName);
     auto hd = std::format(L"Content-Type: {}", ct.data());
-
     ComPtr<ICoreWebView2Environment> env;
     webview->get_Environment(&env);
     env->CreateWebResourceResponse(stream.Get(), 200, L"OK", hd.data(), &response);

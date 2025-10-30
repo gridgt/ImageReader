@@ -6,7 +6,6 @@
 
 WinViewer::WinViewer(winrt::hstring imgPath):imgPath{imgPath}
 {
-    createTessAPI();
     initPosSize();
     createWindow();
     addShadow();
@@ -16,19 +15,11 @@ WinViewer::WinViewer(winrt::hstring imgPath):imgPath{imgPath}
 
 WinViewer::~WinViewer()
 {
-    tessAPI->End();
-    delete tessAPI;
 }
 
 void WinViewer::init(winrt::hstring imgPath)
 {
     auto winViewer = new WinViewer(imgPath);
-}
-
-void WinViewer::createTessAPI()
-{
-    tessAPI = new tesseract::TessBaseAPI();
-    tessAPI->Init(nullptr, "eng+chi_sim");
 }
 
 void WinViewer::initPosSize()
@@ -59,10 +50,10 @@ void WinViewer::addShadow()
     DwmSetWindowAttribute(hwnd, DWMWA_ALLOW_NCPAINT, &value, sizeof(value));
 }
 
-LRESULT WinViewer::procMsg(UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT WinViewer::procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (msg == WM_NCHITTEST) {
-        return HTCAPTION;
+        return hittest(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
     }
     else if (msg == WM_GETMINMAXINFO) {
         setMinMaxInfo((LPMINMAXINFO)lParam);
@@ -76,9 +67,16 @@ LRESULT WinViewer::procMsg(UINT msg, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         return 0;
     }
-    return WinBase::procMsg(msg, wParam, lParam);
+    return WinBase::procNativeMsg(msg, wParam, lParam);
 }
 
+void WinViewer::procProcMsg(Message* msg)
+{
+    auto methodName = msg->param.GetNamedString(L"$methodName");
+    if (methodName == L"readImg") {
+        readImg(msg);
+    }
+}
 
 void WinViewer::onSize(UINT param)
 {
@@ -114,24 +112,58 @@ void WinViewer::setMinMaxInfo(LPMINMAXINFO lpMMI)
     lpMMI->ptMinTrackSize.y = 600;
 }
 
+LRESULT WinViewer::hittest(const int& x, const int& y)
+{
+    RECT winRect;
+    GetWindowRect(hwnd, &winRect);
+    if (x > winRect.left && y > winRect.top && x < winRect.right && y < winRect.bottom) {
+        static int borderWidth = 5;
+        if (x < winRect.left + borderWidth && y < winRect.top + borderWidth) return HTTOPLEFT;
+        else if (x < winRect.left + borderWidth && y > winRect.bottom - borderWidth) return HTBOTTOMLEFT;
+        else if (x > winRect.right - borderWidth && y > winRect.bottom - borderWidth) return HTBOTTOMRIGHT;
+        else if (x > winRect.right - borderWidth && y < winRect.top + borderWidth) return HTTOPRIGHT;
+        else if (x < winRect.left + borderWidth) return HTLEFT;
+        else if (x > winRect.right - borderWidth) return HTRIGHT;
+        else if (y < winRect.top + borderWidth) return HTTOP;
+        else if (y > winRect.bottom - borderWidth) return HTBOTTOM;
+        else if (x < winRect.right - 100*dpi && y < winRect.top + 30*dpi) {
+            return HTCAPTION;
+        }
+        return HTCLIENT;
+    }
+    else
+    {
+        return HTNOWHERE;
+    }
+}
+
+ComPtr<IStream> WinViewer::procLocalRes(std::wstring& resName)
+{
+    auto ext = std::filesystem::path(imgPath.data()).extension().wstring();
+    resName = L"$$img." + ext;
+    ComPtr<IStream> stream;
+    HRESULT hr = SHCreateStreamOnFile(imgPath.data(), STGM_READ, stream.GetAddressOf());
+    return stream;
+}
+
 winrt::Windows::Foundation::IAsyncAction WinViewer::readImg(Message* msg)
 {
     co_await winrt::resume_background();
     FILE* fp;
-    auto path = msg->result.GetNamedString(L"imgPath");
-    auto err = _wfopen_s(&fp, path.c_str(), L"rb");
+    auto err = _wfopen_s(&fp, imgPath.c_str(), L"rb");
     if (err != 0 || !fp)
     {
         throw std::runtime_error("Failed to open image file.");
     }
     Pix* image = pixReadStream(fp, IFF_DEFAULT);
     fclose(fp);
-    tessAPI->SetImage(image);
-    tessAPI->Recognize(0);
+    auto tess = Environment::get()->tess;
+    tess->SetImage(image);
+    tess->Recognize(0);
     JsonArray lineArr;
     JsonArray wordArr;
     int lineIndex{ 0 };
-    tesseract::ResultIterator* ri = tessAPI->GetIterator();
+    tesseract::ResultIterator* ri = tess->GetIterator();
     do {
         if (ri->IsAtBeginningOf(tesseract::RIL_TEXTLINE)) {
             JsonObject line;
@@ -165,7 +197,12 @@ winrt::Windows::Foundation::IAsyncAction WinViewer::readImg(Message* msg)
     pixDestroy(&image);
     msg->result.SetNamedValue(L"lines", lineArr);
     msg->result.SetNamedValue(L"words", wordArr);
-    msg->resolve();
+    Environment::get()->uiDQ.TryEnqueue([msg]()
+        {
+            msg->resolve();
+        });
+
+
     //auto file = co_await winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path.data());
     //auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read);
     //auto decoder = co_await BitmapDecoder::CreateAsync(stream);
@@ -190,3 +227,4 @@ winrt::Windows::Foundation::IAsyncAction WinViewer::readImg(Message* msg)
     //    //text += line.Text() + L"\n";
     //}
 }
+

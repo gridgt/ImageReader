@@ -1,0 +1,29 @@
+@font-face {
+  font-family: "ir"; /* Project id 5053243 */
+  src: url('iconfont.ttf?t=1761804958859') format('truetype');
+}
+
+.ir {
+  font-family: "ir" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ir-close:before {
+  content: "\e6e7";
+}
+
+.ir-minimize:before {
+  content: "\e6e8";
+}
+
+.ir-restore:before {
+  content: "\e6e9";
+}
+
+.ir-maximize:before {
+  content: "\e6e5";
+}
+
