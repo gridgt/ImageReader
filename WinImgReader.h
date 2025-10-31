@@ -23,5 +23,6 @@ private:
 private:
 	tesseract::TessBaseAPI* tess;
 	winrt::Windows::Foundation::IAsyncAction tessTask;
+	winrt::hstring imgPath;
 };
 

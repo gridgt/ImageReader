@@ -5,10 +5,11 @@
 #include "WinImgReader.h"
 
 std::unique_ptr<Environment> envIns;
+winrt::Windows::System::DispatcherQueueController controller{ nullptr };
 
-Environment::Environment() :uiDQ{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }
+
+Environment::Environment():dq{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }
 {
-    
 }
 
 Environment::~Environment()
@@ -18,6 +19,14 @@ Environment::~Environment()
 
 bool Environment::init()
 {
+    DispatcherQueueOptions options{
+        sizeof(DispatcherQueueOptions),
+        DQTYPE_THREAD_CURRENT,
+        DQTAT_COM_NONE
+    };
+    CreateDispatcherQueueController(options,
+        reinterpret_cast<ABI::Windows::System::IDispatcherQueueController**>(winrt::put_abi(controller)));
+
 	auto env = new Environment();
 	envIns.reset(env);
     WinImgReader::init();

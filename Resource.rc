@@ -8,6 +8,8 @@ cpp.js RCDATA "Web/cpp.js"
 viewer.html RCDATA "Web/viewer.html"
 viewer.css RCDATA "Web/viewer.css"
 viewer.js RCDATA "Web/viewer.js"
+./chi_sim.traineddata RCDATA "Lang/chi_sim.traineddata"
+./eng.traineddata RCDATA "Lang/eng.traineddata"
 
 
 // 配置可执行文件产品信息
@@ -28,13 +30,13 @@ BEGIN
     BEGIN
         BLOCK "080404b0"
         BEGIN
-            VALUE "CompanyName", "GitHub xland"
-            VALUE "FileDescription", "WebView2Demo"
+            VALUE "CompanyName", "LiuXiaoLun"
+            VALUE "FileDescription", "ImageReader"
             VALUE "FileVersion", "0.0.1.0"
-            VALUE "InternalName", "WebView2Demo.exe"
-            VALUE "LegalCopyright", "Copyright (C) LiuXiaolun 2023-2025"
-            VALUE "OriginalFilename", "WebView2Demo.exe"
-            VALUE "ProductName", "WebView2Demo"
+            VALUE "InternalName", "ImageReader.exe"
+            VALUE "LegalCopyright", "Copyright (C) LiuXiaoLun 2023-2025"
+            VALUE "OriginalFilename", "ImageReader.exe"
+            VALUE "ProductName", "ImageReader"
             VALUE "ProductVersion", "0.0.1.0"
         END
     END

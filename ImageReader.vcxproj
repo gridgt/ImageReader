@@ -166,6 +166,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="Lang\chi_sim.traineddata" />
+    <None Include="Lang\eng.traineddata" />
     <None Include="packages.config" />
     <None Include="README.md" />
     <None Include="Web\cpp.js" />

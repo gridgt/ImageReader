@@ -7,7 +7,7 @@ std::unique_ptr<WinImgReader> instance;
 
 WinImgReader::WinImgReader()
 {
-    tessTask = initTess();
+    this->tessTask = initTess();
     initPosSize();
     createWindow();
     show();
@@ -29,11 +29,27 @@ WinImgReader* WinImgReader::get()
     return instance.get();
 }
 
+bool langReader(const char* filename, std::vector<char>* data)
+{
+    auto resName = winrt::to_hstring(filename);
+    HRSRC hRes = FindResource(NULL, resName.data(), RT_RCDATA);
+    if (!hRes) return false;
+    HGLOBAL hData = LoadResource(NULL, hRes);
+    if (!hData) return false;
+    void* pData = LockResource(hData);
+    DWORD size = SizeofResource(NULL, hRes);
+    data->resize(size);
+    memcpy(data->data(), pData, size);
+    return true;
+}
+
+
 winrt::Windows::Foundation::IAsyncAction WinImgReader::initTess()
 {
     co_await winrt::resume_background();
     tess = new tesseract::TessBaseAPI();
     tess->Init(nullptr, "eng+chi_sim");
+    //int err = tess->Init(nullptr, 0, "eng+chi_sim", tesseract::OEM_DEFAULT, nullptr, 0, nullptr, nullptr, false, &langReader);
 }
 
 void WinImgReader::initPosSize()
@@ -116,8 +132,6 @@ void WinImgReader::setMinMaxInfo(LPMINMAXINFO lpMMI)
 
 ComPtr<IStream> WinImgReader::procLocalRes(std::wstring& resName)
 {
-    auto msg = eventTargets[L"imgReady"];
-    auto imgPath = msg->result.GetNamedString(L"imgPath");
     auto ext = std::filesystem::path(imgPath.data()).extension().wstring();
     resName = L"$$img." + ext;
     ComPtr<IStream> stream;
@@ -127,10 +141,10 @@ ComPtr<IStream> WinImgReader::procLocalRes(std::wstring& resName)
 
 winrt::Windows::Foundation::IAsyncAction WinImgReader::readImg(Message* msg)
 {
-    tessTask.get();
+    if(!tess){ co_await tessTask; }
     co_await winrt::resume_background();
-    auto arr = msg->result.GetNamedArray(L"files");
-    auto imgPath = arr.GetStringAt(0);
+    auto arr = msg->result.GetNamedArray(L"$files");
+    imgPath = arr.GetStringAt(0);
     FILE* fp;
     auto err = _wfopen_s(&fp, imgPath.c_str(), L"rb");
     if (err != 0 || !fp)
@@ -178,34 +192,31 @@ winrt::Windows::Foundation::IAsyncAction WinImgReader::readImg(Message* msg)
     pixDestroy(&image);
     msg->result.SetNamedValue(L"lines", lineArr);
     msg->result.SetNamedValue(L"words", wordArr);
-    Environment::get()->uiDQ.TryEnqueue([msg]()
-        {
-            msg->resolve();
-        });
-
-
-    //auto file = co_await winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path.data());
-    //auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read);
-    //auto decoder = co_await BitmapDecoder::CreateAsync(stream);
-    //auto softwareBitmap = co_await decoder.GetSoftwareBitmapAsync();
-    ////// 2. 转为灰度（OcrEngine 要求 B8G8R8A8 或 Gray8）
-    ////if (softwareBitmap.BitmapPixelFormat() != BitmapPixelFormat::Gray8)
-    ////{
-    ////    softwareBitmap = SoftwareBitmap::Convert(softwareBitmap, BitmapPixelFormat::Gray8);
-    ////}
-    //OcrEngine ocrEngine = OcrEngine::TryCreateFromUserProfileLanguages();
-    //OcrResult result = co_await ocrEngine.RecognizeAsync(softwareBitmap);
-    //std::wstring text;
-    //for (auto const& line : result.Lines())
-    //{
-    //    auto count = line.Words().Size();
-    //    for (OcrWord const& word : line.Words())
-    //    {
-    //        winrt::hstring text = word.Text();
-    //        winrt::Windows::Foundation::Rect wordRect = word.BoundingRect();
-    //    }
-    //    //winrt::Windows::Foundation::Rect lineRect = line.BoundingRect();
-    //    //text += line.Text() + L"\n";
-    //}
+    co_await winrt::resume_foreground(Environment::get()->dq);
+    msg->resolve();
 }
+
+//auto file = co_await winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path.data());
+//auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read);
+//auto decoder = co_await BitmapDecoder::CreateAsync(stream);
+//auto softwareBitmap = co_await decoder.GetSoftwareBitmapAsync();
+////// 2. 转为灰度（OcrEngine 要求 B8G8R8A8 或 Gray8）
+////if (softwareBitmap.BitmapPixelFormat() != BitmapPixelFormat::Gray8)
+////{
+////    softwareBitmap = SoftwareBitmap::Convert(softwareBitmap, BitmapPixelFormat::Gray8);
+////}
+//OcrEngine ocrEngine = OcrEngine::TryCreateFromUserProfileLanguages();
+//OcrResult result = co_await ocrEngine.RecognizeAsync(softwareBitmap);
+//std::wstring text;
+//for (auto const& line : result.Lines())
+//{
+//    auto count = line.Words().Size();
+//    for (OcrWord const& word : line.Words())
+//    {
+//        winrt::hstring text = word.Text();
+//        winrt::Windows::Foundation::Rect wordRect = word.BoundingRect();
+//    }
+//    //winrt::Windows::Foundation::Rect lineRect = line.BoundingRect();
+//    //text += line.Text() + L"\n";
+//}
 

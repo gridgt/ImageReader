@@ -17,7 +17,7 @@ class Environment
 		static Environment* get();
 	public:
 		ComPtr<ICoreWebView2Environment> env;
-		winrt::Windows::System::DispatcherQueue uiDQ;
+		winrt::Windows::System::DispatcherQueue dq;
 	private:
 		bool initEnv();
 		bool initCOM();

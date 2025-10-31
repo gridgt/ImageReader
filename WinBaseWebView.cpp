@@ -180,7 +180,8 @@ void WinBase::getFiles(ICoreWebView2WebMessageReceivedEventArgs* args, Message* 
     auto hr = args->QueryInterface(IID_PPV_ARGS(&args2));
     if (FAILED(hr)) return;
     ComPtr<ICoreWebView2ObjectCollectionView> additionalObjects;
-    args2->get_AdditionalObjects(&additionalObjects);
+    hr = args2->get_AdditionalObjects(&additionalObjects);
+    if (FAILED(hr)|| !additionalObjects.Get()) return;
     UINT32 count = 0;
     additionalObjects->get_Count(&count);
 
