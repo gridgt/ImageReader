@@ -7,45 +7,18 @@
 }
 body {
     background: #fff;
-    display:flex;
-    flex-direction:column;
-    font-size:12px;
-}
-.titleBar {
-    background: #CCD5F0;
-    height:30px;
-    line-height:30px;
-    display:flex;
-}
-.titleLabel{
-    flex:1;
-    padding-left:12px;
-}
-.winTool{
-    display:flex;
-    width:100px;
-    color:#999;
-}
-.winToolBtn{
-    flex:1;
-    cursor:pointer;
-    text-align:center;
-}
-.winToolBtn:hover {
-    background: #F8F9FF;
+    display: flex;
+    font-size: 12px;
+    box-sizing: border-box;
+    flex-direction: column;
     color: #333;
 }
-.winToolBtn i{
-    font-size:12px !important;
-}
-
-.contentBox{
+.contentBox {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     flex:1;
-    box-sizing:border-box;
     display:flex;
-    overflow:hidden;
 }
-
 .imgBox {
     flex: 1;
     box-sizing: border-box;
@@ -54,15 +27,22 @@ body {
     align-content:center;
     overflow: hidden;
     height: 100%;
+    
 }
 .imgBox img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-} 
-.textBox{
-    width:200px;
-    height:100%;
-    background:#282828;
-    color:#fff;
+}
+.textBox {
+    width: 200px;
+    height: 100%;
+    background: #CCD5F0;
+}
+.statusBar{
+    height:28px;
+    padding-left:12px;
+    line-height:28px;
+    background:#eee;
+    color:#666;
 }

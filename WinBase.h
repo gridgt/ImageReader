@@ -64,25 +64,15 @@ class WinBase
 		ComPtr<ICoreWebView2Controller> webviewCtrl;
 	private:
 		static LRESULT CALLBACK winMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);	
-		void routeMsgToPage(UINT msg, WPARAM wParam, LPARAM lParam);
-		void createCompCtrl();
 		void setMinMaxInfo(LPMINMAXINFO lpMMI);
-		void mouseLeave();
 		void onSize(UINT param);
-		HRESULT ctrlReady(HRESULT result, ICoreWebView2CompositionController* ctrlComp);
-		void bindCompCtrlToHwnd();
 		void addRequestFilter();
 		void addMsgReceiver();
 		void addDomLoader();
 		JsonObject getParam(ICoreWebView2WebMessageReceivedEventArgs* args);
+		void getFiles(ICoreWebView2WebMessageReceivedEventArgs* args, Message* msg);
 		HRESULT resRequested(ICoreWebView2* webview, ICoreWebView2WebResourceRequestedEventArgs* args);
 		std::wstring getContentType(const std::wstring& fileName);
 	private:
-		winrt::Windows::UI::Composition::Compositor compositor{ nullptr };
-		winrt::Windows::UI::Composition::Desktop::DesktopWindowTarget winTarget{ nullptr };
-		winrt::Windows::UI::Composition::ContainerVisual rootVisual{ nullptr };
-		winrt::Windows::UI::Composition::ContainerVisual webviewVisual{ nullptr };
-		ComPtr<ICoreWebView2CompositionController> ctrlComp;
-		bool isMouseTracking{ false };
 };
 

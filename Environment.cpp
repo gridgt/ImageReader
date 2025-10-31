@@ -2,7 +2,7 @@
 #include <shlobj.h>
 #include <WebView2EnvironmentOptions.h>
 #include "Environment.h"
-#include "WinReader.h"
+#include "WinImgReader.h"
 
 std::unique_ptr<Environment> envIns;
 
@@ -13,16 +13,14 @@ Environment::Environment() :uiDQ{ winrt::Windows::System::DispatcherQueue::GetFo
 
 Environment::~Environment()
 {
-    tess->End();
-    delete tess;
+
 }
 
 bool Environment::init()
 {
-    WinReader::init();
 	auto env = new Environment();
 	envIns.reset(env);
-    envIns->initTess();
+    WinImgReader::init();
     if (!envIns->initCOM())
     {
         return false;
@@ -136,7 +134,7 @@ bool Environment::initEnv()
                 ExitProcess(-1);
             }
 			this->env = env;
-            WinReader::get()->initView(env);
+            WinImgReader::get()->initView(env);
             return S_OK;
         });
     auto options = Make<CoreWebView2EnvironmentOptions>();
@@ -147,10 +145,4 @@ bool Environment::initEnv()
         return false;
     }
 	return true;
-}
-
-void Environment::initTess()
-{
-    tess = new tesseract::TessBaseAPI();
-    tess->Init(nullptr, "eng+chi_sim");
 }

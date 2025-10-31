@@ -1,78 +1,40 @@
 ﻿#include "WinBase.h"
 #include "Message.h"
 
-void WinBase::createCompCtrl()
-{
-    DispatcherQueueOptions options{
-        sizeof(DispatcherQueueOptions),
-        DQTYPE_THREAD_CURRENT,
-        DQTAT_COM_ASTA
-    };
-    static winrt::Windows::System::DispatcherQueueController dispatchCtrl{ nullptr };
-    if (!dispatchCtrl) {
-        CreateDispatcherQueueController(options,
-            reinterpret_cast<ABI::Windows::System::IDispatcherQueueController**>(winrt::put_abi(dispatchCtrl)));
-    }    
-    compositor = winrt::Windows::UI::Composition::Compositor();
-}
-
 void WinBase::initView(ICoreWebView2Environment* env)
 {
-    auto ready = Callback<ICoreWebView2CreateCoreWebView2CompositionControllerCompletedHandler>(
-        this, &WinBase::ctrlReady);
-    ICoreWebView2Environment3* env3;
-    env->QueryInterface(IID_PPV_ARGS(&env3));
-    env3->CreateCoreWebView2CompositionController(hwnd, ready.Get());
-}
-
-HRESULT WinBase::ctrlReady(HRESULT result, ICoreWebView2CompositionController* ctrlComp)
-{
-    if (FAILED(result))
-    {
-        MessageBox(NULL, L"Failed to create webview2 controller", L"Error", MB_OK | MB_ICONERROR);
-        ExitProcess(-1);
-    }
-
-    this->ctrlComp = ctrlComp;
-    this->ctrlComp.As(&this->webviewCtrl);
-    ComPtr<ICoreWebView2> webview;
-    webviewCtrl->get_CoreWebView2(&webview);
-    auto hr = webview.As(&this->webview);
-    if (FAILED(hr)) {
-        auto result = MessageBox(nullptr, L"WebView2系统组件版本过低，请安装新版本",
-            L"系统提示", MB_OKCANCEL | MB_ICONINFORMATION | MB_DEFBUTTON1);
-        if (result == IDOK) {
-            ShellExecute(0, 0, L"https://go.microsoft.com/fwlink/p/?LinkId=2124703", 0, 0, SW_SHOW);
+    auto ctrlReadyInstance = Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>([this](HRESULT result, ICoreWebView2Controller* ctrl) {
+        if (FAILED(result))
+        {
+            MessageBox(NULL, L"Failed to create webview2 controller", L"Error", MB_OK | MB_ICONERROR);
+            ExitProcess(-1);
         }
-        ExitProcess(-1);
+        webviewCtrl = ctrl;
+        ComPtr<ICoreWebView2> webview;
+        webviewCtrl->get_CoreWebView2(&webview);
+        auto hr = webview.As(&this->webview);
+        if (FAILED(hr)) {
+            auto result = MessageBox(nullptr, L"WebView2系统组件版本过低，请安装新版本",
+                L"系统提示", MB_OKCANCEL | MB_ICONINFORMATION | MB_DEFBUTTON1);
+            if (result == IDOK) {
+                ShellExecute(0, 0, L"https://go.microsoft.com/fwlink/p/?LinkId=2124703", 0, 0, SW_SHOW);
+            }
+            ExitProcess(-1);
+            return S_OK;
+        }
+        addRequestFilter();
+        addMsgReceiver();
+        addDomLoader();
+        onViewReady();
+
+        RECT bounds;
+        GetClientRect(hwnd, &bounds);
+        webviewCtrl->put_Bounds(bounds);
         return S_OK;
-    }
-    bindCompCtrlToHwnd();
-    addRequestFilter();
-    addMsgReceiver();
-    addDomLoader();
-    onViewReady();
-    return S_OK;
+    });
+    env->CreateCoreWebView2Controller(hwnd, ctrlReadyInstance.Get());
 }
 
-void WinBase::bindCompCtrlToHwnd()
-{
-    auto interop = compositor.as<ABI::Windows::UI::Composition::Desktop::ICompositorDesktopInterop>();
-    interop->CreateDesktopWindowTarget(
-        hwnd, false,
-        reinterpret_cast<ABI::Windows::UI::Composition::Desktop::IDesktopWindowTarget**>(winrt::put_abi(winTarget))
-    );
-    rootVisual = compositor.CreateContainerVisual();
-    rootVisual.RelativeSizeAdjustment({ 1.0f, 1.0f });
-    rootVisual.Offset({ 0, 0, 0 });
-    winTarget.Root(rootVisual);
-    webviewVisual = compositor.CreateContainerVisual();
-    rootVisual.Children().InsertAtTop(webviewVisual);
-    this->ctrlComp->put_RootVisualTarget(webviewVisual.as<IUnknown>().get());
-    RECT bounds;
-    GetClientRect(hwnd, &bounds);
-    webviewCtrl->put_Bounds(bounds);
-}
 
 HRESULT WinBase::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequestedEventArgs* args)
 {
@@ -183,6 +145,7 @@ void WinBase::addMsgReceiver()
         [this](auto wv, auto arg) {
             auto param = getParam(arg);
             auto msg = new Message(std::move(param), this);
+            getFiles(arg, msg);
             msg->route();
             return S_OK;
         }
@@ -209,4 +172,27 @@ JsonObject WinBase::getParam(ICoreWebView2WebMessageReceivedEventArgs* args)
     JsonObject param = JsonObject::Parse(jsonRaw);
     CoTaskMemFree(jsonRaw);
     return param;
+}
+
+void WinBase::getFiles(ICoreWebView2WebMessageReceivedEventArgs* args, Message* msg)
+{
+    ComPtr<ICoreWebView2WebMessageReceivedEventArgs2> args2;
+    auto hr = args->QueryInterface(IID_PPV_ARGS(&args2));
+    if (FAILED(hr)) return;
+    ComPtr<ICoreWebView2ObjectCollectionView> additionalObjects;
+    args2->get_AdditionalObjects(&additionalObjects);
+    UINT32 count = 0;
+    additionalObjects->get_Count(&count);
+
+    JsonArray arr;
+    for (size_t i = 0; i < count; i++)
+    {
+        ComPtr<ICoreWebView2File> file;
+        additionalObjects->GetValueAtIndex(i, &file);
+        PWSTR path;
+        hr = file->get_Path(&path);
+        arr.Append(JsonValue::CreateStringValue(path));
+        CoTaskMemFree(path);
+    }
+    msg->result.SetNamedValue(L"$files", arr);
 }

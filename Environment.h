@@ -4,8 +4,6 @@
 #include <WebView2.h>
 #include <wrl.h>
 #include <functional>
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
 #include <winrt/Windows.System.h>
 using namespace Microsoft::WRL;
 
@@ -19,10 +17,8 @@ class Environment
 		static Environment* get();
 	public:
 		ComPtr<ICoreWebView2Environment> env;
-		tesseract::TessBaseAPI* tess;
 		winrt::Windows::System::DispatcherQueue uiDQ;
 	private:
-		void initTess();
 		bool initEnv();
 		bool initCOM();
 		bool initDataPath();

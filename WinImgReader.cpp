@@ -1,28 +1,42 @@
 #include <dwmapi.h>
-#include "WinViewer.h"
+#include "WinImgReader.h"
 #include "Message.h"
 #include "Environment.h"
 
+std::unique_ptr<WinImgReader> instance;
 
-WinViewer::WinViewer(winrt::hstring imgPath):imgPath{imgPath}
+WinImgReader::WinImgReader()
 {
+    tessTask = initTess();
     initPosSize();
     createWindow();
-    addShadow();
     show();
-    initView(Environment::get()->env.Get());
 }
 
-WinViewer::~WinViewer()
+WinImgReader::~WinImgReader()
 {
+    tess->End();
+    delete tess;
 }
 
-void WinViewer::init(winrt::hstring imgPath)
+void WinImgReader::init()
 {
-    auto winViewer = new WinViewer(imgPath);
+    instance = std::make_unique<WinImgReader>();
 }
 
-void WinViewer::initPosSize()
+WinImgReader* WinImgReader::get()
+{
+    return instance.get();
+}
+
+winrt::Windows::Foundation::IAsyncAction WinImgReader::initTess()
+{
+    co_await winrt::resume_background();
+    tess = new tesseract::TessBaseAPI();
+    tess->Init(nullptr, "eng+chi_sim");
+}
+
+void WinImgReader::initPosSize()
 {
     w = 1000;
     h = 800;
@@ -36,26 +50,14 @@ void WinViewer::initPosSize()
     y = work.top + (height - h) / 2;
 }
 
-void WinViewer::onViewReady()
+void WinImgReader::onViewReady()
 {
     webview->Navigate(L"https://app.localhost/viewer.html");
 }
 
-void WinViewer::addShadow()
+LRESULT WinImgReader::procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    MARGINS margins = { 1, 1, 1, 1 };
-    DwmExtendFrameIntoClientArea(hwnd, &margins);
-    int value = 2;
-    DwmSetWindowAttribute(hwnd, DWMWA_NCRENDERING_POLICY, &value, sizeof(value));
-    DwmSetWindowAttribute(hwnd, DWMWA_ALLOW_NCPAINT, &value, sizeof(value));
-}
-
-LRESULT WinViewer::procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    if (msg == WM_NCHITTEST) {
-        return hittest(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-    }
-    else if (msg == WM_GETMINMAXINFO) {
+    if (msg == WM_GETMINMAXINFO) {
         setMinMaxInfo((LPMINMAXINFO)lParam);
         return 0;
     }
@@ -70,7 +72,7 @@ LRESULT WinViewer::procNativeMsg(UINT msg, WPARAM wParam, LPARAM lParam)
     return WinBase::procNativeMsg(msg, wParam, lParam);
 }
 
-void WinViewer::procProcMsg(Message* msg)
+void WinImgReader::procProcMsg(Message* msg)
 {
     auto methodName = msg->param.GetNamedString(L"$methodName");
     if (methodName == L"readImg") {
@@ -78,7 +80,7 @@ void WinViewer::procProcMsg(Message* msg)
     }
 }
 
-void WinViewer::onSize(UINT param)
+void WinImgReader::onSize(UINT param)
 {
     if (param == SIZE_MAXIMIZED) {
         if (eventTargets.contains(L"win_maximize")) {
@@ -98,7 +100,7 @@ void WinViewer::onSize(UINT param)
     }
 }
 
-void WinViewer::setMinMaxInfo(LPMINMAXINFO lpMMI)
+void WinImgReader::setMinMaxInfo(LPMINMAXINFO lpMMI)
 {
     MONITORINFO mi = { sizeof(mi) };
     HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
@@ -112,33 +114,10 @@ void WinViewer::setMinMaxInfo(LPMINMAXINFO lpMMI)
     lpMMI->ptMinTrackSize.y = 600;
 }
 
-LRESULT WinViewer::hittest(const int& x, const int& y)
+ComPtr<IStream> WinImgReader::procLocalRes(std::wstring& resName)
 {
-    RECT winRect;
-    GetWindowRect(hwnd, &winRect);
-    if (x > winRect.left && y > winRect.top && x < winRect.right && y < winRect.bottom) {
-        static int borderWidth = 5;
-        if (x < winRect.left + borderWidth && y < winRect.top + borderWidth) return HTTOPLEFT;
-        else if (x < winRect.left + borderWidth && y > winRect.bottom - borderWidth) return HTBOTTOMLEFT;
-        else if (x > winRect.right - borderWidth && y > winRect.bottom - borderWidth) return HTBOTTOMRIGHT;
-        else if (x > winRect.right - borderWidth && y < winRect.top + borderWidth) return HTTOPRIGHT;
-        else if (x < winRect.left + borderWidth) return HTLEFT;
-        else if (x > winRect.right - borderWidth) return HTRIGHT;
-        else if (y < winRect.top + borderWidth) return HTTOP;
-        else if (y > winRect.bottom - borderWidth) return HTBOTTOM;
-        else if (x < winRect.right - 100*dpi && y < winRect.top + 30*dpi) {
-            return HTCAPTION;
-        }
-        return HTCLIENT;
-    }
-    else
-    {
-        return HTNOWHERE;
-    }
-}
-
-ComPtr<IStream> WinViewer::procLocalRes(std::wstring& resName)
-{
+    auto msg = eventTargets[L"imgReady"];
+    auto imgPath = msg->result.GetNamedString(L"imgPath");
     auto ext = std::filesystem::path(imgPath.data()).extension().wstring();
     resName = L"$$img." + ext;
     ComPtr<IStream> stream;
@@ -146,9 +125,12 @@ ComPtr<IStream> WinViewer::procLocalRes(std::wstring& resName)
     return stream;
 }
 
-winrt::Windows::Foundation::IAsyncAction WinViewer::readImg(Message* msg)
+winrt::Windows::Foundation::IAsyncAction WinImgReader::readImg(Message* msg)
 {
+    tessTask.get();
     co_await winrt::resume_background();
+    auto arr = msg->result.GetNamedArray(L"files");
+    auto imgPath = arr.GetStringAt(0);
     FILE* fp;
     auto err = _wfopen_s(&fp, imgPath.c_str(), L"rb");
     if (err != 0 || !fp)
@@ -157,7 +139,6 @@ winrt::Windows::Foundation::IAsyncAction WinViewer::readImg(Message* msg)
     }
     Pix* image = pixReadStream(fp, IFF_DEFAULT);
     fclose(fp);
-    auto tess = Environment::get()->tess;
     tess->SetImage(image);
     tess->Recognize(0);
     JsonArray lineArr;

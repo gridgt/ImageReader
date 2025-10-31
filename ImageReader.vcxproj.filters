@@ -33,10 +33,7 @@
     <ClCompile Include="WinBaseWebView.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="WinReader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WinViewer.cpp">
+    <ClCompile Include="WinImgReader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -46,13 +43,9 @@
     <None Include="packages.config" />
     <None Include="Web\mitt.umd.js" />
     <None Include="Web\cpp.js" />
-    <None Include="Web\reader.css" />
-    <None Include="Web\reader.html" />
-    <None Include="Web\reader.js" />
     <None Include="Web\viewer.html" />
     <None Include="Web\viewer.js" />
     <None Include="Web\viewer.css" />
-    <None Include="Web\iconfont.css" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h">
@@ -64,10 +57,7 @@
     <ClInclude Include="Message.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="WinReader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="WinViewer.h">
+    <ClInclude Include="WinImgReader.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -75,8 +65,5 @@
     <ResourceCompile Include="Resource.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Web\iconfont.ttf" />
   </ItemGroup>
 </Project>

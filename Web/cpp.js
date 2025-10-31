@@ -12,16 +12,23 @@
   });
   let callCppMethod = (className, methodName, paramData) => {
     return new Promise((resolve, reject) => {
-      let cbId = `cb_${Math.floor(Math.random() * 1000000000)}`;
-      eventer.on(cbId, (e) => {
+        let cbId = `cb_${Math.floor(Math.random() * 1000000000)}`;
+        eventer.on(cbId, (e) => {
         delete e.$cbId;
         eventer.off(cbId);
         resolve(e);
-      });
+        });
         paramData.$className = className;
         paramData.$methodName = methodName;
         paramData.$cbId = cbId;
-        window.chrome.webview.postMessage(paramData);
+        if (paramData.$additionalObjects) {
+            let objs = paramData.$additionalObjects;
+            delete paramData.$additionalObjects;
+            paramData.$additionalObjectsCount = objs.length;
+            window.chrome.webview.postMessageWithAdditionalObjects(paramData, objs);
+        } else {
+            window.chrome.webview.postMessage(paramData);
+        }
     });
   };
   let listenEvent = (className, eventName, callback) => {
@@ -61,9 +68,6 @@
     off: (eventName, callback) => {
       return unlistenEvent("win", eventName, callback);
     },
-    getFilePath: (param) => {
-        return callCppMethod("win", "getFilePath", param);
-      },
     readImg: (param) => {
         return callCppMethod("win", "readImg", param);
     },

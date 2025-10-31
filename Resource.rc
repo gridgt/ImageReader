@@ -5,14 +5,9 @@
 // 嵌入资源文件
 mitt.umd.js RCDATA "Web/mitt.umd.js"
 cpp.js RCDATA "Web/cpp.js"
-reader.html RCDATA "Web/reader.html"
 viewer.html RCDATA "Web/viewer.html"
-reader.css RCDATA "Web/reader.css"
-reader.js RCDATA "Web/reader.js"
 viewer.css RCDATA "Web/viewer.css"
 viewer.js RCDATA "Web/viewer.js"
-iconfont.css RCDATA "Web/iconfont.css"
-iconfont.ttf RCDATA "Web/iconfont.ttf"
 
 
 // 配置可执行文件产品信息
