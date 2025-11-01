@@ -46,8 +46,6 @@
     <None Include="Web\viewer.html" />
     <None Include="Web\viewer.js" />
     <None Include="Web\viewer.css" />
-    <None Include="Lang\chi_sim.traineddata" />
-    <None Include="Lang\eng.traineddata" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h">

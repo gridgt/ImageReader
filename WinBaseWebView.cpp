@@ -155,7 +155,7 @@ void WinBase::addMsgReceiver()
 void WinBase::addDomLoader()
 {
     auto domLoadedCB = Callback<ICoreWebView2DOMContentLoadedEventHandler>([this](auto wv,auto arg) {
-        wv->OpenDevToolsWindow();
+        //wv->OpenDevToolsWindow();
         return S_OK;
     });
     EventRegistrationToken domLoadedToken;
