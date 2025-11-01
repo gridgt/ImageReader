@@ -70,11 +70,11 @@ void WinBase::exec(Message* msg)
 void WinBase::on(Message* msg)
 {
     auto eName = msg->param.GetNamedString(L"$eventName");
-    if (eventTargets.contains(eName)) {
-        msg->result.Remove(eName);
-        msg->resolve();
-        return;
-    }
+    //if (eventTargets.contains(eName)) {
+    //    msg->result.Remove(eName);
+    //    msg->resolve();
+    //    return;
+    //}
     eventTargets.insert({ eName,msg });
     msg->resolve();
 }
@@ -82,9 +82,9 @@ void WinBase::on(Message* msg)
 void WinBase::off(Message* msg)
 {
     auto eName = msg->param.GetNamedString(L"$eventName");
-    if (eventTargets.contains(eName)) {
-        eventTargets.erase(eName);
-    }
+    //if (eventTargets.contains(eName)) {
+    //    eventTargets.erase(eName);
+    //}
     msg->result.Remove(eName);
     msg->resolve();
 }

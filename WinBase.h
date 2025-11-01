@@ -12,22 +12,13 @@
 #include <windowsx.h>
 #include <wrl.h>
 #include <WebView2.h>
+#include <DispatcherQueue.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Data.Json.h>
-
-#include <DispatcherQueue.h>
 #include <winrt/base.h>
-#include <windows.ui.composition.interop.h>
-#include <winrt/Windows.UI.Composition.Desktop.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Storage.h>
 
-//#include <winrt/Windows.Media.Ocr.h>
-//#include <winrt/Windows.Graphics.Imaging.h>    
-//#include <winrt/Windows.Storage.Streams.h>   
-//using namespace winrt::Windows::Media::Ocr;
-//using namespace winrt::Windows::Graphics::Imaging;
-//using namespace winrt::Windows::Storage::Streams;
 using namespace winrt::Windows::Data::Json;
 using namespace Microsoft::WRL;
 

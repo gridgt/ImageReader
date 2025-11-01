@@ -1,7 +1,5 @@
-#pragma once
+﻿#pragma once
 #include "WinBase.h"
-#include <winrt/Windows.Graphics.Imaging.h>
-#include <winrt/Windows.Media.Ocr.h>
 
 class WinImgReader : public WinBase
 {
@@ -17,7 +15,7 @@ private:
 	void procProcMsg(Message* msg) override;
 	void setMinMaxInfo(LPMINMAXINFO lpMMI);
 	void onSize(UINT param);
-	winrt::Windows::Foundation::IAsyncAction readImg(Message* msg);
+	void readImg(Message* msg);
 	void onViewReady() override;
 private:
 	winrt::hstring imgPath;

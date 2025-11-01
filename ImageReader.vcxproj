@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <PropertyGroup>
     <WebView2LoaderPreference>Static</WebView2LoaderPreference>
   </PropertyGroup>
@@ -116,16 +115,15 @@
       <PreprocessorDefinitions>DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <CompileAsWinRT>false</CompileAsWinRT>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\sdk\PaddleOCR\deploy\cpp_infer;D:\sdk\paddle_inference\paddle\include;D:\sdk\paddle_inference\third_party\install\protobuf\include;D:\sdk\paddle_inference\third_party\install\glog\include;D:\sdk\paddle_inference\third_party\install\gflags\include;D:\sdk\paddle_inference\third_party\install\xxhash\include;D:\sdk\paddle_inference\third_party\install\zlib\include;D:\sdk\paddle_inference\third_party\install\onnxruntime\include;D:\sdk\paddle_inference\third_party\install\paddle2onnx\include;D:\sdk\paddle_inference\third_party\install\yaml-cpp\include;D:\sdk\paddle_inference\third_party\install\openvino\include;D:\sdk\paddle_inference\third_party\install\tbb\include;D:\sdk\paddle_inference\third_party\boost;D:\sdk\paddle_inference\third_party\eigen3;D:\sdk\paddle_inference\third_party\install\mklml\include;D:\sdk\paddle_inference\third_party\install\onednn\include;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\clipper_ver6.4.2\cpp;D:\sdk\PaddleOCR\deploy\cpp_infer\third_party\abseil-cpp;D:\sdk\opencv_build\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Crypt32.lib;Ws2_32.lib;Advapi32.lib;User32.lib;xmllite.lib;Iphlpapi.lib;Secur32.lib;shlwapi.lib;dwmapi.lib;WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>D:\sdk\opencv_build\opencv\build\x64\vc16\lib\opencv_world4120.lib;D:\sdk\paddle_inference\third_party\install\yaml-cpp\lib\yaml-cpp.lib;D:\sdk\paddle_inference\paddle\lib\paddle_inference.lib;D:\sdk\paddle_inference\third_party\install\mklml\lib\mklml.lib;D:\sdk\paddle_inference\third_party\install\mklml\lib\libiomp5md.lib;D:\sdk\paddle_inference\third_party\install\onednn\lib\mkldnn.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\abseil-cpp\absl\status\Debug\absl_statusor.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\clipper_ver6.4.2\cpp\Debug\polyclipping.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\abseil-cpp\absl\Debug\abseil_dll.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\Debug\ppocr.lib;Crypt32.lib;Ws2_32.lib;Advapi32.lib;User32.lib;xmllite.lib;Iphlpapi.lib;Secur32.lib;shlwapi.lib;dwmapi.lib;WindowsApp.lib;Shell32.lib</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
@@ -141,15 +139,14 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard_C>Default</LanguageStandard_C>
       <CompileAsWinRT>false</CompileAsWinRT>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\sdk\PaddleOCR\deploy\cpp_infer;D:\sdk\paddle_inference\paddle\include;D:\sdk\paddle_inference\third_party\install\protobuf\include;D:\sdk\paddle_inference\third_party\install\glog\include;D:\sdk\paddle_inference\third_party\install\gflags\include;D:\sdk\paddle_inference\third_party\install\xxhash\include;D:\sdk\paddle_inference\third_party\install\zlib\include;D:\sdk\paddle_inference\third_party\install\onnxruntime\include;D:\sdk\paddle_inference\third_party\install\paddle2onnx\include;D:\sdk\paddle_inference\third_party\install\yaml-cpp\include;D:\sdk\paddle_inference\third_party\install\openvino\include;D:\sdk\paddle_inference\third_party\install\tbb\include;D:\sdk\paddle_inference\third_party\boost;D:\sdk\paddle_inference\third_party\eigen3;D:\sdk\paddle_inference\third_party\install\mklml\include;D:\sdk\paddle_inference\third_party\install\onednn\include;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\clipper_ver6.4.2\cpp;D:\sdk\PaddleOCR\deploy\cpp_infer\third_party\abseil-cpp;D:\sdk\opencv_build\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Crypt32.lib;Ws2_32.lib;Advapi32.lib;User32.lib;xmllite.lib;Iphlpapi.lib;Secur32.lib;shlwapi.lib;dwmapi.lib;WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>D:\sdk\opencv_build\opencv\build\x64\vc16\lib\opencv_world4120.lib;D:\sdk\paddle_inference\third_party\install\yaml-cpp\lib\yaml-cpp.lib;D:\sdk\paddle_inference\paddle\lib\paddle_inference.lib;D:\sdk\paddle_inference\third_party\install\mklml\lib\mklml.lib;D:\sdk\paddle_inference\third_party\install\mklml\lib\libiomp5md.lib;D:\sdk\paddle_inference\third_party\install\onednn\lib\mkldnn.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\abseil-cpp\absl\status\Release\absl_statusor.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\clipper_ver6.4.2\cpp\Release\polyclipping.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\abseil-cpp\absl\Release\abseil_dll.lib;D:\sdk\PaddleOCR\deploy\cpp_infer\build\Release\ppocr.lib;Crypt32.lib;Ws2_32.lib;Advapi32.lib;User32.lib;xmllite.lib;Iphlpapi.lib;Secur32.lib;shlwapi.lib;dwmapi.lib;WindowsApp.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
@@ -186,14 +183,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\Microsoft.Web.WebView2.1.0.3537.50\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('packages\Microsoft.Web.WebView2.1.0.3537.50\build\native\Microsoft.Web.WebView2.targets')" />
-    <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.3537.50\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.3537.50\build\native\Microsoft.Web.WebView2.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets'))" />
   </Target>
 </Project>

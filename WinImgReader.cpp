@@ -1,4 +1,5 @@
-#include <dwmapi.h>
+﻿#include <dwmapi.h>
+#include <ocrAPI.h>
 #include "WinImgReader.h"
 #include "Message.h"
 #include "Environment.h"
@@ -7,6 +8,7 @@ std::unique_ptr<WinImgReader> instance;
 
 WinImgReader::WinImgReader()
 {
+    ocrInit();
     initPosSize();
     createWindow();
     show();
@@ -72,16 +74,6 @@ void WinImgReader::procProcMsg(Message* msg)
 
 void WinImgReader::onSize(UINT param)
 {
-    if (param == SIZE_MAXIMIZED) {
-        if (eventTargets.contains(L"win_maximize")) {
-            eventTargets[L"win_maximize"]->resolve();
-        }
-    }
-    else if (param == SIZE_RESTORED) {
-        if (eventTargets.contains(L"win_restore")) {
-            eventTargets[L"win_restore"]->resolve();
-        }
-    }
     if (webviewCtrl)
     {
         RECT bounds;
@@ -113,50 +105,16 @@ ComPtr<IStream> WinImgReader::procLocalRes(std::wstring& resName)
     return stream;
 }
 
-winrt::Windows::Foundation::IAsyncAction WinImgReader::readImg(Message* msg)
+void WinImgReader::readImg(Message* msg)
 {
     JsonArray lineArr;
     JsonArray wordArr;
     auto arr = msg->result.GetNamedArray(L"$files");
     imgPath = arr.GetStringAt(0);
-    auto file = co_await winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(imgPath.data());
-    auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read);
-    auto decoder = co_await winrt::Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
-    auto softwareBitmap = co_await decoder.GetSoftwareBitmapAsync();
-    //// 2. 转为灰度（OcrEngine 要求 B8G8R8A8 或 Gray8）
-    //if (softwareBitmap.BitmapPixelFormat() != BitmapPixelFormat::Gray8)
-    //{
-    //    softwareBitmap = SoftwareBitmap::Convert(softwareBitmap, BitmapPixelFormat::Gray8);
-    //}
-    winrt::Windows::Media::Ocr::OcrEngine ocrEngine = winrt::Windows::Media::Ocr::OcrEngine::TryCreateFromUserProfileLanguages();
-    winrt::Windows::Media::Ocr::OcrResult result = co_await ocrEngine.RecognizeAsync(softwareBitmap);
-    std::wstring text;
-    int lineIndex{ 0 };
-    for (auto const& line : result.Lines())
-    {
-        JsonObject lineObj;
-        auto text = line.Text();
-        lineObj.SetNamedValue(L"text", JsonValue::CreateStringValue(line.Text()));
-        lineArr.Append(lineObj);
-        auto count = line.Words().Size();
-        for (auto const& word : line.Words())
-        {
-            JsonObject wordObj;
-            winrt::hstring text = word.Text();
-            wordObj.SetNamedValue(L"text", JsonValue::CreateStringValue(text));
-            winrt::Windows::Foundation::Rect wordRect = word.BoundingRect();
-            float wx1{ wordRect.X }, wy1{wordRect.Y}, wx2{ wordRect.Width }, wy2{ wordRect.Height };
-            wordObj.SetNamedValue(L"x1", JsonValue::CreateNumberValue(wx1));
-            wordObj.SetNamedValue(L"y1", JsonValue::CreateNumberValue(wy1));
-            wordObj.SetNamedValue(L"x2", JsonValue::CreateNumberValue(wx2));
-            wordObj.SetNamedValue(L"y2", JsonValue::CreateNumberValue(wy2));
-            wordObj.SetNamedValue(L"lineIndex", JsonValue::CreateNumberValue(lineIndex));
-        }
-        lineIndex += 1;
-    }
+    
     msg->result.SetNamedValue(L"lines", lineArr);
     msg->result.SetNamedValue(L"words", wordArr);
-    co_await winrt::resume_foreground(Environment::get()->dq);
+    //co_await winrt::resume_foreground(Environment::get()->dq);
     msg->resolve();
 }
 

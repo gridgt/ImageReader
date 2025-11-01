@@ -50,7 +50,7 @@ HRESULT WinBase::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequest
     std::wstring resName = url.substr(pos0, pos1 == std::wstring::npos ? std::wstring::npos : pos1 - pos0);
     
     ComPtr<IStream> stream;
-    if (resName.starts_with(L"$$")) {
+    if (resName[0]==L'$'&&resName[1] == L'$') {
         stream = procLocalRes(resName);
     }
     else {
@@ -70,7 +70,7 @@ HRESULT WinBase::resRequested(ICoreWebView2* wv, ICoreWebView2WebResourceRequest
     }    
     ComPtr<ICoreWebView2WebResourceResponse> response;
     auto ct = getContentType(resName);
-    auto hd = std::format(L"Content-Type: {}", ct.data());
+    auto hd = L"Content-Type: " + ct;
     ComPtr<ICoreWebView2Environment> env;
     webview->get_Environment(&env);
     env->CreateWebResourceResponse(stream.Get(), 200, L"OK", hd.data(), &response);
