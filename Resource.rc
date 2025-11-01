@@ -8,8 +8,7 @@ cpp.js RCDATA "Web/cpp.js"
 viewer.html RCDATA "Web/viewer.html"
 viewer.css RCDATA "Web/viewer.css"
 viewer.js RCDATA "Web/viewer.js"
-./chi_sim.traineddata RCDATA "Lang/chi_sim.traineddata"
-./eng.traineddata RCDATA "Lang/eng.traineddata"
+chi_sim.traineddata RCDATA "Lang/chi_sim.traineddata"
 
 
 // 配置可执行文件产品信息

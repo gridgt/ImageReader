@@ -32,6 +32,8 @@ WinImgReader* WinImgReader::get()
 bool langReader(const char* filename, std::vector<char>* data)
 {
     auto resName = winrt::to_hstring(filename);
+    std::filesystem::path path{ resName.data() };
+    resName = path.filename().wstring();
     HRSRC hRes = FindResource(NULL, resName.data(), RT_RCDATA);
     if (!hRes) return false;
     HGLOBAL hData = LoadResource(NULL, hRes);
@@ -48,8 +50,8 @@ winrt::Windows::Foundation::IAsyncAction WinImgReader::initTess()
 {
     co_await winrt::resume_background();
     tess = new tesseract::TessBaseAPI();
-    tess->Init(nullptr, "eng+chi_sim");
-    //int err = tess->Init(nullptr, 0, "eng+chi_sim", tesseract::OEM_DEFAULT, nullptr, 0, nullptr, nullptr, false, &langReader);
+    //tess->Init(nullptr, "eng+chi_sim");
+    int err = tess->Init(nullptr, 0, "chi_sim", tesseract::OEM_DEFAULT, nullptr, 0, nullptr, nullptr, false, &langReader);
 }
 
 void WinImgReader::initPosSize()

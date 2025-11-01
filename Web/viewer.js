@@ -8,6 +8,7 @@ let updateOverlay = () => {
     overlay.style.top = `${top}px`;
     overlay.style.width = `${rect.width}px`;
     overlay.style.height = `${rect.height}px`;
+    splitter.style.right = `${textBox.clientWidth - splitter.clientWidth / 2}px`;
 }
 let onFileDrop = async (e) => {
     e.preventDefault();
@@ -23,6 +24,9 @@ let onFileDrop = async (e) => {
     textBox.style.display = "block";
     console.log(data);
     textBox.innerHTML = "";
+    splitter.style.display = "block";
+    splitter.style.right = `${textBox.clientWidth-splitter.clientWidth/2}px`;
+
     data.lines.forEach((item, index) => {
         let dom = document.createElement('div');
         dom.className = "line";
@@ -31,12 +35,26 @@ let onFileDrop = async (e) => {
     })
 }
 
+let onMouseMove = (e)=> {
+    if (!dragging) return;
+    let x = e.clientX;
+    if (x < 100) x = 100;
+    let textBoxWidth = Math.max(100, document.body.clientWidth - x);
+    textBox.style.width = `${textBoxWidth}px`;
+    splitter.style.right = `${textBox.clientWidth - splitter.clientWidth / 2}px`;
+}
+
 window.addEventListener("load", async (event) => {
     window.tarImg = document.getElementById("tarImg");
     window.overlay = document.getElementById('overlay');
     window.tip = document.getElementById('tip');
     window.textBox = document.getElementById('textBox');
     window.statusBar = document.getElementById('statusBar');
+    window.splitter = document.getElementById('splitter');
+    window.dragging = false;
+    splitter.addEventListener("mousedown", (e) => dragging = true);
+    window.addEventListener("mouseup", (e) => dragging = false);
+    window.addEventListener("mousemove", onMouseMove);
     tarImg.addEventListener('load', updateOverlay);
     window.addEventListener('resize', updateOverlay);
     document.body.addEventListener('dragover', (e) => e.preventDefault());

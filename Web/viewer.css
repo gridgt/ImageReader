@@ -35,6 +35,7 @@ body {
     display: flex;
     overflow: hidden;
     box-sizing: border-box;
+    position:relative;
 }
 .imgBox {
     flex: 1;
@@ -59,10 +60,10 @@ body {
 #textBox {
     width: 220px;
     height: 100%;
-    display:none;
-    overflow:auto;
-    box-sizing:border-box;
-    border-left:1px solid #aaa;
+    display: none;
+    overflow: auto;
+    box-sizing: border-box;
+    border-left: 1px solid #dddddd;
 }
 #statusBar {
     height: 28px;
@@ -76,11 +77,22 @@ body {
     font-weight:bold;
     color:#aaa;
 }
+#splitter {
+    top: 0px;
+    bottom: 0px;
+    width: 5px;
+    display: none;
+    position: absolute;
+    cursor: ew-resize;
+}
+#splitter:hover{
+    background:#dddddd;
+}
 .line {
     height: 26px;
     line-height: 26px;
     white-space: nowrap;
-    padding-left:6px;
-    padding-right:6px;
-    box-sizing:border-box;
+    padding-left: 6px;
+    padding-right: 6px;
+    box-sizing: border-box;
 }
