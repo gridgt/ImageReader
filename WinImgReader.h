@@ -15,9 +15,11 @@ private:
 	void procProcMsg(Message* msg) override;
 	void setMinMaxInfo(LPMINMAXINFO lpMMI);
 	void onSize(UINT param);
-	void readImg(Message* msg);
+	winrt::Windows::Foundation::IAsyncAction readImg(Message* msg);
 	void onViewReady() override;
+	winrt::Windows::Foundation::IAsyncAction initOCR();
 private:
 	winrt::hstring imgPath;
+	winrt::Windows::Foundation::IAsyncAction ocrTask;
 };
 

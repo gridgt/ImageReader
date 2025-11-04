@@ -8,7 +8,7 @@ std::unique_ptr<WinImgReader> instance;
 
 WinImgReader::WinImgReader()
 {
-    ocrInit();
+    this->ocrTask = initOCR();
     initPosSize();
     createWindow();
     show();
@@ -16,6 +16,7 @@ WinImgReader::WinImgReader()
 
 WinImgReader::~WinImgReader()
 {
+    ocrUninit();
 }
 
 void WinImgReader::init()
@@ -26,6 +27,12 @@ void WinImgReader::init()
 WinImgReader* WinImgReader::get()
 {
     return instance.get();
+}
+
+winrt::Windows::Foundation::IAsyncAction WinImgReader::initOCR()
+{
+    co_await winrt::resume_background();
+    ocrInit(true);
 }
 
 void WinImgReader::initPosSize()
@@ -105,16 +112,47 @@ ComPtr<IStream> WinImgReader::procLocalRes(std::wstring& resName)
     return stream;
 }
 
-void WinImgReader::readImg(Message* msg)
+
+std::string hstring_to_ansi(const winrt::hstring& hstr) {
+    if (hstr.empty()) {
+        return {};
+    }
+
+    // 1. 获取 wchar_t* 视图
+    auto wstr = static_cast<std::wstring_view>(hstr);
+
+    // 2. 计算所需 ANSI 缓冲区大小（CP_ACP = 当前系统 ANSI 代码页）
+    int size = WideCharToMultiByte(CP_ACP, 0, wstr.data(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+    if (size <= 0) {
+        return {}; // 转换失败
+    }
+
+    // 3. 分配并转换
+    std::string ansi(size, '\0');
+    WideCharToMultiByte(CP_ACP, 0, wstr.data(), (int)wstr.size(), ansi.data(), size, nullptr, nullptr);
+
+    return ansi;
+}
+
+winrt::Windows::Foundation::IAsyncAction WinImgReader::readImg(Message* msg)
 {
-    JsonArray lineArr;
-    JsonArray wordArr;
+    if (ocrTask.Status() != winrt::Windows::Foundation::AsyncStatus::Completed)
+    {
+        co_await ocrTask;
+    }
+    
+    co_await winrt::resume_background();
     auto arr = msg->result.GetNamedArray(L"$files");
     imgPath = arr.GetStringAt(0);
-    
-    msg->result.SetNamedValue(L"lines", lineArr);
-    msg->result.SetNamedValue(L"words", wordArr);
-    //co_await winrt::resume_foreground(Environment::get()->dq);
+	auto imgPathStr = hstring_to_ansi(imgPath);
+    char* resultStr{nullptr};
+    ocrRecognize(imgPathStr.data(), &resultStr);
+    auto result = winrt::to_hstring(resultStr);
+    free(resultStr);
+	JsonObject resultObj = JsonObject::Parse(result);
+    msg->result.SetNamedValue(L"lines", resultObj.GetNamedArray(L"rec_texts"));
+    msg->result.SetNamedValue(L"polys", resultObj.GetNamedArray(L"rec_polys"));
+    co_await winrt::resume_foreground(Environment::get()->dq);
     msg->resolve();
 }
 

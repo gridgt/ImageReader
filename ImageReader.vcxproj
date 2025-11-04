@@ -114,8 +114,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <CompileAsWinRT>false</CompileAsWinRT>
       <AdditionalIncludeDirectories>D:\sdk\PaddleOCR\deploy\cpp_infer;D:\sdk\paddle_inference\paddle\include;D:\sdk\paddle_inference\third_party\install\protobuf\include;D:\sdk\paddle_inference\third_party\install\glog\include;D:\sdk\paddle_inference\third_party\install\gflags\include;D:\sdk\paddle_inference\third_party\install\xxhash\include;D:\sdk\paddle_inference\third_party\install\zlib\include;D:\sdk\paddle_inference\third_party\install\onnxruntime\include;D:\sdk\paddle_inference\third_party\install\paddle2onnx\include;D:\sdk\paddle_inference\third_party\install\yaml-cpp\include;D:\sdk\paddle_inference\third_party\install\openvino\include;D:\sdk\paddle_inference\third_party\install\tbb\include;D:\sdk\paddle_inference\third_party\boost;D:\sdk\paddle_inference\third_party\eigen3;D:\sdk\paddle_inference\third_party\install\mklml\include;D:\sdk\paddle_inference\third_party\install\onednn\include;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\clipper_ver6.4.2\cpp;D:\sdk\PaddleOCR\deploy\cpp_infer\third_party\abseil-cpp;D:\sdk\opencv_build\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -139,7 +139,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <CompileAsWinRT>false</CompileAsWinRT>
       <AdditionalIncludeDirectories>D:\sdk\PaddleOCR\deploy\cpp_infer;D:\sdk\paddle_inference\paddle\include;D:\sdk\paddle_inference\third_party\install\protobuf\include;D:\sdk\paddle_inference\third_party\install\glog\include;D:\sdk\paddle_inference\third_party\install\gflags\include;D:\sdk\paddle_inference\third_party\install\xxhash\include;D:\sdk\paddle_inference\third_party\install\zlib\include;D:\sdk\paddle_inference\third_party\install\onnxruntime\include;D:\sdk\paddle_inference\third_party\install\paddle2onnx\include;D:\sdk\paddle_inference\third_party\install\yaml-cpp\include;D:\sdk\paddle_inference\third_party\install\openvino\include;D:\sdk\paddle_inference\third_party\install\tbb\include;D:\sdk\paddle_inference\third_party\boost;D:\sdk\paddle_inference\third_party\eigen3;D:\sdk\paddle_inference\third_party\install\mklml\include;D:\sdk\paddle_inference\third_party\install\onednn\include;D:\sdk\PaddleOCR\deploy\cpp_infer\build\third_party\clipper_ver6.4.2\cpp;D:\sdk\PaddleOCR\deploy\cpp_infer\third_party\abseil-cpp;D:\sdk\opencv_build\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>

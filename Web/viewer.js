@@ -30,7 +30,7 @@ let onFileDrop = async (e) => {
     data.lines.forEach((item, index) => {
         let dom = document.createElement('div');
         dom.className = "line";
-        dom.textContent = item.text;
+        dom.textContent = item;
         textBox.appendChild(dom);
     })
 }
