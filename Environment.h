@@ -4,7 +4,9 @@
 #include <WebView2.h>
 #include <wrl.h>
 #include <functional>
-#include <winrt/Windows.System.h>
+#include <dispatcherqueue.h>           // DispatcherQueueOptions, CreateDispatcherQueueController
+#include <winrt/Windows.System.h>      // C++/WinRT types
+#include <winrt/base.h> 
 using namespace Microsoft::WRL;
 
 class Environment
