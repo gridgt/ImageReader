@@ -16,10 +16,11 @@ void Env::init()
 	env->checkRuntimeVersion();
     env->initDataPath();
     env->initWebViewEnv();
+    auto coreNum = std::thread::hardware_concurrency();
     env->ocrHandle = OcrInit("models/ch_PP-OCRv3_det_infer",
         "models/ch_ppocr_mobile_v2.0_cls_infer",
         "models/ch_PP-OCRv3_rec_infer",
-        "models/ppocr_keys_v1.txt", 8, -1);
+        "models/ppocr_keys_v1.txt", coreNum, -1);
 }
 
 OCR_HANDLE Env::getOcrHandle()

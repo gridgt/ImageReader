@@ -133,6 +133,15 @@ std::string convertToStr(const std::wstring& wstr)
     WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
     return str;
 }
+std::wstring convertToWStr(const char* str)
+{
+    if (!str) return std::wstring();
+    int count = MultiByteToWideChar(CP_UTF8, 0, str, -1, 0, 0);
+    if (count == 0) return std::wstring();
+    std::vector<wchar_t> buffer(count);
+    MultiByteToWideChar(CP_UTF8, 0, str, -1, buffer.data(), count);
+    return std::wstring(buffer.data(), buffer.size() - 1);
+}
 
 void Page::openOneFile()
 {
@@ -151,33 +160,26 @@ void Page::openOneFile()
         StorageFile file = sender.GetResults();
         if (file) {
             std::filesystem::path path(std::wstring{ file.Path() });
-            std::wstring dirPath = path.parent_path().wstring();
-            std::wstring fileName = path.filename().wstring();
-            auto dirStr = convertToStr(dirPath);
-            auto nameStr = convertToStr(fileName);
-
-            Env::getDispatcherQueue().TryEnqueue([this, dirStr,nameStr]()
+            Env::getDispatcherQueue().TryEnqueue([this, path]()
                 {
-
+                    std::wstring dirPath = path.parent_path().wstring() + L"\\";
+                    std::wstring fileName = path.filename().wstring();
+                    auto dirStr = convertToStr(dirPath);
+                    auto nameStr = convertToStr(fileName);
                     auto handle = Env::getOcrHandle();
                     OCR_PARAM param = { 0 };
-                    OCR_BOOL bRet = OcrDetect(handle,"C:/Users/liulun/Desktop/img/", "1.jpg", &param);
-                    if (bRet) {
-                        int nLen = OcrGetLen(handle);
-                        if (nLen > 0) {
-                            char* szInfo = (char*)malloc(nLen);
-                            if (szInfo) {
-                                if (OcrGetResult(handle, szInfo, nLen)) {
-                                    printf("%s", szInfo);
-                                }
-                                free(szInfo);
-                            }
-                        }
-                    }
-
+                    OCR_BOOL bRet = OcrDetect(handle,dirStr.data(), nameStr.data(), &param);
+                    if (!bRet) return;
+                    int nLen = OcrGetLen(handle);
+                    if (nLen <= 0) return;
+                    std::vector<char> buf(nLen);
+                    if (!OcrGetResult(handle, buf.data(), nLen)) return;
+                    std::string resultStr(buf.data());
+                    auto wResultStr = convertToWStr(buf.data());
                     JsonObject result;
                     result.SetNamedValue(L"eventName", JsonValue::CreateStringValue(L"imageFileSelected"));
-                    //result.SetNamedValue(L"filePath", JsonValue::CreateStringValue(str.data()));
+                    result.SetNamedValue(L"filePath", JsonValue::CreateStringValue(path.wstring()));
+                    result.SetNamedValue(L"data", JsonValue::CreateStringValue(wResultStr));
                     winrt::hstring jsonString = result.Stringify();
                     this->webview->PostWebMessageAsJson(jsonString.data());
                 });

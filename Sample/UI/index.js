@@ -46,6 +46,7 @@ let initSelectBtn = () => {
   selectBtn.addEventListener("click", async () => {
     ipc.once("imageFileSelected", (arg) => {
       document.getElementById("selectedFile").innerHTML = `选中的文件：${arg.filePath}`;
+      document.getElementById("dataDom").innerHTML = `<pre>${arg.data}</pre>`;
     });
     ipc.invoke("selectImageFile");
   });
