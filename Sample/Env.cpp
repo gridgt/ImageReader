@@ -3,11 +3,17 @@
 #include "Window.h"
 std::unique_ptr<Env> env;
 Env::Env() :dq{ winrt::Windows::System::DispatcherQueue::GetForCurrentThread() }
-{}
+{
+    auto coreNum = std::thread::hardware_concurrency();
+    ocr.setNumThread(coreNum);
+    ocr.initLogger(false,false, false);
+    ocr.setGpuIndex(-1);
+    bool initModelsRet = ocr.initModels("models/ch_PP-OCRv3_det_infer.onnx",
+        "models/ch_ppocr_mobile_v2.0_cls_infer.onnx", 
+        "models/ch_PP-OCRv3_rec_infer.onnx", 
+        "models/ppocr_keys_v1.txt");
+}
 Env::~Env(){
-    if (ocrHandle) {
-        OcrDestroy(ocrHandle);
-    }
 }
 void Env::init()
 {
@@ -16,16 +22,11 @@ void Env::init()
 	env->checkRuntimeVersion();
     env->initDataPath();
     env->initWebViewEnv();
-    auto coreNum = std::thread::hardware_concurrency();
-    env->ocrHandle = OcrInit("models/ch_PP-OCRv3_det_infer",
-        "models/ch_ppocr_mobile_v2.0_cls_infer",
-        "models/ch_PP-OCRv3_rec_infer",
-        "models/ppocr_keys_v1.txt", coreNum, -1);
 }
 
-OCR_HANDLE Env::getOcrHandle()
+OcrLite* Env::getOcr()
 {
-    return env->ocrHandle;
+    return &env->ocr;
 }
 
 void Env::initDispatcherQueueCtrl()
@@ -97,6 +98,7 @@ void Env::initDataPath()
 void Env::initWebViewEnv()
 {
     auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
+    options->put_AdditionalBrowserArguments(L"--disable-web-security --allow-file-access-from-files --allow-file-access");
     auto envReadyCB = Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(this, &Env::onEnvReady);
     CreateCoreWebView2EnvironmentWithOptions(nullptr, dataPath.c_str(), options.Get(), envReadyCB.Get());
 }

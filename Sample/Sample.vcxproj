@@ -21,6 +21,46 @@
   <ItemGroup>
     <ClCompile Include="Env.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OCR\AngleNet.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\clipper.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\CrnnNet.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\DbNet.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\getopt.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrLite.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrLiteCApi.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrLiteJni.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrResultUtils.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrUtils.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Page.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="pch.cpp">
@@ -38,6 +78,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Env.h" />
+    <ClInclude Include="OCR\AngleNet.h" />
+    <ClInclude Include="OCR\clipper.hpp" />
+    <ClInclude Include="OCR\CrnnNet.h" />
+    <ClInclude Include="OCR\DbNet.h" />
+    <ClInclude Include="OCR\getopt.h" />
+    <ClInclude Include="OCR\OcrLite.h" />
+    <ClInclude Include="OCR\OcrLiteCApi.h" />
+    <ClInclude Include="OCR\OcrResultUtils.h" />
+    <ClInclude Include="OCR\OcrStruct.h" />
+    <ClInclude Include="OCR\OcrUtils.h" />
+    <ClInclude Include="OCR\version.h" />
     <ClInclude Include="Page.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="pch.h" />
@@ -98,6 +149,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -135,12 +189,13 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>D:\sdk\rapidocr-ncnn\windows-clib\win-CLIB-CPU-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrNcnn-1.2.0\ncnn-static\windows-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrNcnn-1.2.0\opencv-static\windows-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;Shlwapi.lib;RapidOcrNcnn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>WindowsApp.lib;Shlwapi.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_video460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\zlib.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\IlmImf.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libjpeg-turbo.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libopenjp2.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libpng.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libtiff.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libwebp.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_core460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_features2d460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_highgui460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_imgcodecs460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_imgproc460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_photo460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_synchronization.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_throw_delegate.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_time.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_time_zone.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\clog.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\cpuinfo.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\flatbuffers.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\libprotobuf-lite.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnx.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnx_proto.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_common.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_flatbuffers.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_framework.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_graph.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_mlas.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_optimizer.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_providers.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_session.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_util.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\re2.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_bad_optional_access.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_bad_variant_access.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_base.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_city.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_civil_time.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cord.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cord_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cordz_functions.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cordz_handle.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cordz_info.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_debugging_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_demangle_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_exponential_biased.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_graphcycles_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_hash.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_hashtablez_sampler.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_int128.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_log_severity.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_low_level_hash.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_malloc_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_raw_hash_set.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_raw_logging_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_spinlock_wait.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_stacktrace.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_strings.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_strings_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_symbolize.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\sdk\rapidocr-ncnn\windows-clib\win-CLIB-CPU-x64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
@@ -158,12 +213,14 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>D:\sdk\rapidocr-ncnn\windows-clib\win-CLIB-CPU-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrNcnn-1.2.0\ncnn-static\windows-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrNcnn-1.2.0\opencv-static\windows-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\sdk\rapidocr-ncnn\windows-clib\win-CLIB-CPU-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;Shlwapi.lib;RapidOcrNcnn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>WindowsApp.lib;Shlwapi.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_video460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\zlib.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\IlmImf.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libjpeg-turbo.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libopenjp2.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libpng.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libtiff.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\libwebp.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_core460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_features2d460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_highgui460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_imgcodecs460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_imgproc460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\opencv_photo460.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_synchronization.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_throw_delegate.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_time.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_time_zone.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\clog.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\cpuinfo.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\flatbuffers.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\libprotobuf-lite.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnx.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnx_proto.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_common.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_flatbuffers.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_framework.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_graph.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_mlas.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_optimizer.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_providers.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_session.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\onnxruntime_util.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\re2.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_bad_optional_access.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_bad_variant_access.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_base.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_city.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_civil_time.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cord.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cord_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cordz_functions.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cordz_handle.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_cordz_info.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_debugging_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_demangle_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_exponential_biased.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_graphcycles_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_hash.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_hashtablez_sampler.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_int128.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_log_severity.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_low_level_hash.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_malloc_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_raw_hash_set.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_raw_logging_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_spinlock_wait.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_stacktrace.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_strings.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_strings_internal.lib;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\absl_symbolize.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\sdk\rapidocr-ncnn\windows-clib\win-CLIB-CPU-x64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>

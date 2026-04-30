@@ -41,12 +41,33 @@ window.chrome.webview.addEventListener("message", (event) => {
   }
 });
 
+let renderOverlay = async (arg) => {
+  let overlay = document.getElementById("overlay");
+  overlay.innerHTML = "";
+  let img = document.getElementById("img");
+  img.src = `/LOCAL:${arg.filePath}`;
+  img.style.display = "block";
+  arg.data.forEach((item, index) => {
+    const box = document.createElement("div");
+    box.className = "ocr-box";
+    box.dataset.index = index;
+    const imgRect = img.getBoundingClientRect();
+    const scaleX = (imgRect.width / img.naturalWidth) * 1.5;
+    const scaleY = (imgRect.height / img.naturalHeight) * 1.5;
+    box.style.left = item.x1 * scaleX + "px";
+    box.style.top = item.y1 * scaleY + "px";
+    box.style.width = (item.x2 - item.x1) * scaleX + "px";
+    box.style.height = (item.y2 - item.y1) * scaleY + "px";
+    overlay.appendChild(box);
+  });
+};
+
 let initSelectBtn = () => {
   const selectBtn = document.getElementById("selectBtn");
   selectBtn.addEventListener("click", async () => {
     ipc.once("imageFileSelected", (arg) => {
-      document.getElementById("selectedFile").innerHTML = `选中的文件：${arg.filePath}`;
-      document.getElementById("dataDom").innerHTML = `<pre>${arg.data}</pre>`;
+      document.getElementById("tip").innerHTML = `操作时间：${arg.duration}ms`;
+      renderOverlay(arg);
     });
     ipc.invoke("selectImageFile");
   });

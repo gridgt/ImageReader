@@ -6,9 +6,32 @@
     <title>首页</title>
     <script src="index.js"></script>
     <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        #oprationDom {
+            height: 38px;
+            align-items: center;
+            display: flex;
+            border-bottom: 1px solid #ccc;
+        }
+
         #selectBtn {
             display: inline-block;
-            padding: 8px 12px;
+            padding: 6px 12px;
             margin: 6px;
             color: white;
             border: none;
@@ -22,20 +45,76 @@
             background-color: #0056b3;
         }
 
-        #selectedFile {
-            padding: 10px 0px;
+        #tip {
             margin: 6px;
+            height: 38px;
+            line-height: 38px;
             font-size: 13px;
-            display: inline-block;
+        }
+
+        #dataDom {
+            flex: 1;
+            display: flex;
+            overflow-y: auto;
+        }
+
+        #imgBox {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid #ccc;
+            position: relative;
+        }
+
+        #img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .ocr-box {
+            position: absolute;
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            background: rgba(66, 133, 244, 0.05);
+            transition: background 0.15s;
+        }
+
+        .ocr-box.highlighted {
+            background: rgba(66, 133, 244, 0.3);
+            border-color: rgba(66, 133, 244, 0.8);
+        }
+
+        #text {
+            padding: 8px;
+            width: 200px;
         }
     </style>
 
 </head>
 
 <body>
-    <div id="selectBtn">选择图像</div>
-    <div id="selectedFile">文件：无</div>
-    <div id="dataDom"></div>
+    <div id="oprationDom">
+        <div id="selectBtn">选择图像</div>
+        <div id="tip"></div>
+    </div>
+    <div id="dataDom">
+        <div id="imgBox">
+            <img src="" id="img">
+            <div id="overlay"></div>
+        </div>
+        <div id="text"></div>
+    </div>
 </body>
 
 </html>

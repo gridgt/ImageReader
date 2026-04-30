@@ -2,7 +2,7 @@
 #include "Page.h"
 #include "Window.h"
 #include "Env.h"
-#include <OcrLiteCApi.h>
+//#include <OcrLiteCApi.h>
 
 Page::Page(Window* win, ICoreWebView2* webview) :win{ win }, webview{ webview }
 {
@@ -73,6 +73,16 @@ HRESULT Page::onRequest(ICoreWebView2* webview, ICoreWebView2WebResourceRequeste
     request->get_Uri(&rawUri);
     std::wstring url(rawUri);
     CoTaskMemFree(rawUri);
+    if (url.starts_with(L"https://app.localhost/LOCAL:")) {
+        auto localPath = url.substr(28);
+        ComPtr<IStream> stream;
+        SHCreateStreamOnFile(localPath.data(), STGM_READ,&stream);
+        auto ct = getContentType(localPath);
+        ComPtr<ICoreWebView2WebResourceResponse> response;
+        Env::getWebViewEnv()->CreateWebResourceResponse(stream.Get(), 200, L"OK", ct.data(), &response);
+        args->put_Response(response.Get());
+        return S_OK;
+    }
     size_t slashPos = url.find_last_of(L'/');
     size_t queryPos = url.find(L'?');
     size_t start = (slashPos != std::wstring::npos) ? slashPos + 1 : 0;
@@ -159,28 +169,37 @@ void Page::openOneFile()
     fileOp.Completed([this](auto& sender, auto status) {
         StorageFile file = sender.GetResults();
         if (file) {
+            auto startTime = std::chrono::high_resolution_clock::now();
             std::filesystem::path path(std::wstring{ file.Path() });
-            Env::getDispatcherQueue().TryEnqueue([this, path]()
+            std::wstring dirPath = path.parent_path().wstring() + L"\\";
+            std::wstring fileName = path.filename().wstring();
+            auto dirStr = convertToStr(dirPath);
+            auto nameStr = convertToStr(fileName);
+            auto ocr = Env::getOcr();
+            OcrResult ocrResult = ocr->detect(dirStr.c_str(), nameStr.c_str(), 50, 1024,
+                0.5f, 0.3f, 1.6f, true, true);
+            JsonObject result;
+            result.SetNamedValue(L"eventName", JsonValue::CreateStringValue(L"imageFileSelected"));
+            result.SetNamedValue(L"filePath", JsonValue::CreateStringValue(path.wstring()));
+            JsonArray arr;
+            for (auto& block : ocrResult.textBlocks)
+            {
+                JsonObject item;
+                item.SetNamedValue(L"x1", JsonValue::CreateNumberValue(block.boxPoint[0].x));
+                item.SetNamedValue(L"y1", JsonValue::CreateNumberValue(block.boxPoint[0].y));
+                item.SetNamedValue(L"x2", JsonValue::CreateNumberValue(block.boxPoint[2].x));
+                item.SetNamedValue(L"y2", JsonValue::CreateNumberValue(block.boxPoint[2].y));
+                auto str = convertToWStr(block.text.data());
+                item.SetNamedValue(L"text", JsonValue::CreateStringValue(str));
+                arr.Append(item);
+            }
+            result.SetNamedValue(L"data", arr);
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+            result.SetNamedValue(L"duration", JsonValue::CreateNumberValue(duration));
+            winrt::hstring jsonString = result.Stringify();
+            Env::getDispatcherQueue().TryEnqueue([this, jsonString]()
                 {
-                    std::wstring dirPath = path.parent_path().wstring() + L"\\";
-                    std::wstring fileName = path.filename().wstring();
-                    auto dirStr = convertToStr(dirPath);
-                    auto nameStr = convertToStr(fileName);
-                    auto handle = Env::getOcrHandle();
-                    OCR_PARAM param = { 0 };
-                    OCR_BOOL bRet = OcrDetect(handle,dirStr.data(), nameStr.data(), &param);
-                    if (!bRet) return;
-                    int nLen = OcrGetLen(handle);
-                    if (nLen <= 0) return;
-                    std::vector<char> buf(nLen);
-                    if (!OcrGetResult(handle, buf.data(), nLen)) return;
-                    std::string resultStr(buf.data());
-                    auto wResultStr = convertToWStr(buf.data());
-                    JsonObject result;
-                    result.SetNamedValue(L"eventName", JsonValue::CreateStringValue(L"imageFileSelected"));
-                    result.SetNamedValue(L"filePath", JsonValue::CreateStringValue(path.wstring()));
-                    result.SetNamedValue(L"data", JsonValue::CreateStringValue(wResultStr));
-                    winrt::hstring jsonString = result.Stringify();
                     this->webview->PostWebMessageAsJson(jsonString.data());
                 });
         }

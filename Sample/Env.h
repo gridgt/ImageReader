@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "pch.h"
-#include <OcrLiteCApi.h>
+#include "OCR/OcrLite.h"
+#include "OCR/OcrUtils.h"
 class Window;
 class Env
 {
@@ -8,7 +9,7 @@ public:
 	Env();
 	~Env();
 	static void init();
-	static OCR_HANDLE getOcrHandle();
+	static OcrLite* getOcr();
 	static std::filesystem::path getDataPath();
 	static ICoreWebView2Environment* getWebViewEnv();
 	static winrt::Windows::System::DispatcherQueue& getDispatcherQueue();
@@ -25,6 +26,6 @@ private:
 	ComPtr<ICoreWebView2Environment> webViewEnv;
 	std::unique_ptr<Window> mainWindow;
 	winrt::Windows::System::DispatcherQueue dq;
-	OCR_HANDLE ocrHandle;
+	OcrLite ocr;
 };
 

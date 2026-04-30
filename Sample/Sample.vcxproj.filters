@@ -30,6 +30,36 @@
     <ClCompile Include="Page.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="OCR\AngleNet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\clipper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\CrnnNet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\DbNet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\getopt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrLite.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrLiteCApi.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrLiteJni.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrResultUtils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OCR\OcrUtils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\index.js" />
@@ -47,6 +77,39 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Page.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\AngleNet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\clipper.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\CrnnNet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\DbNet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\getopt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\OcrLite.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\OcrLiteCApi.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\OcrResultUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\OcrStruct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\OcrUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OCR\version.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
