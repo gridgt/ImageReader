@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ImageReader/ImageReader.vcxproj" Id="bfe8b94d-c255-484c-8c31-5a085698f2db" />
+</Solution>
