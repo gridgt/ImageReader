@@ -2,6 +2,7 @@
 #include "pch.h"
 class Render;
 class Btn;
+class Img;
 class MainWin
 {
 public:
@@ -13,6 +14,7 @@ public:
 	int x, y, w, h;
 	float dpi, headerHeight{40};
 	std::unique_ptr<Render> render;
+	std::unique_ptr<Img> img;
 	std::unique_ptr<Btn> btnMini, btnMax, btnRestore, btnClose;
 private:
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

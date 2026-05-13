@@ -63,6 +63,9 @@
     <ClCompile Include="Btn.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Img.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Env.h">
@@ -111,6 +114,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Btn.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Img.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include "Render.h"
 #include "MainWin.h"
 #include "Btn.h"
+#include "Img.h"
 
 Render::Render(MainWin* win):win{win}
 {
@@ -87,5 +88,6 @@ void Render::paint()
 	win->btnMax->paint();
 	win->btnRestore->paint();
     win->btnMini->paint();
+	win->img->paint();
 	render->EndDraw();
 }

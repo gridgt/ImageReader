@@ -9,6 +9,7 @@
 #include <d2d1_1.h>
 #include <dwrite_3.h>
 #include <dwmapi.h>
+#include <wincodec.h>
 
 #include <filesystem>
 #include <string>

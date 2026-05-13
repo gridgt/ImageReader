@@ -2,6 +2,7 @@
 #include "MainWin.h"
 #include "Render.h"
 #include "Btn.h"
+#include "Img.h"
 
 std::unique_ptr<MainWin> win;
 
@@ -26,6 +27,7 @@ void MainWin::init()
 	win->btnRestore = std::make_unique<Btn>(L"\ue6e9", 1, win.get());
 	win->btnRestore->isVisible = false;
 	win->btnClose = std::make_unique<Btn>(L"\ue6e7", 0, win.get());
+	win->img = std::make_unique<Img>(win.get());
 	win->render->changeSize();
 	win->show();
 }
@@ -61,6 +63,9 @@ LRESULT MainWin::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		self->onPaint();
 	}
+	else if (msg == WM_DROPFILES) {
+		self->onDropFiles((HDROP)wParam);
+	}
 	else if (msg == WM_DESTROY) {
 		self->onDestroy();
 	}
@@ -88,6 +93,7 @@ void MainWin::createWin()
 	RegisterClassEx(&wcex);
 	auto style = WS_POPUP | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
 	hwnd = CreateWindowEx(NULL, wcex.lpszClassName, wcex.lpszClassName, style, x, y, w, h, NULL, NULL, wcex.hInstance, NULL);
+	DragAcceptFiles(hwnd, TRUE);
 	onDpiChange(GetDpiForWindow(hwnd));
 	if (!hwnd)
 	{
@@ -243,5 +249,23 @@ LRESULT MainWin::onHitTest(const POINT& pt)
 
 void MainWin::onDestroy()
 {
+	DragAcceptFiles(hwnd, FALSE);
 	PostQuitMessage(0);
+}
+void MainWin::onDropFiles(HDROP hDrop)
+{
+	POINT pt;
+	DragQueryPoint(hDrop, &pt);
+	ScreenToClient(hwnd, &pt);
+	if (pt.y > render->headerRect.bottom) {
+		DragFinish(hDrop);
+		return;
+	}
+	UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+	UINT pathLen = DragQueryFile(hDrop, 0, NULL, 0);
+	std::wstring path(pathLen + 1, L'\0');
+	DragQueryFile(hDrop, 0, path.data(), pathLen + 1);
+	path.resize(pathLen);
+	DragFinish(hDrop); 
+	img->load(path);
 }

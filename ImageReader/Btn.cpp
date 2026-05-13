@@ -4,7 +4,7 @@
 #include "Render.h"
 
 
-ComPtr<IDWriteTextFormat> format;
+static ComPtr<IDWriteTextFormat> format;
 
 Btn::Btn(const std::wstring& icon, int index, MainWin* win)
 	: icon(icon), index(index), win(win)

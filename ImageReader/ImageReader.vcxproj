@@ -137,7 +137,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dwmapi.lib;WindowsApp.lib;Shlwapi.lib;opencv_video460.lib;zlib.lib;IlmImf.lib;libjpeg-turbo.lib;libopenjp2.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_core460.lib;opencv_features2d460.lib;opencv_highgui460.lib;opencv_imgcodecs460.lib;opencv_imgproc460.lib;opencv_photo460.lib;absl_synchronization.lib;absl_throw_delegate.lib;absl_time.lib;absl_time_zone.lib;clog.lib;cpuinfo.lib;flatbuffers.lib;libprotobuf-lite.lib;onnx.lib;onnx_proto.lib;onnxruntime_common.lib;onnxruntime_flatbuffers.lib;onnxruntime_framework.lib;onnxruntime_graph.lib;onnxruntime_mlas.lib;onnxruntime_optimizer.lib;onnxruntime_providers.lib;onnxruntime_session.lib;onnxruntime_util.lib;re2.lib;absl_bad_optional_access.lib;absl_bad_variant_access.lib;absl_base.lib;absl_city.lib;absl_civil_time.lib;absl_cord.lib;absl_cord_internal.lib;absl_cordz_functions.lib;absl_cordz_handle.lib;absl_cordz_info.lib;absl_debugging_internal.lib;absl_demangle_internal.lib;absl_exponential_biased.lib;absl_graphcycles_internal.lib;absl_hash.lib;absl_hashtablez_sampler.lib;absl_int128.lib;absl_log_severity.lib;absl_low_level_hash.lib;absl_malloc_internal.lib;absl_raw_hash_set.lib;absl_raw_logging_internal.lib;absl_spinlock_wait.lib;absl_stacktrace.lib;absl_strings.lib;absl_strings_internal.lib;absl_symbolize.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dwmapi.lib;WindowsApp.lib;windowscodecs.lib;Shlwapi.lib;opencv_video460.lib;zlib.lib;IlmImf.lib;libjpeg-turbo.lib;libopenjp2.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_core460.lib;opencv_features2d460.lib;opencv_highgui460.lib;opencv_imgcodecs460.lib;opencv_imgproc460.lib;opencv_photo460.lib;absl_synchronization.lib;absl_throw_delegate.lib;absl_time.lib;absl_time_zone.lib;clog.lib;cpuinfo.lib;flatbuffers.lib;libprotobuf-lite.lib;onnx.lib;onnx_proto.lib;onnxruntime_common.lib;onnxruntime_flatbuffers.lib;onnxruntime_framework.lib;onnxruntime_graph.lib;onnxruntime_mlas.lib;onnxruntime_optimizer.lib;onnxruntime_providers.lib;onnxruntime_session.lib;onnxruntime_util.lib;re2.lib;absl_bad_optional_access.lib;absl_bad_variant_access.lib;absl_base.lib;absl_city.lib;absl_civil_time.lib;absl_cord.lib;absl_cord_internal.lib;absl_cordz_functions.lib;absl_cordz_handle.lib;absl_cordz_info.lib;absl_debugging_internal.lib;absl_demangle_internal.lib;absl_exponential_biased.lib;absl_graphcycles_internal.lib;absl_hash.lib;absl_hashtablez_sampler.lib;absl_int128.lib;absl_log_severity.lib;absl_low_level_hash.lib;absl_malloc_internal.lib;absl_raw_hash_set.lib;absl_raw_logging_internal.lib;absl_spinlock_wait.lib;absl_stacktrace.lib;absl_strings.lib;absl_strings_internal.lib;absl_symbolize.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\sdk\rapidocr-ncnn\windows-clib\win-CLIB-CPU-x64\include;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\onnxruntime-static\windows-x64\lib\;D:\sdk\rapidocr-ncnn\Project_RapidOcrOnnx-1.2.2\opencv-static\windows-x64\x64\vc16\staticlib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="Btn.cpp" />
     <ClCompile Include="Env.cpp" />
+    <ClCompile Include="Img.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWin.cpp" />
     <ClCompile Include="OCR\AngleNet.cpp">
@@ -188,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="Btn.h" />
     <ClInclude Include="Env.h" />
+    <ClInclude Include="Img.h" />
     <ClInclude Include="MainWin.h" />
     <ClInclude Include="OCR\AngleNet.h" />
     <ClInclude Include="OCR\clipper.hpp" />
