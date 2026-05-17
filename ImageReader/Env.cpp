@@ -57,3 +57,20 @@ void Env::initOcr()
         "models/ch_PP-OCRv3_rec_infer.onnx",
         "models/ppocr_keys_v1.txt");
 }
+
+std::string Env::convertToStr(const std::wstring& wstr)
+{
+    const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
+    std::string str(count, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
+    return str;
+}
+std::wstring Env::convertToWStr(const char* str)
+{
+    if (!str) return std::wstring();
+    int count = MultiByteToWideChar(CP_UTF8, 0, str, -1, 0, 0);
+    if (count == 0) return std::wstring();
+    std::vector<wchar_t> buffer(count);
+    MultiByteToWideChar(CP_UTF8, 0, str, -1, buffer.data(), count);
+    return std::wstring(buffer.data(), buffer.size() - 1);
+}

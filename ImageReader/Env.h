@@ -10,6 +10,8 @@ public:
 	static void init();
 	static winrt::Windows::System::DispatcherQueue& getDQ();
 	static OcrLite* getOcr();
+	static std::string convertToStr(const std::wstring& wstr);
+	static std::wstring convertToWStr(const char* str);
 private:
 	static void initDQCtrl();
 	void initOcr();

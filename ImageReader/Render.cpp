@@ -25,12 +25,6 @@ void Render::changeSize()
     headerTextLayout->GetMetrics(&textMetrics);
     headerTextY = (headerHeight - textMetrics.height) / 2.0f;
     headerTextX = 10 * win->dpi;
-
-    win->btnClose->changeSize();
-	win->btnMax->changeSize();
-    win->btnRestore->changeSize();
-    win->btnMini->changeSize();
-
 }
 
 void Render::init()

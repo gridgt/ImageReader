@@ -29,7 +29,9 @@ private:
 	void onRestore();
 	void onMinMaxInfo(MINMAXINFO* mmi);
 	void onMouseMove(int x, int y);
-	void onClick();
+	void onMouseDrag(int x, int y);
+	void onMouseDown(int x, int y);
+	void onMouseUp(int x, int y);
 	void onMouseLeave();
 	void onDpiChange(int dpi);
 	LRESULT onHitTest(const POINT& pt);
@@ -37,5 +39,6 @@ private:
 	void onDropFiles(HDROP hDrop);
 private:
 	bool isMouseTracking{ false };
+	bool isMouseDown{ false };
 };
 

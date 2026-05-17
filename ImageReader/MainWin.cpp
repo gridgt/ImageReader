@@ -28,7 +28,7 @@ void MainWin::init()
 	win->btnRestore->isVisible = false;
 	win->btnClose = std::make_unique<Btn>(L"\ue6e7", 0, win.get());
 	win->img = std::make_unique<Img>(win.get());
-	win->render->changeSize();
+	win->onSize(win->w, win->h);
 	win->show();
 }
 
@@ -47,13 +47,21 @@ LRESULT MainWin::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return self->onHitTest(pt);
 	}
 	else if (msg == WM_MOUSEMOVE) {
-		self->onMouseMove(LOWORD(lParam), HIWORD(lParam));
+		if (self->isMouseDown) {
+			self->onMouseDrag(LOWORD(lParam), HIWORD(lParam));
+		}
+		else {
+			self->onMouseMove(LOWORD(lParam), HIWORD(lParam));
+		}
 	}
 	else if (msg == WM_MOUSELEAVE) {
 		self->onMouseLeave();
 	}
 	else if (msg == WM_LBUTTONDOWN) {
-		self->onClick();
+		self->onMouseDown(LOWORD(lParam), HIWORD(lParam));
+	}
+	else if (msg == WM_LBUTTONUP) {
+		self->onMouseUp(LOWORD(lParam), HIWORD(lParam));
 	}
 	else if (msg == WM_GETMINMAXINFO) {
 		MINMAXINFO* mmi = (PMINMAXINFO)lParam;
@@ -155,7 +163,14 @@ void MainWin::onSize(int w, int h)
 {
 	this->w = w;
 	this->h = h;
-	if (render.get()) render->changeSize();
+	if (render.get()) { 
+		render->changeSize(); 
+		btnClose->changeSize();
+		btnMax->changeSize();
+		btnRestore->changeSize();
+		btnMini->changeSize();
+		img->changeSize();
+	}
 }
 
 void MainWin::onMaximize()
@@ -197,10 +212,17 @@ void MainWin::onMouseMove(int x, int y)
 	btnMax->hitTest(x, y);
 	btnRestore->hitTest(x, y);
 	btnMini->hitTest(x, y);
+	img->changeCursor(x, y);
 }
 
-void MainWin::onClick()
+void MainWin::onMouseDrag(int x, int y)
 {
+
+}
+
+void MainWin::onMouseDown(int x, int y)
+{
+	isMouseDown = true;
 	if (btnClose->isHover) {
 		PostMessage(hwnd, WM_CLOSE, 0, 0);
 	}
@@ -213,6 +235,11 @@ void MainWin::onClick()
 	else if (btnMini->isHover) {
 		ShowWindow(hwnd, SW_SHOWMINIMIZED);
 	}
+}
+
+void MainWin::onMouseUp(int x, int y)
+{
+	isMouseDown = false;
 }
 
 void MainWin::onMouseLeave()
