@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "pch.h"
 
+class Node;
 class WindowBase
 {
-	friend class WindowCalendar;
 public:
 	WindowBase();
 	virtual ~WindowBase();
@@ -29,36 +29,17 @@ public:
 	void setPosScreenCenter();
 public:
 	int x, y, w, h;
-	bool isMouseDown{ false }, isMouseIn{ false };
 	float dpi{ 1.0 };
 	HWND hwnd{ nullptr };
 	std::wstring title;
-	/// <summary>
-	/// 1. 将子元素的锚点设置为其自身的中心点 (0.5, 0.5)
-	/// childVisual.AnchorPoint = new Vector2(0.5f, 0.5f);
-	// 2. 将子元素的 Offset 设置为父容器的中心坐标
-	/// childVisual.Offset = new Vector3(
-	/// 	parentVisual.Size.X / 2,
-	/// 	parentVisual.Size.Y / 2,
-	/// 	0
-	/// );
-	// 3. 插入子元素
-	/// parentVisual.Children.InsertAtTop(childVisual);
-	/// </summary>
-	Composition::SpriteVisual rootVisual{ nullptr };
 	Composition::Compositor compositor;
+	std::unique_ptr<Node> root;
 protected:
 	virtual void onCreated() {};
 	virtual void onShown() {};
 	virtual void onHidden();
 	virtual LRESULT onHitTest(const int& x, const int& y) { return HTCLIENT; };
-	virtual void onMouseDrag(const int& x, const int& y, const UINT_PTR& modifiers) {};
-	virtual void onMouseMove(const int& x, const int& y) {};
-	virtual void onMouseDown(const int& x, const int& y, bool isRight) {};
-	virtual void onMouseUp(const int& x, const int& y) {};
-	virtual void onMouseDoubleClick(const int& x, const int& y, bool isRight) { onMouseDown(x, y, isRight); };
 	virtual void onMouseWheel(const int& x, const int& y, const short& delta) {};
-	virtual void onMouseLeave() {};
 	virtual void onKeyDown(const UINT& key) {};
 	virtual void onKeyUp() {};
 	virtual void onChar(const UINT& ch) {};
@@ -67,7 +48,6 @@ protected:
 	virtual void onBlur() {};
 	virtual void onDestroy() {};
 	virtual void onDpiChanged() {};
-	virtual void onSizeChange() {};
 	virtual void onPositionChange() {};
 	virtual BOOL setCursor();
 private:
@@ -76,12 +56,14 @@ private:
 	void mouseMove(const int& x, const int& y);
 	void mouseLeave();
 	void mouseDown(const int& x, const int& y, bool isRight);
+	void mouseUp(const int& x, const int& y, bool isRight);
 	void paint();
 	void dpiChange(WPARAM wParam, LPARAM lParam);
 	void sizeChange(const int& w, const int& h);
 	void positionChange(const int& x, const int& y);
 private:
 	Composition::Desktop::DesktopWindowTarget winTarget{ nullptr };	
-	Composition::CompositionRoundedRectangleGeometry clip{nullptr};
+	Node* nodeHover{nullptr};
+	bool isMouseIn{ false };
 };
 

@@ -154,53 +154,35 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ColorA.cpp" />
     <ClCompile Include="D2D.cpp" />
-    <ClCompile Include="DayBtn.cpp" />
-    <ClCompile Include="ElementBase.cpp" />
-    <ClCompile Include="ListBar.cpp" />
-    <ClCompile Include="ListContent.cpp" />
-    <ClCompile Include="ListItem.cpp" />
+    <ClCompile Include="Event.cpp" />
+    <ClCompile Include="EventArg.cpp" />
+    <ClCompile Include="MouseEventArg.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Skin.cpp" />
-    <ClCompile Include="SwitchBtn.cpp" />
     <ClCompile Include="Tip.cpp" />
-    <ClCompile Include="TodayBtn.cpp" />
+    <ClCompile Include="TitleBar.cpp" />
     <ClCompile Include="Util.cpp" />
-    <ClCompile Include="WebSocket.cpp" />
-    <ClCompile Include="WeekHeader.cpp" />
-    <ClCompile Include="YearText.cpp" />
-    <ClCompile Include="TitleBtn.cpp" />
     <ClCompile Include="WindowBase.cpp" />
-    <ClCompile Include="WindowCalendar.cpp" />
-    <ClCompile Include="YearBtn.cpp" />
+    <ClCompile Include="WindowMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="ColorA.h" />
     <ClInclude Include="D2D.h" />
-    <ClInclude Include="DayBtn.h" />
-    <ClInclude Include="ElementBase.h" />
-    <ClInclude Include="ListBar.h" />
-    <ClInclude Include="ListContent.h" />
-    <ClInclude Include="ListItem.h" />
-    <ClInclude Include="Menu.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="EventArg.h" />
+    <ClInclude Include="MouseEventArg.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Skin.h" />
-    <ClInclude Include="SwitchBtn.h" />
     <ClInclude Include="Tip.h" />
-    <ClInclude Include="TodayBtn.h" />
+    <ClInclude Include="TitleBar.h" />
     <ClInclude Include="Util.h" />
-    <ClInclude Include="WebSocket.h" />
-    <ClInclude Include="WeekHeader.h" />
-    <ClInclude Include="YearText.h" />
-    <ClInclude Include="TitleBtn.h" />
     <ClInclude Include="WindowBase.h" />
-    <ClInclude Include="WindowCalendar.h" />
-    <ClInclude Include="YearBtn.h" />
+    <ClInclude Include="WindowMain.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="iconfont.ttf" />

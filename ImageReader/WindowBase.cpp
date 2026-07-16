@@ -1,9 +1,11 @@
 ﻿#include "pch.h"
 #include "WindowBase.h"
 #include "D2D.h"
+#include "Node.h"
+#include "EventArg.h"
+#include "MouseEventArg.h"
 WindowBase::WindowBase() :compositor{ Composition::Compositor() }
 {
-    rootVisual = compositor.CreateSpriteVisual();
     dpi = static_cast<float>(GetDpiForSystem()) / 96.f;
 }
 WindowBase::~WindowBase()
@@ -20,7 +22,7 @@ void WindowBase::hide()
 void WindowBase::onHidden()
 {
     isMouseIn = false;
-    onMouseLeave();
+    mouseLeave();
 }
 void WindowBase::refresh()
 {
@@ -128,31 +130,11 @@ void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
     auto interop = compositor.as<ABI::Windows::UI::Composition::Desktop::ICompositorDesktopInterop>();
     auto r = reinterpret_cast<ABI::Windows::UI::Composition::Desktop::IDesktopWindowTarget**>(winrt::put_abi(winTarget));
     interop->CreateDesktopWindowTarget(hwnd, false, r);
-    winTarget.Root(rootVisual);
-    rootVisual.Offset({ 0.f,0.f,0.f });
-    rootVisual.RelativeSizeAdjustment({ 1.f,1.f });
-    rootVisual.Brush(compositor.CreateColorBrush(ColorHelper::FromArgb(178,255,255,255)));
-    //Composition::RectangleClip clip{nullptr};
-    //clip = compositor.CreateRectangleClip();
-    //clip.Left(0.f);
-    //clip.Top(0.f);
-    //clip.Right(w); //大小改变时要处理这里
-    //clip.Bottom(h);
-    //float borderRadius{4*dpi};
-    //clip.TopLeftRadius({ borderRadius, borderRadius });
-    //clip.TopRightRadius({ borderRadius, borderRadius });
-    //clip.BottomLeftRadius({ borderRadius, borderRadius });
-    //clip.BottomRightRadius({ borderRadius, borderRadius });
-    //rootVisual.Clip(clip);
 
-    clip = compositor.CreateRoundedRectangleGeometry();
-    clip.Size({ (float)w, (float)h });
-    float borderRadius{ 4 * dpi };
-    clip.CornerRadius({ borderRadius, borderRadius });
-    auto gclip = compositor.CreateGeometricClip(clip);
-    rootVisual.Clip(gclip);
-
-    
+    root = std::make_unique<Node>(this);
+    winTarget.Root(root->visual);
+    root->visual.Offset({ 0.f,0.f,0.f });
+    root->visual.RelativeSizeAdjustment({ 1.f,1.f });   
     onCreated();
 }
 
@@ -167,7 +149,7 @@ std::wstring& WindowBase::getWinClsName()
     static std::wstring clsName = [] {
         WNDCLASSEXW wcex;
         wcex.cbSize = sizeof(WNDCLASSEX);
-        wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+        wcex.style = CS_HREDRAW | CS_VREDRAW;
         wcex.lpfnWndProc = &WindowBase::winProc;
         wcex.cbClsExtra = 0;
         wcex.cbWndExtra = 0;
@@ -175,7 +157,7 @@ std::wstring& WindowBase::getWinClsName()
         wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
         wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
         wcex.lpszMenuName = nullptr;
-        wcex.lpszClassName = L"Ling";
+        wcex.lpszClassName = L"ImageReader";
         wcex.hIcon = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(100));  // 任务栏大图标
         wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(100));  // 标题栏小图标
         auto r = RegisterClassEx(&wcex);
@@ -211,31 +193,19 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if (LOWORD(lParam) == HTCLIENT) return self->setCursor();
     }
     else if (msg == WM_RBUTTONDOWN) {
-        self->onMouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), true);
+        self->mouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), true);
     }
-    else if (msg == WM_RBUTTONDBLCLK) {
-        self->onMouseDoubleClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), true);
-        return 0;
-    }
-    else if (msg == WM_LBUTTONDBLCLK) {
-        self->onMouseDoubleClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), false);
-        return 0;
+    else if (msg == WM_RBUTTONUP) {
+        self->mouseUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), true);
     }
     else if (msg == WM_LBUTTONDOWN) {
         self->mouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), false);
     }
     else if (msg == WM_LBUTTONUP) {
-        ReleaseCapture();
-        self->isMouseDown = false;
-        self->onMouseUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        self->mouseUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),false);
     }
     else if (msg == WM_MOUSEMOVE) {
-        if (self->isMouseDown) {
-            self->onMouseDrag(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), wParam);
-        }
-        else {
-            self->mouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        }
+        self->mouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
     }
     else if (msg == WM_MOUSELEAVE) {
         self->mouseLeave();
@@ -266,21 +236,11 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         self->onBlur();
     }
     else if (msg == WM_DPICHANGED) {
-        const UINT newDPI = HIWORD(wParam);
-        self->dpi = newDPI / 96.f;
-        RECT* prcNewWindow = reinterpret_cast<RECT*>(lParam);
-        auto w{ prcNewWindow->right - prcNewWindow->left };
-        auto h{ prcNewWindow->bottom - prcNewWindow->top };
-        SetWindowPos(hwnd, nullptr, prcNewWindow->left, prcNewWindow->top, w, h, SWP_NOZORDER | SWP_NOACTIVATE);
-        self->positionChange(prcNewWindow->left, prcNewWindow->top);
-        self->sizeChange(w, h);
-        self->onDpiChanged();
+        self->dpiChange(wParam, lParam);
     }
     else if (msg == WM_SIZE) {
         if (wParam == SIZE_MINIMIZED) {
-            self->isMouseDown = false;
-            ReleaseCapture();
-            self->onMouseLeave();
+            self->mouseLeave();
         }
         self->sizeChange(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
@@ -300,7 +260,28 @@ void WindowBase::mouseMove(const int& x, const int& y)
         tme.hwndTrack = hwnd;
         TrackMouseEvent(&tme);
     }
-    onMouseMove(x, y);
+    auto hit = root->findLeafByPos(x, y);
+    if (hit == nodeHover) {        
+        return;// 没有变化，什么都不做
+    }
+    auto lca = hit->findLCA(nodeHover); //找最近公共祖先
+    if (nodeHover) {
+        auto leavePath = nodeHover->pathUpTo(lca);
+        EventArg arg;
+        for (auto* node : leavePath) {
+            node->mouseLeave(arg);
+            if (arg.stopPopup) break;
+        }
+    }
+    nodeHover = hit;
+    if (nodeHover) {
+        auto enterPath = nodeHover->pathUpTo(lca);
+        MouseEventArg arg(x, y, false);
+        for (auto* node : enterPath) {
+            node->mouseEnter(arg);
+            if (arg.stopPopup) break;
+        }
+    }
 }
 
 void WindowBase::mouseLeave()
@@ -310,29 +291,57 @@ void WindowBase::mouseLeave()
     tme.dwFlags = TME_CANCEL | TME_LEAVE;
     tme.hwndTrack = hwnd;
     TrackMouseEvent(&tme);
-    onMouseLeave();
+    if (nodeHover) {
+        EventArg arg;
+        auto path = nodeHover->pathUpTo(nullptr); // 冒泡到根
+        for (auto* node : path) {
+            node->mouseLeave(arg);
+            if (arg.stopPopup) break;
+        }
+    }
+    nodeHover = nullptr;
 }
 
 void WindowBase::mouseDown(const int& x, const int& y, bool isRight)
 {
-    SetCapture(hwnd);
-    isMouseDown = true;
-    onMouseDown(x, y, false);
+    if (!nodeHover) return;
+    auto path = nodeHover->pathUpTo(nullptr);
+    MouseEventArg arg(x, y, isRight);
+    for (auto* node : path) {
+        node->mouseDown(arg);
+        if (arg.stopPopup) break;
+    }
+}
+
+void WindowBase::mouseUp(const int& x, const int& y, bool isRight)
+{
+    if (!nodeHover) return;
+    auto path = nodeHover->pathUpTo(nullptr);
+    MouseEventArg arg(x, y, isRight);
+    for (auto* node : path) {
+        node->mouseUp(arg);
+        if (arg.stopPopup) break;
+    }
+}
+
+void WindowBase::dpiChange(WPARAM wParam, LPARAM lParam)
+{
+    const UINT newDPI = HIWORD(wParam);
+    dpi = newDPI / 96.f;
+    RECT* prcNewWindow = reinterpret_cast<RECT*>(lParam);
+    auto w{ prcNewWindow->right - prcNewWindow->left };
+    auto h{ prcNewWindow->bottom - prcNewWindow->top };
+    SetWindowPos(hwnd, nullptr, prcNewWindow->left, prcNewWindow->top, w, h, SWP_NOZORDER | SWP_NOACTIVATE);
+    positionChange(prcNewWindow->left, prcNewWindow->top);
+    sizeChange(w, h);
+    onDpiChanged();
 }
 
 void WindowBase::sizeChange(const int& w, const int& h)
 {
     this->w = w;
     this->h = h;
-    //clip.Right(w);
-    //clip.Bottom(h);
-    clip.Size({ (float)w, (float)h });
-    onSizeChange();
-    if (w <= 0 || h <= 0) {
-        // 窗口最小化，重置鼠标状态
-        isMouseIn = false;
-        return;
-    }
+    root->sizeChange();
 }
 void WindowBase::positionChange(const int& x, const int& y)
 {

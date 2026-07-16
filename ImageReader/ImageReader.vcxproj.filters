@@ -27,61 +27,34 @@
     <ClCompile Include="WindowBase.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="WindowCalendar.cpp">
+    <ClCompile Include="WindowMain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="D2D.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="YearText.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleBtn.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Skin.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ColorA.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="YearBtn.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ElementBase.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WeekHeader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WebSocket.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DayBtn.cpp">
+    <ClCompile Include="Node.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ListBar.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ListContent.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ListItem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="SwitchBtn.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Menu.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TodayBtn.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Tip.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Event.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EventArg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseEventArg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,61 +68,34 @@
     <ClInclude Include="WindowBase.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="WindowCalendar.h">
+    <ClInclude Include="WindowMain.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="D2D.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="YearText.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleBtn.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Skin.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ColorA.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="YearBtn.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ElementBase.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="WeekHeader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="WebSocket.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DayBtn.h">
+    <ClInclude Include="Node.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Util.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ListBar.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ListContent.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ListItem.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="SwitchBtn.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Menu.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TodayBtn.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Tip.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EventArg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseEventArg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

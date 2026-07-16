@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "App.h"
-#include "Skin.h"
-#include "WebSocket.h"
-#include "WindowCalendar.h"
+#include "WindowMain.h"
 
 static std::unique_ptr<App> app;
 
@@ -22,9 +20,7 @@ void App::init()
     App::initDispatcherQueueCtrl();
     auto ptr = new App();
     app.reset(ptr);
-    Skin::init();
-    WindowCalendar::init();
-    WebSocket::init();
+    WindowMain::init();
 }
 
 void App::initDispatcherQueueCtrl()

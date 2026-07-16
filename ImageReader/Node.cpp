@@ -1,0 +1,139 @@
+﻿#include "pch.h"
+#include "D2D.h"
+#include "Node.h"
+#include "EventArg.h"
+#include "WindowBase.h"
+
+Node::Node(WindowBase* win, const std::wstring& id) :Event(), win{win}, id{id}
+{
+    visual = win->compositor.CreateSpriteVisual();
+}
+
+Node::~Node()
+{
+}
+
+Node* Node::createChild(const std::wstring& id)
+{
+    auto insPtr = new Node(win, id);
+    std::unique_ptr<Node> ptr(insPtr);
+    visual.Children().InsertAtTop(insPtr->visual);
+    children.push_back(std::move(ptr));
+    return insPtr;
+}
+
+void Node::initSurface()
+{
+    auto d2d = D2D::get();
+    surface = d2d->createDrawingSurface(win->compositor);
+    Composition::CompositionSurfaceBrush brush = win->compositor.CreateSurfaceBrush(surface);
+    visual.Brush(brush);
+}
+
+bool Node::isPosIn(float x, float y)
+{
+    if (visual.IsVisible()) return false;
+    return x >= absX && x < absX + absW && y >= absY && y < absY + absH;
+}
+
+Node* Node::findLeafByPos(float x, float y)
+{
+    if (!visual.IsVisible() || !isPosIn(x, y)) return nullptr;
+    // 从后往前遍历 children（后添加 = 视觉上层）
+    for (int i = (int)children.size() - 1; i >= 0; --i) {
+        auto* hit = children[i]->findLeafByPos(x, y);
+        if (hit) return hit;
+    }
+    // 没有子节点命中，就是自己（叶子节点）
+    return this;
+}
+
+void Node::hide()
+{
+    visual.IsVisible(false);
+}
+
+void Node::show()
+{
+    visual.IsVisible(true);
+}
+
+void Node::traverse(std::function<void(Node*)> visit)
+{
+    visit(this);
+    for (auto& child : children) {
+        child->traverse(visit);
+    }
+}
+
+void Node::setBackgroundColor(const ColorA& color)
+{
+    visual.Brush(win->compositor.CreateColorBrush(color.getUIColor()));
+}
+
+bool Node::isVisible()
+{
+    return visual.IsVisible();
+}
+
+std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>, ComPtr<ID2D1DeviceContext>> Node::paintStart()
+{
+    auto surfaceInterop = surface.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
+    ComPtr<ID2D1DeviceContext> d2d;
+    POINT offset{};
+    HRESULT hr = surfaceInterop->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(d2d.GetAddressOf()), &offset);
+    auto trans = D2D1::Matrix3x2F::Translation(static_cast<float>(offset.x), static_cast<float>(offset.y));
+    d2d->SetTransform(trans);
+    d2d->Clear(0);
+    return { surfaceInterop ,d2d };
+}
+
+void Node::sizeChange()
+{
+    EventArg arg;
+    Event::sizeChange(arg);
+    if (parent) {
+        auto pos = visual.Offset();
+        absX = parent->absX + pos.x;
+        absY = parent->absY + pos.y;
+    }
+    else {
+        absX = x;
+        absY = y;
+    }
+    auto size = visual.Size();
+    absW = size.x;
+    absH = size.y;
+    for (auto& child : children) {
+        child->sizeChange();
+    }
+}
+
+Node* Node::findLCA(Node* tar) {
+    if (!tar) return nullptr;
+    // 收集 a 的所有祖先（含自身）
+    std::vector<Node*> ancestorsA;
+    auto self = this;
+    while (self->parent)
+    {
+        ancestorsA.push_back(self->parent);
+    }
+    // 从 b 向上，找到第一个在 ancestorsA 中的节点
+    for (auto* p = tar; p; p = p->parent) {
+        for (auto* cand : ancestorsA) {
+            if (cand == p) return cand;
+        }
+    }
+    return nullptr; // 不应到达
+}
+
+std::vector<Node*> Node::pathUpTo(Node* stopAt)
+{
+    std::vector<Node*> path;
+    auto node = this;
+    while (node && node != stopAt) {
+        path.push_back(node);
+        node = node->parent;
+    }
+    return path; // [self, parent, grandparent, ..., stopAt.parent]
+}

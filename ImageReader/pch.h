@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <windowsx.h>
+#include <shellscalingapi.h>
 #include <d2d1_1.h>
 #include <dwrite_3.h>
 #include <d3d11.h>
@@ -14,6 +15,7 @@
 #include <format>
 #include <unordered_map>
 #include <unordered_set>
+#include <functional>
 #include <iostream>
 #include <sstream>
 

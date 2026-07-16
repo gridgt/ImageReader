@@ -1,11 +1,11 @@
 #pragma once
 #include "pch.h"
-#include "ElementBase.h"
-class WindowCalendar;
-class Tip :public ElementBase
+#include "Node.h"
+class WindowBase;
+class Tip :public Node
 {
 public:
-	Tip(WindowCalendar* win, const std::wstring& id);
+	Tip(WindowBase* win, const std::wstring& id);
 	~Tip();
 	void show(const float& x, const float& y, const std::wstring& text);
 private:
