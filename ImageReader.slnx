@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="ImageReader/ImageReader.vcxproj" Id="bfe8b94d-c255-484c-8c31-5a085698f2db" />
+  <Project Path="ImageReader/ImageReader.vcxproj" Id="5fcba504-9c4f-4832-874a-9031a09790f3" />
 </Solution>
