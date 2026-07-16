@@ -32,7 +32,7 @@ void Node::initSurface()
 
 bool Node::isPosIn(float x, float y)
 {
-    if (visual.IsVisible()) return false;
+    if (!visual.IsVisible()) return false;
     return x >= absX && x < absX + absW && y >= absY && y < absY + absH;
 }
 
@@ -96,14 +96,16 @@ void Node::sizeChange()
         auto pos = visual.Offset();
         absX = parent->absX + pos.x;
         absY = parent->absY + pos.y;
+        auto size = visual.Size();
+        absW = size.x;
+        absH = size.y;
     }
     else {
         absX = x;
         absY = y;
+        absW = win->w;
+        absH = win->h;
     }
-    auto size = visual.Size();
-    absW = size.x;
-    absH = size.y;
     for (auto& child : children) {
         child->sizeChange();
     }

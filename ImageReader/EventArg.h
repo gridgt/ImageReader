@@ -1,4 +1,5 @@
-#pragma once
+﻿#pragma once
+class Event;
 class EventArg
 {
 public:
@@ -6,6 +7,7 @@ public:
 	virtual ~EventArg();
 public:
 	bool stopPopup{ false };
+	Event* target;
 private:
 
 };

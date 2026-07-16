@@ -1,11 +1,12 @@
-#pragma once
+﻿#pragma once
 #include "pch.h"
-#include "Event.h"
 #include "EventArg.h"
 #include "MouseEventArg.h"
 class Event
 {
 public:
+	Event();
+	virtual ~Event();
 	size_t onMouseEnter(std::function<void(const MouseEventArg&)> callback);
 	size_t onMouseLeave(std::function<void(const EventArg&)> callback);
 	size_t onMouseMove(std::function<void(const MouseEventArg&)> callback);
@@ -22,13 +23,13 @@ public:
 	void offShown(const size_t& callbackId);	
 	void offSizeChange(const size_t& callbackId);
 
-	void mouseEnter(const MouseEventArg& arg);
-	void mouseLeave(const EventArg& arg);
-	void mouseMove(const MouseEventArg& arg);
-	void mouseDown(const MouseEventArg& arg);
-	void mouseUp(const MouseEventArg& arg);
-	void shown(const EventArg& arg);
-	void sizeChange(const EventArg& arg);
+	void mouseEnter(MouseEventArg& arg);
+	void mouseLeave(EventArg& arg);
+	void mouseMove(MouseEventArg& arg);
+	void mouseDown(MouseEventArg& arg);
+	void mouseUp(MouseEventArg& arg);
+	void shown(EventArg& arg);
+	void sizeChange(EventArg& arg);
 protected:
 
 private:

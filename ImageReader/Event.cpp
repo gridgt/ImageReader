@@ -1,6 +1,15 @@
 #include "pch.h"
 #include "Event.h"
 
+Event::Event()
+{
+}
+
+Event::~Event()
+{
+}
+
+
 size_t Event::onMouseMove(std::function<void(const MouseEventArg&)> callback)
 {
 	mouseMoveCBId += 1;
@@ -21,6 +30,8 @@ size_t Event::onMouseUp(std::function<void(const MouseEventArg&)> callback)
 	mouseUpCBs.insert({ mouseUpCBId,callback });
 	return mouseDownCBId;
 }
+
+
 
 size_t Event::onMouseEnter(std::function<void(const MouseEventArg&)> callback)
 {
@@ -80,50 +91,57 @@ void Event::offSizeChange(const size_t& callbackId)
 	sizeChangeCBs.erase(callbackId);
 }
 
-void Event::mouseEnter(const MouseEventArg& arg)
+void Event::mouseEnter(MouseEventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : mouseEnterCBs) {
 		pair.second(arg);
 	}
 }
 
-void Event::mouseLeave(const EventArg& arg)
+void Event::mouseLeave(EventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : mouseLeaveCBs) {
 		pair.second(arg);
 	}
 }
 
-void Event::mouseMove(const MouseEventArg& arg)
+void Event::mouseMove(MouseEventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : mouseMoveCBs) {
 		pair.second(arg);
 	}
 }
 
-void Event::mouseDown(const MouseEventArg& arg)
+void Event::mouseDown(MouseEventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : mouseDownCBs) {
 		pair.second(arg);
 	}
 }
 
-void Event::mouseUp(const MouseEventArg& arg)
+void Event::mouseUp(MouseEventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : mouseUpCBs) {
 		pair.second(arg);
 	}
 }
 
-void Event::shown(const EventArg& arg)
+void Event::shown(EventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : shownCBs) {
 		pair.second(arg);
 	}
 }
 
-void Event::sizeChange(const EventArg& arg)
+void Event::sizeChange(EventArg& arg)
 {
+	arg.target = this;
 	for (const auto& pair : sizeChangeCBs) {
 		pair.second(arg);
 	}

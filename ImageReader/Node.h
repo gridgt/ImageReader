@@ -29,6 +29,7 @@ public:
 	/// </summary>
 	std::vector<Node*> pathUpTo(Node* stopAt);
 public:
+	WindowBase* win;
 	std::wstring id;	
 	/// <summary>
 	/// 1. 将子元素的锚点设置为其自身的中心点 (0.5, 0.5)
@@ -47,7 +48,6 @@ public:
 protected:
 	std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>, ComPtr<ID2D1DeviceContext>> paintStart();
 protected:
-	WindowBase* win;
 	float x, y, w, h;
 	float absX, absY, absW, absH;
 private:

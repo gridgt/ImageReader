@@ -136,6 +136,7 @@ void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
     root->visual.Offset({ 0.f,0.f,0.f });
     root->visual.RelativeSizeAdjustment({ 1.f,1.f });   
     onCreated();
+    root->sizeChange();
 }
 
 BOOL WindowBase::setCursor()
