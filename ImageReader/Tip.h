@@ -5,7 +5,7 @@ class WindowBase;
 class Tip :public Node
 {
 public:
-	Tip(WindowBase* win, const std::wstring& id);
+	Tip(WindowBase* win, const std::string& id);
 	~Tip();
 	void show(const float& x, const float& y, const std::wstring& text);
 private:

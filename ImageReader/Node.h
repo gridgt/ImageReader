@@ -7,9 +7,9 @@ class Node:public Event
 {
 	friend class WindowBase;
 public:
-	Node(WindowBase* win, const std::wstring& id = L"");
+	Node(WindowBase* win, const std::string& id = "");
 	virtual ~Node();
-	Node* createChild(const std::wstring& id = L"");
+	Node* createChild(const std::string& id = "");
 	void initSurface();
 	void setPosSize(const float& x, const float& y, const float& w, const float& h);
 	bool isPosIn(float x, float y);
@@ -32,7 +32,7 @@ public:
 	std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>, ComPtr<ID2D1DeviceContext>> paintStart();
 public:
 	WindowBase* win;
-	std::wstring id;	
+	std::string id;	
 	/// <summary>
 	/// 1. 将子元素的锚点设置为其自身的中心点 (0.5, 0.5)
 	/// childVisual.AnchorPoint = new Vector2(0.5f, 0.5f);

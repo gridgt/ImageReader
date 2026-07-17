@@ -4,7 +4,7 @@
 #include "WebSocket.h"
 
 
-Tip::Tip(WindowBase* win, const std::wstring& id) :Node(win,id)
+Tip::Tip(WindowBase* win, const std::string& id) :Node(win,id)
 {
     //visual = win->compositor.CreateSpriteVisual();
     //win->rootVisual.Children().InsertAtTop(visual);

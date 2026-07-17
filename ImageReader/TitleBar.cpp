@@ -9,7 +9,7 @@ static std::unique_ptr<TitleBar> ins;
 TitleBar::TitleBar(WindowBase* win)
 {
 	auto d2d = D2D::get();
-	bar = win->root->createChild(L"titleBar");
+	bar = win->root->createChild("titleBar");
 	bar->onSizeChange([this](auto& e) {this->onBarSize(e);});
 	bar->initSurface();
 	title = d2d->createTextLayout(win->title, FLT_MAX, FLT_MAX);
@@ -18,7 +18,7 @@ TitleBar::TitleBar(WindowBase* win)
 	std::wstring code;
 	for (size_t i = 0; i < 3; i++)
 	{
-		auto id = std::format(L"btn{}", i);
+		auto id = std::format("btn{}", i);
 		auto btn = bar->createChild(id);
 		btn->onSizeChange([this](auto& e) {this->onSize(e);});
 		btn->onMouseEnter([this](auto& e) {this->onEnter(e);});

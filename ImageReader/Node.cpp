@@ -4,7 +4,7 @@
 #include "EventArg.h"
 #include "WindowBase.h"
 
-Node::Node(WindowBase* win, const std::wstring& id) :Event(), win{win}, id{id}
+Node::Node(WindowBase* win, const std::string& id) :Event(), win{win}, id{id}
 {
     visual = win->compositor.CreateSpriteVisual();
 }
@@ -13,7 +13,7 @@ Node::~Node()
 {
 }
 
-Node* Node::createChild(const std::wstring& id)
+Node* Node::createChild(const std::string& id)
 {
     auto insPtr = new Node(win, id);
     insPtr->parent = this;
