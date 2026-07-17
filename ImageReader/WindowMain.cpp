@@ -37,6 +37,14 @@ void WindowMain::onCreated()
     root->setBackgroundColor(0xFFFFFFFF);
     TitleBar::init(this);
 }
+void WindowMain::onMaximize()
+{
+
+}
+void WindowMain::onRestore()
+{
+
+}
 void WindowMain::onMouseWheel(const float& x, const float& y, const short& delta)
 {
     //for (auto& item : elements) item->onMouseWheel(x, y, delta);
@@ -85,16 +93,4 @@ LRESULT WindowMain::onHitTest(const float& x, const float& y)
         return HTCAPTION;
     }
     return HTCLIENT;
-}
-
-BOOL WindowMain::setCursor()
-{
-    //for (auto& item : elements)
-    //{
-    //    if (item->setCursor()) {
-    //        return TRUE;
-    //    }
-    //}
-    //SetCursor(LoadCursor(NULL, IDC_ARROW));
-    return TRUE;
 }

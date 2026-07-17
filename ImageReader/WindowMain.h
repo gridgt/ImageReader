@@ -12,11 +12,12 @@ public:
 private:
 	WindowMain();
 	void onCreated() override;
+	void onMaximize() override;
+	void onRestore() override;
 	void onMouseWheel(const float& x, const float& y, const short& delta) override;
 	void onTimer(const UINT& timerId) override;
 	void onMinMaxInfo(MINMAXINFO* mmi) override;
 	LRESULT onHitTest(const float& x, const float& y) override;
-	BOOL setCursor() override;
 private:
 	Composition::CompositionDrawingSurface surface{ nullptr };
 };

@@ -9,12 +9,12 @@ static std::unique_ptr<TitleBar> ins;
 TitleBar::TitleBar(WindowBase* win)
 {
 	auto d2d = D2D::get();
-
 	bar = win->root->createChild(L"titleBar");
 	bar->onSizeChange([this](auto& e) {this->onBarSize(e);});
 	bar->initSurface();
 	title = d2d->createTextLayout(win->title, FLT_MAX, FLT_MAX);
 
+	HCURSOR handCursor = LoadCursor(nullptr, IDC_HAND);
 	std::wstring code;
 	for (size_t i = 0; i < 3; i++)
 	{
@@ -25,6 +25,7 @@ TitleBar::TitleBar(WindowBase* win)
 		btn->onMouseLeave([this](auto& e) {this->onLeave(e);});
 		btn->onMouseDown([this](auto& e) {this->onDown(e);});
 		btn->initSurface();
+		btn->cursor = handCursor;
 		btns.push_back(btn);
 		if (i == 0) {
 			code = L"\ue6e8";
@@ -63,6 +64,10 @@ void TitleBar::init(WindowBase* win)
 {
 	ins.reset(new TitleBar(win));
 
+}
+TitleBar* TitleBar::get()
+{
+	return ins.get();
 }
 void TitleBar::onSize(const EventArg& e)
 {
@@ -103,6 +108,17 @@ void TitleBar::onDown(const MouseEventArg& e)
 	auto win = btn->win;
 	if (index == 2) {
 		ExitProcess(0);
+	}
+	else if (index == 1) {
+		if (IsZoomed(btn->win->hwnd)) {
+			ShowWindow(btn->win->hwnd, SW_RESTORE);
+		}
+		else {
+			ShowWindow(btn->win->hwnd, SW_SHOWMAXIMIZED);
+		}
+	}
+	else if (index == 0) {
+		ShowWindow(btn->win->hwnd, SW_MINIMIZE);
 	}
 }
 

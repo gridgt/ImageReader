@@ -9,6 +9,7 @@ class TitleBar
 public:
 	~TitleBar();
 	static void init(WindowBase* win);
+	static TitleBar* get();
 private:
 	TitleBar(WindowBase* win);
 	void onBarSize(const EventArg& e);

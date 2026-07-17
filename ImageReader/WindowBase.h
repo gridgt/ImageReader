@@ -38,6 +38,9 @@ public:
 protected:
 	virtual void onCreated() {};
 	virtual void onShown() {};
+	virtual void onMaximize() {};
+	virtual void onRestore() {};
+	virtual void onMinimize() {};
 	virtual void onHidden();
 	virtual LRESULT onHitTest(const float& x, const float& y) { return HTCLIENT; };
 	virtual void onMouseWheel(const float& x, const float& y, const short& delta) {};
@@ -61,11 +64,11 @@ private:
 	void mouseUp(const float& x, const float& y, bool isRight);
 	void paint();
 	void dpiChange(WPARAM wParam, LPARAM lParam);
-	void sizeChange(const int& w, const int& h);
+	void sizeChange(WPARAM wParam, LPARAM lParam);
 	void positionChange(const int& x, const int& y);
 private:
 	Composition::Desktop::DesktopWindowTarget winTarget{ nullptr };	
 	Node* nodeHover{nullptr};
-	bool isMouseIn{ false };
+	bool isMouseIn{ false }, wasMaximized{false};
 };
 

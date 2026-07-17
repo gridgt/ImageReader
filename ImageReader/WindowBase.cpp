@@ -158,7 +158,13 @@ void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
 
 BOOL WindowBase::setCursor()
 {
-    SetCursor(LoadCursor(NULL, IDC_ARROW));
+    for (auto* n = nodeHover; n; n = n->parent) {
+        if (n->cursor) {
+            ::SetCursor(n->cursor);
+            return TRUE;
+        }
+    }
+    ::SetCursor(LoadCursor(nullptr, IDC_ARROW));
     return TRUE;
 }
 
@@ -259,14 +265,11 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     else if (msg == WM_DPICHANGED) {
         self->dpiChange(wParam, lParam);
     }
-    else if (msg == WM_SIZE) {
-        if (wParam == SIZE_MINIMIZED) {
-            self->mouseLeave();
-        }
-        else {
-            self->sizeChange(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        }
-        
+    else if (msg == WM_SYSCOMMAND) {
+
+    }
+    else if (msg == WM_SIZE) { 
+        self->sizeChange(wParam, lParam);
         return 0;
     }
     else if (msg == WM_MOVE) {
@@ -365,10 +368,25 @@ void WindowBase::dpiChange(WPARAM wParam, LPARAM lParam)
     onDpiChanged();
 }
 
-void WindowBase::sizeChange(const int& w, const int& h)
+void WindowBase::sizeChange(WPARAM wParam, LPARAM lParam)
 {
-    this->w = static_cast<float>(w);
-    this->h = static_cast<float>(h);
+    if (wParam == SIZE_MINIMIZED) {
+        mouseLeave();
+        onMinimize();
+        return;
+    }
+    if (wParam == SIZE_MAXIMIZED) {
+        wasMaximized = true;
+        onMaximize();
+    }
+    else if (wParam == SIZE_RESTORED) {
+        if (wasMaximized) {
+            wasMaximized = false;
+            onRestore();
+        }
+    }
+    w = static_cast<float>(GET_X_LPARAM(lParam));
+    h = static_cast<float>(GET_Y_LPARAM(lParam));
     if (w <= 0 || h <= 0) return;
     root->sizeChange();
 }
