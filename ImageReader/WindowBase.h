@@ -29,7 +29,7 @@ public:
 	void setPosScreenCenter();
 public:
 	int x{ 0 }, y{ 0 };      // 屏幕坐标：物理像素
-	float w{ 0 }, h{ 0 };    // 客户区大小：逻辑像素（DIPs）
+	float w{ 0 }, h{ 0 };    // 客户区大小：物理像素
 	float dpi{ 1.0 };
 	HWND hwnd{ nullptr };
 	std::wstring title;
@@ -51,6 +51,7 @@ protected:
 	virtual void onDpiChanged() {};
 	virtual void onPositionChange() {};
 	virtual BOOL setCursor();
+	virtual void onMinMaxInfo(MINMAXINFO* mmi) {};
 private:
 	std::wstring& getWinClsName();
 	static LRESULT CALLBACK winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

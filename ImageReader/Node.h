@@ -11,7 +11,7 @@ public:
 	virtual ~Node();
 	Node* createChild(const std::wstring& id = L"");
 	void initSurface();
-	void resizeSurface();
+	void setPosSize(const float& x, const float& y, const float& w, const float& h);
 	bool isPosIn(float x, float y);
 	Node* findLeafByPos(float x, float y);
 	void hide();

@@ -31,12 +31,14 @@ void Node::initSurface()
     visual.Brush(brush);
 }
 
-void Node::resizeSurface()
+void Node::setPosSize(const float& x, const float& y, const float& w, const float& h)
 {
-    auto sz = visual.Size();
-    int pw = sz.x * win->dpi;
-    int ph = sz.y * win->dpi;
-    surface.Resize({ pw,ph });
+
+    visual.Offset({ x,y,0.f });
+    visual.Size({ w,h });
+    if (surface) {
+        surface.Resize({ static_cast<int>(w), static_cast<int>(h) });
+    }
 }
 
 bool Node::isPosIn(float x, float y)
@@ -89,9 +91,9 @@ std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawin
 {
     auto surfaceInterop = surface.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
     ComPtr<ID2D1DeviceContext> d2d;
-    POINT offset{};
+    POINT offset{};   // 物理像素
     HRESULT hr = surfaceInterop->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(d2d.GetAddressOf()), &offset);
-    d2d->SetDpi(96.f * win->dpi, 96.f * win->dpi);
+    // 全程使用物理像素，不调 SetDpi
     auto trans = D2D1::Matrix3x2F::Translation(static_cast<float>(offset.x), static_cast<float>(offset.y));
     d2d->SetTransform(trans);
     d2d->Clear(0);
@@ -104,7 +106,7 @@ void Node::sizeChange()
     arg.target = this;
     Event::sizeChange(arg);
     if (parent) {
-        // visual.Offset / visual.Size 是逻辑像素（DIPs）
+        // visual.Offset / visual.Size 是物理像素
         auto pos = visual.Offset();
         absX = parent->absX + pos.x;
         absY = parent->absY + pos.y;
@@ -113,7 +115,7 @@ void Node::sizeChange()
         absH = size.y;
     }
     else {
-        // root：win->w/h 现在也是逻辑像素
+        // root：win->w/h 是物理像素
         absX = x;
         absY = y;
         absW = win->w;

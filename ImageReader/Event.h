@@ -31,7 +31,6 @@ public:
 	void shown(EventArg& arg);
 	void sizeChange(EventArg& arg);
 public:
-	bool isHover{ false };
 protected:
 
 private:

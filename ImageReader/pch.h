@@ -18,6 +18,7 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 #include <dispatcherqueue.h>
 #include <winrt/Windows.System.h>

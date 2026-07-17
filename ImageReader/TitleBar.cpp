@@ -8,40 +8,51 @@ static std::unique_ptr<TitleBar> ins;
 
 TitleBar::TitleBar(WindowBase* win)
 {
-	btn0 = win->root->createChild(L"btn0");
-	btn1 = win->root->createChild(L"btn1");
-	btn2 = win->root->createChild(L"btn2");
-
-	btn0->initSurface();
-	btn1->initSurface();
-	btn2->initSurface();
-
-
-	//btn0->setBackgroundColor(0xEEEEEEFF);
-	//btn1->setBackgroundColor(0xEEEEEEFF);
-	//btn2->setBackgroundColor(0xEEEEEEFF);
-
-	btn0->onSizeChange([this](auto& e) {this->onSize(e);});
-	btn1->onSizeChange([this](auto& e) {this->onSize(e);});
-	btn2->onSizeChange([this](auto& e) {this->onSize(e);});
-
-	btn0->onMouseEnter([this](auto& e) {this->onEnter(e);});
-	btn1->onMouseEnter([this](auto& e) {this->onEnter(e);});
-	btn2->onMouseEnter([this](auto& e) {this->onEnter(e);});
-
-
-	btn0->onMouseLeave([this](auto& e) {this->onLeave(e);});
-	btn1->onMouseLeave([this](auto& e) {this->onLeave(e);});
-	btn2->onMouseLeave([this](auto& e) {this->onLeave(e);});
-
-
 	auto d2d = D2D::get();
-	icon0 = d2d->createTextLayout(L"\ue74c", FLT_MAX, FLT_MAX);
-	icon0->SetFontFamilyName(L"iconfont", { 0,INT_MAX });
-	icon1 = d2d->createTextLayout(L"\ue74c", FLT_MAX, FLT_MAX);
-	icon1->SetFontFamilyName(L"iconfont", { 0,INT_MAX });
-	icon2 = d2d->createTextLayout(L"\ue74c", FLT_MAX, FLT_MAX);
-	icon2->SetFontFamilyName(L"iconfont", { 0,INT_MAX });
+
+	bar = win->root->createChild(L"titleBar");
+	bar->onSizeChange([this](auto& e) {this->onBarSize(e);});
+	bar->initSurface();
+	title = d2d->createTextLayout(win->title, FLT_MAX, FLT_MAX);
+
+	std::wstring code;
+	for (size_t i = 0; i < 3; i++)
+	{
+		auto id = std::format(L"btn{}", i);
+		auto btn = bar->createChild(id);
+		btn->onSizeChange([this](auto& e) {this->onSize(e);});
+		btn->onMouseEnter([this](auto& e) {this->onEnter(e);});
+		btn->onMouseLeave([this](auto& e) {this->onLeave(e);});
+		btn->onMouseDown([this](auto& e) {this->onDown(e);});
+		btn->initSurface();
+		btns.push_back(btn);
+		if (i == 0) {
+			code = L"\ue6e8";
+		}
+		else if (i == 1) {
+			code = L"\ue6e5";
+		}
+		else if (i == 2) {
+			code = L"\ue6e7";
+		}
+		auto icon = d2d->createTextLayout(code, FLT_MAX, FLT_MAX);
+		icon->SetFontFamilyName(L"icon", { 0,INT_MAX });
+		icons.push_back(std::move(icon));
+		poss.push_back({ 0.f,0.f });
+	}
+}
+
+void TitleBar::onBarSize(const EventArg& e)
+{
+	auto& dpi = bar->win->dpi;
+	auto h{ 30.f * dpi };
+	bar->setPosSize(0.f, 0.f, (float)(bar->win->w), h);
+	title->SetFontSize(13.f * dpi, { 0,INT_MAX });
+	DWRITE_TEXT_METRICS metrics;
+	title->GetMetrics(&metrics);
+	titlePos.x = 12 * dpi;
+	titlePos.y = (h - metrics.height) / 2;
+	paintBar();
 }
 
 TitleBar::~TitleBar()
@@ -55,85 +66,85 @@ void TitleBar::init(WindowBase* win)
 }
 void TitleBar::onSize(const EventArg& e)
 {
-	auto node = dynamic_cast<Node*>(e.target);
-	auto win = node->win;
-	// 全部使用逻辑像素（DIPs）
-	auto btnW{ 32.f }, btnH{ 30.f };
-	node->visual.Size({ btnW,btnH });
+	auto btn = dynamic_cast<Node*>(e.target);
+	auto it = std::find(btns.begin(), btns.end(), btn);
+	size_t index = std::distance(btns.begin(), it);
+	auto win = btn->win;
+	auto btnW{ 34.f * win->dpi }, btnH{ 30.f * win->dpi };
+	btn->setPosSize(win->w - btnW * (3 - index), 0.f, btnW, btnH);
+	icons[index]->SetFontSize(12.f * win->dpi, {0,INT_MAX});
 	DWRITE_TEXT_METRICS metrics;
-	if (node == btn0) {
-		btn0->resizeSurface();
-		node->visual.Offset({ win->w - btnW * 3,0.f,0.f });
-		icon0->GetMetrics(&metrics);
-		icon0->SetFontSize(12.f, { 0,INT_MAX });
-		iconPos0.x = (btnW - metrics.width) / 2;
-		iconPos0.y = (btnH - metrics.height) / 2;
-	}
-	else if (node == btn1) {
-		btn1->resizeSurface();
-		node->visual.Offset({ win->w - btnW * 2,0.f,0.f });
-		icon1->GetMetrics(&metrics);
-		iconPos1.x = (btnW - metrics.width) / 2;
-		iconPos1.y = (btnH - metrics.height) / 2;
-	}
-	else if (node == btn2) {
-		btn2->resizeSurface();
-		node->visual.Offset({ win->w - btnW,0.f,0.f });
-		icon1->GetMetrics(&metrics);
-		iconPos1.x = (btnW - metrics.width) / 2;
-		iconPos1.y = (btnH - metrics.height) / 2;
-	}
-	paint(node);
+	icons[index]->GetMetrics(&metrics);
+	poss[index].x = (btnW - metrics.width) / 2;
+	poss[index].y = (btnH - metrics.height) / 2;
+	paint(btn);
 }
 
 void TitleBar::onEnter(const MouseEventArg& e)
 {
-	auto node = dynamic_cast<Node*>(e.target);
-	if (node == btn0) {
-		//btn0->setBackgroundColor(0xE0E0E0FF);
-		paint(btn0);
-	}
-	else if (node == btn1) {
-		//btn1->setBackgroundColor(0xE0E0E0FF);
-		paint(btn1);
-	}
-	else if (node == btn2) {
-		//btn2->setBackgroundColor(0xF44336ff);
-		paint(btn2);
-	}
+	auto btn = dynamic_cast<Node*>(e.target);
+	auto it = std::find(btns.begin(), btns.end(), btn);
+	hoverIndex = std::distance(btns.begin(), it);
+	paint(btn);
 }
 
 void TitleBar::onLeave(const EventArg& e)
 {
-	//auto node = dynamic_cast<Node*>(e.target);
-	//if (node == btn0) {
-	//	btn0->setBackgroundColor(0xEEEEEEFF);
-	//}
-	//else if (node == btn1) {
-	//	btn1->setBackgroundColor(0xEEEEEEFF);
-	//}
-	//else if (node == btn2) {
-	//	btn2->setBackgroundColor(0xEEEEEEFF);
-	//}
+	auto btn = dynamic_cast<Node*>(e.target);
+	hoverIndex = -1;
+	paint(btn);
+}
+
+void TitleBar::onDown(const MouseEventArg& e)
+{
+	auto btn = dynamic_cast<Node*>(e.target);
+	auto it = std::find(btns.begin(), btns.end(), btn);
+	size_t index = std::distance(btns.begin(), it);
+	auto win = btn->win;
+	if (index == 2) {
+		ExitProcess(0);
+	}
 }
 
 void TitleBar::paint(Node* btn)
 {
 	auto [s, d2d] = btn->paintStart();
-	if (btn->id == L"btn0") {
-		if (btn->isHover) {
-			auto size = btn->surface.Size();
-			auto r{ 2 };
-			D2D1_ROUNDED_RECT rr = { {0,0,size.Width,size.Height}, r,r };
-			ComPtr<ID2D1SolidColorBrush> bgBrush;
-			ColorA color(0xE0E0E0FF);
-			d2d->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
-			d2d->FillRoundedRectangle(rr, bgBrush.Get());
-		}
-		ComPtr<ID2D1SolidColorBrush> textBrush;
-		ColorA color(0x000000ff);
-		d2d->CreateSolidColorBrush(color.getD2DColor(), textBrush.GetAddressOf());
-		d2d->DrawTextLayout(iconPos0, icon0.Get(), textBrush.Get());
+	auto it = std::find(btns.begin(), btns.end(), btn);
+	size_t index = std::distance(btns.begin(), it);
+	if (index == hoverIndex) {
+		auto size = btn->surface.Size();
+		D2D1_RECT_F rr = { 0,0,size.Width,size.Height };
+		ComPtr<ID2D1SolidColorBrush> bgBrush;
+		ColorA color(index == 2 ? 0xE81123FF : 0xE0E0E0FF);
+		d2d->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
+		d2d->FillRectangle(rr, bgBrush.Get());
 	}
+	uint32_t colorVal{ 0x888888ff };
+	if (index == hoverIndex) {
+		if (index == 2) {
+			colorVal = 0xFFFFFFff;
+		}
+		else {
+			colorVal = 0x333333ff;
+		}
+	}
+	ComPtr<ID2D1SolidColorBrush> textBrush;
+	ColorA color(colorVal);
+	d2d->CreateSolidColorBrush(color.getD2DColor(), textBrush.GetAddressOf());
+	d2d->DrawTextLayout(poss[index], icons[index].Get(), textBrush.Get());
+	s->EndDraw();
+}
+
+void TitleBar::paintBar()
+{
+	auto [s, d2d] = bar->paintStart();
+	auto size = bar->surface.Size();
+	D2D1_RECT_F r = { 0,0,size.Width,size.Height };
+	ComPtr<ID2D1SolidColorBrush> bgBrush;
+	d2d->CreateSolidColorBrush(ColorA(0xEEEEEEFF).getD2DColor(), bgBrush.GetAddressOf());
+	d2d->FillRectangle(r, bgBrush.Get());
+	ComPtr<ID2D1SolidColorBrush> textBrush;
+	d2d->CreateSolidColorBrush(ColorA(0x666666FF).getD2DColor(), textBrush.GetAddressOf());
+	d2d->DrawTextLayout(titlePos, title.Get(), textBrush.Get());
 	s->EndDraw();
 }
