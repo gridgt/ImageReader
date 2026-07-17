@@ -16,6 +16,7 @@ Node::~Node()
 Node* Node::createChild(const std::wstring& id)
 {
     auto insPtr = new Node(win, id);
+    insPtr->parent = this;
     std::unique_ptr<Node> ptr(insPtr);
     visual.Children().InsertAtTop(insPtr->visual);
     children.push_back(std::move(ptr));
@@ -119,6 +120,7 @@ Node* Node::findLCA(Node* tar) {
     while (self->parent)
     {
         ancestorsA.push_back(self->parent);
+        self = self->parent;
     }
     // 从 b 向上，找到第一个在 ancestorsA 中的节点
     for (auto* p = tar; p; p = p->parent) {

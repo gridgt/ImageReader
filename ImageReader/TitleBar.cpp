@@ -16,9 +16,9 @@ TitleBar::TitleBar(WindowBase* win)
 	btn2->initSurface();
 
 
-	btn0->setBackgroundColor(0x22FFFFFF);
-	btn1->setBackgroundColor(0xFF66FFFF);
-	btn2->setBackgroundColor(0xFFFF88FF);
+	btn0->setBackgroundColor(0xEEEEEEFF);
+	btn1->setBackgroundColor(0xEEEEEEFF);
+	btn2->setBackgroundColor(0xEEEEEEFF);
 
 	btn0->onSizeChange([this](auto& e) {this->onSize(e);});
 	btn1->onSizeChange([this](auto& e) {this->onSize(e);});
@@ -69,7 +69,7 @@ void TitleBar::onEnter(const MouseEventArg& e)
 		btn0->setBackgroundColor(0xE0E0E0FF);
 	}
 	else if (node == btn1) {
-		btn0->setBackgroundColor(0xE0E0E0FF);
+		btn1->setBackgroundColor(0xE0E0E0FF);
 	}
 	else if (node == btn2) {
 		btn2->setBackgroundColor(0xF44336ff);
@@ -80,12 +80,12 @@ void TitleBar::onLeave(const EventArg& e)
 {
 	auto node = dynamic_cast<Node*>(e.target);
 	if (node == btn0) {
-		btn0->setBackgroundColor(0xE0E0E0FF);
+		btn0->setBackgroundColor(0xEEEEEEFF);
 	}
 	else if (node == btn1) {
-		btn0->setBackgroundColor(0xE0E0E0FF);
+		btn1->setBackgroundColor(0xEEEEEEFF);
 	}
 	else if (node == btn2) {
-		btn2->setBackgroundColor(0xE0E0E0FF);
+		btn2->setBackgroundColor(0xEEEEEEFF);
 	}
 }

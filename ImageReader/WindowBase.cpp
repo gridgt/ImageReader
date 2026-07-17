@@ -277,6 +277,7 @@ void WindowBase::mouseMove(const int& x, const int& y)
     nodeHover = hit;
     if (nodeHover) {
         auto enterPath = nodeHover->pathUpTo(lca);
+        std::reverse(enterPath.begin(), enterPath.end());
         MouseEventArg arg(x, y, false);
         for (auto* node : enterPath) {
             node->mouseEnter(arg);

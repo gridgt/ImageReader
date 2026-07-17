@@ -34,7 +34,7 @@ WindowMain* WindowMain::get()
 }
 void WindowMain::onCreated()
 {
-    root->setBackgroundColor(0xFF99FFFF);
+    root->setBackgroundColor(0xFFFFFFFF);
     TitleBar::init(this);
 }
 void WindowMain::onMouseWheel(const int& x, const int& y, const short& delta)

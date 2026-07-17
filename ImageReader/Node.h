@@ -53,7 +53,7 @@ protected:
 private:
 	void sizeChange();
 private:
-	Node* parent;
+	Node* parent{nullptr};
 	Composition::CompositionDrawingSurface surface{ nullptr };
 };
 
