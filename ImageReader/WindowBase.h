@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include "pch.h"
+#include "Event.h"
 
 class Node;
-class WindowBase
+class WindowBase: public Event
 {
 public:
 	WindowBase();
@@ -38,9 +39,6 @@ public:
 protected:
 	virtual void onCreated() {};
 	virtual void onShown() {};
-	virtual void onMaximize() {};
-	virtual void onRestore() {};
-	virtual void onMinimize() {};
 	virtual void onHidden();
 	virtual LRESULT onHitTest(const float& x, const float& y) { return HTCLIENT; };
 	virtual void onMouseWheel(const float& x, const float& y, const short& delta) {};

@@ -8,6 +8,10 @@ static std::unique_ptr<TitleBar> ins;
 
 TitleBar::TitleBar(WindowBase* win)
 {
+	win->on("maximize", [this](void* ptr) {
+		auto a = 1;
+		});
+
 	auto d2d = D2D::get();
 	bar = win->root->createChild("titleBar");
 	bar->onSizeChange([this](auto& e) {this->onBarSize(e);});
@@ -21,7 +25,8 @@ TitleBar::TitleBar(WindowBase* win)
 		auto id = std::format("btn{}", i);
 		auto btn = bar->createChild(id);
 		btn->onSizeChange([this](auto& e) {this->onSize(e);});
-		btn->onMouseEnter([this](auto& e) {this->onEnter(e);});
+		//btn->onMouseEnter([this](auto& e) {this->onEnter(e);});
+		btn->on("mouseEnter", [this](void* e) {this->onEnter(e);});
 		btn->onMouseLeave([this](auto& e) {this->onLeave(e);});
 		btn->onMouseDown([this](auto& e) {this->onDown(e);});
 		btn->initSurface();
@@ -85,9 +90,11 @@ void TitleBar::onSize(const EventArg& e)
 	paint(btn);
 }
 
-void TitleBar::onEnter(const MouseEventArg& e)
+void TitleBar::onEnter(void* e)
 {
-	auto btn = dynamic_cast<Node*>(e.target);
+	auto tuplePtr = static_cast<std::tuple<float, float, bool, Node*>*>(e);
+	auto btn = std::get<3>(*tuplePtr);
+	//auto btn = dynamic_cast<Node*>(e.target);
 	auto it = std::find(btns.begin(), btns.end(), btn);
 	hoverIndex = std::distance(btns.begin(), it);
 	paint(btn);

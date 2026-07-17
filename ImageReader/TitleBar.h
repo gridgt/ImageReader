@@ -14,7 +14,7 @@ private:
 	TitleBar(WindowBase* win);
 	void onBarSize(const EventArg& e);
 	void onSize(const EventArg& e);
-	void onEnter(const MouseEventArg& e);
+	void onEnter(void* e);
 	void onLeave(const EventArg& e);
 	void onDown(const MouseEventArg& e);
 	void paint(Node* btn);

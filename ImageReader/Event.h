@@ -7,6 +7,14 @@ class Event
 public:
 	Event();
 	virtual ~Event();
+	size_t on(const std::string& eventName, std::function<void(void*)> cb);
+	void off(const std::string& eventName, const size_t& id);
+	void emit(const std::string& eventName, void* arg);
+
+
+
+
+
 	size_t onMouseEnter(std::function<void(const MouseEventArg&)> callback);
 	size_t onMouseLeave(std::function<void(const EventArg&)> callback);
 	size_t onMouseMove(std::function<void(const MouseEventArg&)> callback);
@@ -48,5 +56,15 @@ private:
 	std::unordered_map<size_t, std::function<void(const EventArg&)>> shownCBs;
 	size_t sizeChangeCBId{ 0 };
 	std::unordered_map<size_t, std::function<void(const EventArg&)>> sizeChangeCBs;
+
+	struct Slot
+	{
+		size_t id;
+		std::function<void(void*)> cb;
+	};
+
+	// 一个事件名可挂多个回调，按注册顺序派发
+	std::unordered_map<std::string, std::vector<Slot>> events;
+	size_t nextId{ 0 };   // 每实例独立的 id 计数器
 };
 

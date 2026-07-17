@@ -4,7 +4,7 @@
 #include "Node.h"
 #include "EventArg.h"
 #include "MouseEventArg.h"
-WindowBase::WindowBase() :compositor{ Composition::Compositor() }
+WindowBase::WindowBase() :Event(), compositor{ Composition::Compositor() }
 {
     dpi = static_cast<float>(GetDpiForSystem()) / 96.f;
 }
@@ -298,8 +298,11 @@ void WindowBase::mouseMove(const float& x, const float& y)
     if (nodeHover) {
         auto leavePath = nodeHover->pathUpTo(lca);
         EventArg arg;
+        auto arg2{ false };
         for (auto* node : leavePath) {
             node->mouseLeave(arg);
+            node->emit("mouseLeave", &arg2);
+            if (arg2) break;
             if (arg.stopPopup) break;
         }
     }
@@ -307,10 +310,13 @@ void WindowBase::mouseMove(const float& x, const float& y)
     if (nodeHover) {
         auto enterPath = nodeHover->pathUpTo(lca);
         std::reverse(enterPath.begin(), enterPath.end());
-        MouseEventArg arg(x, y, false);
-        for (auto* node : enterPath) {
-            node->mouseEnter(arg);
-            if (arg.stopPopup) break;
+        //MouseEventArg arg(x, y, false);
+        for (auto node : enterPath) {
+            //node->mouseEnter(arg);
+            auto arg2 = std::make_tuple(x, y, false,node);
+            node->emit("mouseEnter", &arg2);
+            if (std::get<2>(arg2)) break;
+            //if (arg.stopPopup) break;
         }
     }
 }
@@ -372,17 +378,17 @@ void WindowBase::sizeChange(WPARAM wParam, LPARAM lParam)
 {
     if (wParam == SIZE_MINIMIZED) {
         mouseLeave();
-        onMinimize();
+        emit("minimize", nullptr);
         return;
     }
     if (wParam == SIZE_MAXIMIZED) {
         wasMaximized = true;
-        onMaximize();
+        emit("maximize", nullptr);
     }
     else if (wParam == SIZE_RESTORED) {
         if (wasMaximized) {
             wasMaximized = false;
-            onRestore();
+            emit("restore", nullptr);
         }
     }
     w = static_cast<float>(GET_X_LPARAM(lParam));

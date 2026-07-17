@@ -37,14 +37,6 @@ void WindowMain::onCreated()
     root->setBackgroundColor(0xFFFFFFFF);
     TitleBar::init(this);
 }
-void WindowMain::onMaximize()
-{
-
-}
-void WindowMain::onRestore()
-{
-
-}
 void WindowMain::onMouseWheel(const float& x, const float& y, const short& delta)
 {
     //for (auto& item : elements) item->onMouseWheel(x, y, delta);
