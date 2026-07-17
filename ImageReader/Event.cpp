@@ -93,6 +93,7 @@ void Event::offSizeChange(const size_t& callbackId)
 
 void Event::mouseEnter(MouseEventArg& arg)
 {
+	isHover = true;
 	arg.target = this;
 	for (const auto& pair : mouseEnterCBs) {
 		pair.second(arg);
@@ -101,6 +102,7 @@ void Event::mouseEnter(MouseEventArg& arg)
 
 void Event::mouseLeave(EventArg& arg)
 {
+	isHover = false;
 	arg.target = this;
 	for (const auto& pair : mouseLeaveCBs) {
 		pair.second(arg);

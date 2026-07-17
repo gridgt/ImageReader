@@ -30,6 +30,8 @@ public:
 	void mouseUp(MouseEventArg& arg);
 	void shown(EventArg& arg);
 	void sizeChange(EventArg& arg);
+public:
+	bool isHover{ false };
 protected:
 
 private:

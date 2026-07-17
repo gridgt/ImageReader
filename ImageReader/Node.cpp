@@ -31,6 +31,14 @@ void Node::initSurface()
     visual.Brush(brush);
 }
 
+void Node::resizeSurface()
+{
+    auto sz = visual.Size();
+    int pw = sz.x * win->dpi;
+    int ph = sz.y * win->dpi;
+    surface.Resize({ pw,ph });
+}
+
 bool Node::isPosIn(float x, float y)
 {
     if (!visual.IsVisible()) return false;
@@ -83,6 +91,7 @@ std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawin
     ComPtr<ID2D1DeviceContext> d2d;
     POINT offset{};
     HRESULT hr = surfaceInterop->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(d2d.GetAddressOf()), &offset);
+    d2d->SetDpi(96.f * win->dpi, 96.f * win->dpi);
     auto trans = D2D1::Matrix3x2F::Translation(static_cast<float>(offset.x), static_cast<float>(offset.y));
     d2d->SetTransform(trans);
     d2d->Clear(0);
@@ -92,8 +101,10 @@ std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawin
 void Node::sizeChange()
 {
     EventArg arg;
+    arg.target = this;
     Event::sizeChange(arg);
     if (parent) {
+        // visual.Offset / visual.Size 是逻辑像素（DIPs）
         auto pos = visual.Offset();
         absX = parent->absX + pos.x;
         absY = parent->absY + pos.y;
@@ -102,6 +113,7 @@ void Node::sizeChange()
         absH = size.y;
     }
     else {
+        // root：win->w/h 现在也是逻辑像素
         absX = x;
         absY = y;
         absW = win->w;

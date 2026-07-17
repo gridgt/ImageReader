@@ -1,12 +1,12 @@
-#pragma once
+﻿#pragma once
 #include "EventArg.h"
 class MouseEventArg : public EventArg
 {
 public:
-	MouseEventArg(const int& x,const int& y,bool isRight);
+	MouseEventArg(const float& x, const float& y, bool isRight);
 	~MouseEventArg();
 public:
-	int x, y;
+	float x, y;      // 逻辑像素（DIPs）
 	bool isRight;
 };
 

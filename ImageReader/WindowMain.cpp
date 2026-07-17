@@ -37,7 +37,7 @@ void WindowMain::onCreated()
     root->setBackgroundColor(0xFFFFFFFF);
     TitleBar::init(this);
 }
-void WindowMain::onMouseWheel(const int& x, const int& y, const short& delta)
+void WindowMain::onMouseWheel(const float& x, const float& y, const short& delta)
 {
     //for (auto& item : elements) item->onMouseWheel(x, y, delta);
 }
@@ -49,9 +49,10 @@ void WindowMain::onTimer(const UINT& timerId)
 }
 
 
-LRESULT WindowMain::onHitTest(const int& x, const int& y)
+LRESULT WindowMain::onHitTest(const float& x, const float& y)
 {
-    if (x < w - 80 * dpi && y < 48 * dpi) {
+    // 三个按钮各 32 逻辑宽，共 96；标题栏拖动区截止到按钮左边界
+    if (x < w - 96 && y < 48) {
         return HTCAPTION;
     }
     else {

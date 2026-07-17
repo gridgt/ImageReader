@@ -28,7 +28,8 @@ public:
 	float getScaleFactor();
 	void setPosScreenCenter();
 public:
-	int x, y, w, h;
+	int x{ 0 }, y{ 0 };      // 屏幕坐标：物理像素
+	float w{ 0 }, h{ 0 };    // 客户区大小：逻辑像素（DIPs）
 	float dpi{ 1.0 };
 	HWND hwnd{ nullptr };
 	std::wstring title;
@@ -38,8 +39,8 @@ protected:
 	virtual void onCreated() {};
 	virtual void onShown() {};
 	virtual void onHidden();
-	virtual LRESULT onHitTest(const int& x, const int& y) { return HTCLIENT; };
-	virtual void onMouseWheel(const int& x, const int& y, const short& delta) {};
+	virtual LRESULT onHitTest(const float& x, const float& y) { return HTCLIENT; };
+	virtual void onMouseWheel(const float& x, const float& y, const short& delta) {};
 	virtual void onKeyDown(const UINT& key) {};
 	virtual void onKeyUp() {};
 	virtual void onChar(const UINT& ch) {};
@@ -53,10 +54,10 @@ protected:
 private:
 	std::wstring& getWinClsName();
 	static LRESULT CALLBACK winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	void mouseMove(const int& x, const int& y);
+	void mouseMove(const float& x, const float& y);
 	void mouseLeave();
-	void mouseDown(const int& x, const int& y, bool isRight);
-	void mouseUp(const int& x, const int& y, bool isRight);
+	void mouseDown(const float& x, const float& y, bool isRight);
+	void mouseUp(const float& x, const float& y, bool isRight);
 	void paint();
 	void dpiChange(WPARAM wParam, LPARAM lParam);
 	void sizeChange(const int& w, const int& h);

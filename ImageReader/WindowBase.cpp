@@ -47,9 +47,12 @@ void WindowBase::move(const int& x, const int& y)
 
 void WindowBase::resize(const int& w, const int& h)
 {
-    this->w = w*dpi;
-    this->h = h*dpi;
-    SetWindowPos(hwnd, nullptr, 0, 0, this->w, this->h, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREDRAW);
+    // 入参：逻辑像素；字段：逻辑像素；SetWindowPos：物理像素
+    this->w = static_cast<float>(w);
+    this->h = static_cast<float>(h);
+    SetWindowPos(hwnd, nullptr, 0, 0,
+        static_cast<int>(w * dpi), static_cast<int>(h * dpi),
+        SWP_NOMOVE | SWP_NOZORDER | SWP_NOREDRAW);
 }
 
 
@@ -98,8 +101,9 @@ std::tuple<float, float> WindowBase::getSize()
 }
 void WindowBase::setSize(const float& w, const float& h)
 {
-    this->w = w*dpi;
-    this->h = h*dpi;
+    // 存逻辑像素
+    this->w = w;
+    this->h = h;
 }
 
 void WindowBase::setPosition(const int& x, const int& y)
@@ -117,15 +121,28 @@ float WindowBase::getScaleFactor()
 }
 void WindowBase::setPosScreenCenter()
 {
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-    x = (screenWidth - w) / 2;
-    y = (screenHeight - h) / 2;
+    RECT workArea;
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+
+    int workWidth = workArea.right - workArea.left;
+    int workHeight = workArea.bottom - workArea.top;
+
+    // 工作区左上角偏移（处理多显示器时主屏可能不在 (0,0) 的情况）
+    int workLeft = workArea.left;
+    int workTop = workArea.top;
+
+    // w/h 是逻辑尺寸，屏幕坐标需要乘以 DPI
+    x = workLeft + static_cast<int>((workWidth - w * dpi) / 2);
+    y = workTop + static_cast<int>((workHeight - h * dpi) / 2);
 }
 
 void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
 {
-    hwnd = CreateWindowEx(WS_EX_NOREDIRECTIONBITMAP | exStyle, getWinClsName().data(), title.data(), style, x, y, w, h, NULL, NULL, GetModuleHandle(nullptr), NULL); //WS_POPUP
+    // CreateWindowEx 用物理像素
+    hwnd = CreateWindowEx(WS_EX_NOREDIRECTIONBITMAP | exStyle, getWinClsName().data(), title.data(), style,
+        x, y,
+        static_cast<int>(w * dpi), static_cast<int>(h * dpi),
+        NULL, NULL, GetModuleHandle(nullptr), NULL); //WS_POPUP
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
     auto interop = compositor.as<ABI::Windows::UI::Composition::Desktop::ICompositorDesktopInterop>();
     auto r = reinterpret_cast<ABI::Windows::UI::Composition::Desktop::IDesktopWindowTarget**>(winrt::put_abi(winTarget));
@@ -134,7 +151,9 @@ void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
     root = std::make_unique<Node>(this);
     winTarget.Root(root->visual);
     root->visual.Offset({ 0.f,0.f,0.f });
-    root->visual.RelativeSizeAdjustment({ 1.f,1.f });   
+    // 关键：合成器坐标系是物理像素；用 Scale=dpi 让子树都工作在逻辑坐标下
+    root->visual.Scale({ dpi, dpi, 1.f });
+    root->visual.Size({ w, h });    // 逻辑
     onCreated();
     root->sizeChange();
 }
@@ -177,7 +196,10 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
     else if (msg == WM_NCHITTEST) {
-        return self->onHitTest(GET_X_LPARAM(lParam) - self->x, GET_Y_LPARAM(lParam) - self->y);
+        // WM_NCHITTEST 的坐标是屏幕坐标（物理），减去窗口位置后转成逻辑
+        float lx = (GET_X_LPARAM(lParam) - self->x) / self->dpi;
+        float ly = (GET_Y_LPARAM(lParam) - self->y) / self->dpi;
+        return self->onHitTest(lx, ly);
     }
     else if (msg == WM_ERASEBKGND) {
         return 1;
@@ -194,19 +216,19 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if (LOWORD(lParam) == HTCLIENT) return self->setCursor();
     }
     else if (msg == WM_RBUTTONDOWN) {
-        self->mouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), true);
+        self->mouseDown(GET_X_LPARAM(lParam) / self->dpi, GET_Y_LPARAM(lParam) / self->dpi, true);
     }
     else if (msg == WM_RBUTTONUP) {
-        self->mouseUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), true);
+        self->mouseUp(GET_X_LPARAM(lParam) / self->dpi, GET_Y_LPARAM(lParam) / self->dpi, true);
     }
     else if (msg == WM_LBUTTONDOWN) {
-        self->mouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), false);
+        self->mouseDown(GET_X_LPARAM(lParam) / self->dpi, GET_Y_LPARAM(lParam) / self->dpi, false);
     }
     else if (msg == WM_LBUTTONUP) {
-        self->mouseUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),false);
+        self->mouseUp(GET_X_LPARAM(lParam) / self->dpi, GET_Y_LPARAM(lParam) / self->dpi, false);
     }
     else if (msg == WM_MOUSEMOVE) {
-        self->mouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        self->mouseMove(GET_X_LPARAM(lParam) / self->dpi, GET_Y_LPARAM(lParam) / self->dpi);
     }
     else if (msg == WM_MOUSELEAVE) {
         self->mouseLeave();
@@ -215,7 +237,7 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     else if (msg == WM_MOUSEWHEEL) {
         POINT pt{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         ScreenToClient(hwnd, &pt);
-        self->onMouseWheel(pt.x, pt.y, (short)HIWORD(wParam));
+        self->onMouseWheel(pt.x / self->dpi, pt.y / self->dpi, (short)HIWORD(wParam));
         return 0;
     }
     else if (msg == WM_KEYDOWN) {
@@ -252,7 +274,7 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void WindowBase::mouseMove(const int& x, const int& y)
+void WindowBase::mouseMove(const float& x, const float& y)
 {
     if (!isMouseIn) {
         isMouseIn = true;
@@ -304,7 +326,7 @@ void WindowBase::mouseLeave()
     nodeHover = nullptr;
 }
 
-void WindowBase::mouseDown(const int& x, const int& y, bool isRight)
+void WindowBase::mouseDown(const float& x, const float& y, bool isRight)
 {
     if (!nodeHover) return;
     auto path = nodeHover->pathUpTo(nullptr);
@@ -315,7 +337,7 @@ void WindowBase::mouseDown(const int& x, const int& y, bool isRight)
     }
 }
 
-void WindowBase::mouseUp(const int& x, const int& y, bool isRight)
+void WindowBase::mouseUp(const float& x, const float& y, bool isRight)
 {
     if (!nodeHover) return;
     auto path = nodeHover->pathUpTo(nullptr);
@@ -330,6 +352,9 @@ void WindowBase::dpiChange(WPARAM wParam, LPARAM lParam)
 {
     const UINT newDPI = HIWORD(wParam);
     dpi = newDPI / 96.f;
+    if (root) {
+        root->visual.Scale({ dpi, dpi, 1.f });
+    }
     RECT* prcNewWindow = reinterpret_cast<RECT*>(lParam);
     auto w{ prcNewWindow->right - prcNewWindow->left };
     auto h{ prcNewWindow->bottom - prcNewWindow->top };
@@ -341,8 +366,12 @@ void WindowBase::dpiChange(WPARAM wParam, LPARAM lParam)
 
 void WindowBase::sizeChange(const int& w, const int& h)
 {
-    this->w = w;
-    this->h = h;
+    // WM_SIZE 给的是客户区物理像素，转为逻辑存储
+    this->w = w / dpi;
+    this->h = h / dpi;
+    if (root) {
+        root->visual.Size({ this->w, this->h });   // root 用逻辑尺寸，Scale=dpi 会缩放到窗口的物理大小
+    }
     root->sizeChange();
 }
 void WindowBase::positionChange(const int& x, const int& y)

@@ -11,10 +11,10 @@ public:
 public:
 private:
 	WindowMain();
-	void onCreated() override;	
-	void onMouseWheel(const int& x, const int& y, const short& delta) override;
+	void onCreated() override;
+	void onMouseWheel(const float& x, const float& y, const short& delta) override;
 	void onTimer(const UINT& timerId) override;
-	LRESULT onHitTest(const int& x, const int& y) override;
+	LRESULT onHitTest(const float& x, const float& y) override;
 	BOOL setCursor() override;
 private:
 	Composition::CompositionDrawingSurface surface{ nullptr };
