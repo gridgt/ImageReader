@@ -5,19 +5,17 @@
 #include "Util.h"
 #include "Tip.h"
 #include "TitleBar.h"
+#include "Loader.h"
 #include "WebSocket.h"
 
 namespace {
-    static std::unique_ptr<WindowMain> win;
+    static std::unique_ptr<WindowMain> ins;
 }
 WindowMain::WindowMain() :WindowBase()
 {
     setTitle(L"图像文字识别工具");
     setSize(800, 600);
     setPosScreenCenter();
-    createNativeWindow(0, WS_POPUP | WS_MAXIMIZEBOX | WS_MINIMIZEBOX); //必须先创建窗口，再创建元素
-    enableShadow();
-    show();
 }
 
 WindowMain::~WindowMain()
@@ -26,26 +24,20 @@ WindowMain::~WindowMain()
 void WindowMain::init()
 {
     auto ptr = new WindowMain();
-    win.reset(ptr);
+    ins.reset(ptr);
+    ptr->createNativeWindow(0, WS_POPUP | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
+    ptr->enableShadow();
+    ptr->show();
 }
 WindowMain* WindowMain::get()
 {
-    return win.get();
+    return ins.get();
 }
 void WindowMain::onCreated()
 {
     root->setBackgroundColor(0xFFFFFFFF);
     TitleBar::init(this);
-}
-void WindowMain::onMouseWheel(const float& x, const float& y, const short& delta)
-{
-    //for (auto& item : elements) item->onMouseWheel(x, y, delta);
-}
-
-void WindowMain::onTimer(const UINT& timerId)
-{
-    if (timerId == 66) {
-    }
+    Loader::init(this);
 }
 
 void WindowMain::onMinMaxInfo(MINMAXINFO* mmi)

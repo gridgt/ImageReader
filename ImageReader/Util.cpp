@@ -22,3 +22,5 @@ bool Util::isWin11()
     }
     return false;
 }
+
+

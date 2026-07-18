@@ -36,7 +36,7 @@ void Node::setPosSize(const float& x, const float& y, const float& w, const floa
     visual.Offset({ x,y,0.f });
     visual.Size({ w,h });
     if (surface) {
-        surface.Resize({ static_cast<int>(w), static_cast<int>(h) });
+        surface.Resize({ static_cast<int>(w), static_cast<int>(h) }); //todo 尺寸没变就跳过
     }
 }
 
