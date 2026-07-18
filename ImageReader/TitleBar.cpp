@@ -8,13 +8,11 @@ static std::unique_ptr<TitleBar> ins;
 
 TitleBar::TitleBar(WindowBase* win)
 {
-	win->on("maximize", [this](void* ptr) {
-		auto a = 1;
-		});
-
+	win->on("maximize", [this](void* ptr) { this->onMaximize(); });
+	win->on("restore", [this](void* ptr) { this->onRestore(); });
 	auto d2d = D2D::get();
 	bar = win->root->createChild("titleBar");
-	bar->onSizeChange([this](auto& e) {this->onBarSize(e);});
+	bar->on("sizeChange", [this](void* e) {this->onBarSize(e);});
 	bar->initSurface();
 	title = d2d->createTextLayout(win->title, FLT_MAX, FLT_MAX);
 
@@ -24,11 +22,10 @@ TitleBar::TitleBar(WindowBase* win)
 	{
 		auto id = std::format("btn{}", i);
 		auto btn = bar->createChild(id);
-		btn->onSizeChange([this](auto& e) {this->onSize(e);});
-		//btn->onMouseEnter([this](auto& e) {this->onEnter(e);});
+		btn->on("sizeChange", [this](void* e) {this->onSize(e);});
 		btn->on("mouseEnter", [this](void* e) {this->onEnter(e);});
-		btn->onMouseLeave([this](auto& e) {this->onLeave(e);});
-		btn->onMouseDown([this](auto& e) {this->onDown(e);});
+		btn->on("mouseLeave", [this](void* e) {this->onLeave(e);});
+		btn->on("mouseDown", [this](void* e) {this->onDown(e);});
 		btn->initSurface();
 		btn->cursor = handCursor;
 		btns.push_back(btn);
@@ -48,7 +45,7 @@ TitleBar::TitleBar(WindowBase* win)
 	}
 }
 
-void TitleBar::onBarSize(const EventArg& e)
+void TitleBar::onBarSize(void* e)
 {
 	auto& dpi = bar->win->dpi;
 	auto h{ 30.f * dpi };
@@ -74,9 +71,9 @@ TitleBar* TitleBar::get()
 {
 	return ins.get();
 }
-void TitleBar::onSize(const EventArg& e)
+void TitleBar::onSize(void* e)
 {
-	auto btn = dynamic_cast<Node*>(e.target);
+	auto btn = static_cast<Node*>(e);
 	auto it = std::find(btns.begin(), btns.end(), btn);
 	size_t index = std::distance(btns.begin(), it);
 	auto win = btn->win;
@@ -92,24 +89,24 @@ void TitleBar::onSize(const EventArg& e)
 
 void TitleBar::onEnter(void* e)
 {
-	auto tuplePtr = static_cast<std::tuple<float, float, bool, Node*>*>(e);
-	auto btn = std::get<3>(*tuplePtr);
-	//auto btn = dynamic_cast<Node*>(e.target);
+	auto tuplePtr = static_cast<std::tuple<float, float, Node*>*>(e);
+	auto btn = std::get<2>(*tuplePtr);
 	auto it = std::find(btns.begin(), btns.end(), btn);
 	hoverIndex = std::distance(btns.begin(), it);
 	paint(btn);
 }
 
-void TitleBar::onLeave(const EventArg& e)
+void TitleBar::onLeave(void* e)
 {
-	auto btn = dynamic_cast<Node*>(e.target);
+	auto btn = static_cast<Node*>(e);
 	hoverIndex = -1;
 	paint(btn);
 }
 
-void TitleBar::onDown(const MouseEventArg& e)
+void TitleBar::onDown(void* e)
 {
-	auto btn = dynamic_cast<Node*>(e.target);
+	auto tuplePtr = static_cast<std::tuple<float, float,bool, Node*>*>(e);
+	auto btn = std::get<3>(*tuplePtr);
 	auto it = std::find(btns.begin(), btns.end(), btn);
 	size_t index = std::distance(btns.begin(), it);
 	auto win = btn->win;
@@ -170,4 +167,20 @@ void TitleBar::paintBar()
 	d2d->CreateSolidColorBrush(ColorA(0x666666FF).getD2DColor(), textBrush.GetAddressOf());
 	d2d->DrawTextLayout(titlePos, title.Get(), textBrush.Get());
 	s->EndDraw();
+}
+
+void TitleBar::onMaximize()
+{
+	auto d2d = D2D::get();
+	auto icon = d2d->createTextLayout(L"\ue6e9", FLT_MAX, FLT_MAX);
+	icon->SetFontFamilyName(L"icon", { 0,INT_MAX });
+	icons[1] = icon;
+}
+
+void TitleBar::onRestore()
+{
+	auto d2d = D2D::get();
+	auto icon = d2d->createTextLayout(L"\ue6e5", FLT_MAX, FLT_MAX);
+	icon->SetFontFamilyName(L"icon", { 0,INT_MAX });
+	icons[1] = icon;
 }

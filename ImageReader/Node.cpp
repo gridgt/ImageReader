@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "D2D.h"
 #include "Node.h"
-#include "EventArg.h"
 #include "WindowBase.h"
 
 Node::Node(WindowBase* win, const std::string& id) :Event(), win{win}, id{id}
@@ -102,9 +101,7 @@ std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawin
 
 void Node::sizeChange()
 {
-    EventArg arg;
-    arg.target = this;
-    Event::sizeChange(arg);
+    emit("sizeChange", this);
     if (parent) {
         // visual.Offset / visual.Size 是物理像素
         auto pos = visual.Offset();

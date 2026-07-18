@@ -155,8 +155,6 @@
     <ClCompile Include="ColorA.cpp" />
     <ClCompile Include="D2D.cpp" />
     <ClCompile Include="Event.cpp" />
-    <ClCompile Include="EventArg.cpp" />
-    <ClCompile Include="MouseEventArg.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
@@ -174,8 +172,6 @@
     <ClInclude Include="ColorA.h" />
     <ClInclude Include="D2D.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="EventArg.h" />
-    <ClInclude Include="MouseEventArg.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Tip.h" />

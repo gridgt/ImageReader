@@ -1,8 +1,6 @@
 #pragma once
 #include "pch.h"
 #include "Node.h"
-#include "EventArg.h"
-#include "MouseEventArg.h"
 class WindowBase;
 class TitleBar
 {
@@ -12,13 +10,15 @@ public:
 	static TitleBar* get();
 private:
 	TitleBar(WindowBase* win);
-	void onBarSize(const EventArg& e);
-	void onSize(const EventArg& e);
+	void onBarSize(void* e);
+	void onSize(void* e);
 	void onEnter(void* e);
-	void onLeave(const EventArg& e);
-	void onDown(const MouseEventArg& e);
+	void onLeave(void* e);
+	void onDown(void* e);
 	void paint(Node* btn);
 	void paintBar();
+	void onMaximize();
+	void onRestore();
 private:
 	Node* bar;
 	ComPtr<IDWriteTextLayout> title;

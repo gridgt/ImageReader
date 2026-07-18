@@ -2,8 +2,6 @@
 #include "WindowBase.h"
 #include "D2D.h"
 #include "Node.h"
-#include "EventArg.h"
-#include "MouseEventArg.h"
 WindowBase::WindowBase() :Event(), compositor{ Composition::Compositor() }
 {
     dpi = static_cast<float>(GetDpiForSystem()) / 96.f;
@@ -297,26 +295,26 @@ void WindowBase::mouseMove(const float& x, const float& y)
     auto lca = hit->findLCA(nodeHover); //找最近公共祖先
     if (nodeHover) {
         auto leavePath = nodeHover->pathUpTo(lca);
-        EventArg arg;
-        auto arg2{ false };
         for (auto* node : leavePath) {
-            node->mouseLeave(arg);
-            node->emit("mouseLeave", &arg2);
-            if (arg2) break;
-            if (arg.stopPopup) break;
+            node->stopEventPopup = false;
+            node->emit("mouseLeave", node);
+            if (node->stopEventPopup) {
+                node->stopEventPopup = false;
+                break;
+            }
         }
     }
     nodeHover = hit;
     if (nodeHover) {
-        auto enterPath = nodeHover->pathUpTo(lca);
-        std::reverse(enterPath.begin(), enterPath.end());
-        //MouseEventArg arg(x, y, false);
+        auto enterPath = nodeHover->pathUpTo(lca); 
         for (auto node : enterPath) {
-            //node->mouseEnter(arg);
-            auto arg2 = std::make_tuple(x, y, false,node);
-            node->emit("mouseEnter", &arg2);
-            if (std::get<2>(arg2)) break;
-            //if (arg.stopPopup) break;
+            node->stopEventPopup = false;
+            auto arg = std::make_tuple(x, y, node);
+            node->emit("mouseEnter", &arg);
+            if (node->stopEventPopup) {
+                node->stopEventPopup = false;
+                break;
+            }
         }
     }
 }
@@ -329,11 +327,14 @@ void WindowBase::mouseLeave()
     tme.hwndTrack = hwnd;
     TrackMouseEvent(&tme);
     if (nodeHover) {
-        EventArg arg;
         auto path = nodeHover->pathUpTo(nullptr); // 冒泡到根
         for (auto* node : path) {
-            node->mouseLeave(arg);
-            if (arg.stopPopup) break;
+            node->stopEventPopup = false;
+            node->emit("mouseLeave", node);
+            if (node->stopEventPopup) {
+                node->stopEventPopup = false;
+                break;
+            }
         }
     }
     nodeHover = nullptr;
@@ -343,10 +344,14 @@ void WindowBase::mouseDown(const float& x, const float& y, bool isRight)
 {
     if (!nodeHover) return;
     auto path = nodeHover->pathUpTo(nullptr);
-    MouseEventArg arg(x, y, isRight);
     for (auto* node : path) {
-        node->mouseDown(arg);
-        if (arg.stopPopup) break;
+        node->stopEventPopup = false;
+        auto arg = std::make_tuple(x, y, isRight, node);
+        node->emit("mouseDown", &arg);
+        if (node->stopEventPopup) {
+            node->stopEventPopup = false;
+            break;
+        }
     }
 }
 
@@ -354,10 +359,14 @@ void WindowBase::mouseUp(const float& x, const float& y, bool isRight)
 {
     if (!nodeHover) return;
     auto path = nodeHover->pathUpTo(nullptr);
-    MouseEventArg arg(x, y, isRight);
     for (auto* node : path) {
-        node->mouseUp(arg);
-        if (arg.stopPopup) break;
+        node->stopEventPopup = false;
+        auto arg = std::make_tuple(x, y, isRight, node);
+        node->emit("mouseUp", &arg);
+        if (node->stopEventPopup) {
+            node->stopEventPopup = false;
+            break;
+        }
     }
 }
 

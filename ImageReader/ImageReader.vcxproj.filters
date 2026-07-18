@@ -48,12 +48,6 @@
     <ClCompile Include="Event.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EventArg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MouseEventArg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="TitleBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -87,12 +81,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Event.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="EventArg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MouseEventArg.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TitleBar.h">

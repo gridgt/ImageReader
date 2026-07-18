@@ -49,6 +49,7 @@ public:
 	std::vector<std::unique_ptr<Node>> children;
 	Composition::CompositionDrawingSurface surface{ nullptr };
 	HCURSOR cursor{ nullptr };   // nullptr = 继承父节点/窗口默认
+	bool stopEventPopup{false};
 protected:
 protected:
 	float x, y, w, h;
