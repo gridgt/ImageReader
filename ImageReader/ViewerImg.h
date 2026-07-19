@@ -12,7 +12,7 @@ private:
 	ViewerImg(WindowBase* win, const std::wstring& path);
 	void onSize(void* e);
 	void onDown(void* e);
-	void paint();
+	void onPaint(void* e);
 private:
 	D2D1_POINT_2F pos;
 	bool isHover{false};

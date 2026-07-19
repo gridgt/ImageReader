@@ -27,6 +27,7 @@ TitleBar::TitleBar(WindowBase* win)
 		btn->on("mouseEnter", [this](void* e) {this->onEnter(e);});
 		btn->on("mouseLeave", [this](void* e) {this->onLeave(e);});
 		btn->on("mouseDown", [this](void* e) {this->onDown(e);});
+		btn->on("paint", [this](void* e) {this->onBtnPaint(e);});
 		btn->initSurface();
 		btn->cursor = handCursor;
 		btns.push_back(btn);
@@ -85,7 +86,7 @@ void TitleBar::onSize(void* e)
 	icons[index]->GetMetrics(&metrics);
 	poss[index].x = (btnW - metrics.width) / 2;
 	poss[index].y = (btnH - metrics.height) / 2;
-	paint(btn);
+	btn->paint();
 }
 
 void TitleBar::onEnter(void* e)
@@ -94,14 +95,14 @@ void TitleBar::onEnter(void* e)
 	auto btn = std::get<2>(*tuplePtr);
 	auto it = std::find(btns.begin(), btns.end(), btn);
 	hoverIndex = std::distance(btns.begin(), it);
-	paint(btn);
+	btn->paint();
 }
 
 void TitleBar::onLeave(void* e)
 {
 	auto btn = static_cast<Node*>(e);
 	hoverIndex = -1;
-	paint(btn);
+	btn->paint();
 }
 
 void TitleBar::onDown(void* e)
@@ -127,9 +128,10 @@ void TitleBar::onDown(void* e)
 	}
 }
 
-void TitleBar::paint(Node* btn)
+void TitleBar::onBtnPaint(void* e)
 {
-	auto [s, d2d] = btn->paintStart();
+	auto tuplePtr = static_cast<std::tuple<Node*, ID2D1DeviceContext*>*>(e);
+	auto [btn, ctx] = *tuplePtr;
 	auto it = std::find(btns.begin(), btns.end(), btn);
 	size_t index = std::distance(btns.begin(), it);
 	if (index == hoverIndex) {
@@ -137,8 +139,8 @@ void TitleBar::paint(Node* btn)
 		D2D1_RECT_F rr = { 0,0,size.Width,size.Height };
 		ComPtr<ID2D1SolidColorBrush> bgBrush;
 		ColorA color(index == 2 ? 0xE81123FF : 0xE0E0E0FF);
-		d2d->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
-		d2d->FillRectangle(rr, bgBrush.Get());
+		ctx->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
+		ctx->FillRectangle(rr, bgBrush.Get());
 	}
 	uint32_t colorVal{ 0x888888ff };
 	if (index == hoverIndex) {
@@ -151,9 +153,8 @@ void TitleBar::paint(Node* btn)
 	}
 	ComPtr<ID2D1SolidColorBrush> textBrush;
 	ColorA color(colorVal);
-	d2d->CreateSolidColorBrush(color.getD2DColor(), textBrush.GetAddressOf());
-	d2d->DrawTextLayout(poss[index], icons[index].Get(), textBrush.Get());
-	s->EndDraw();
+	ctx->CreateSolidColorBrush(color.getD2DColor(), textBrush.GetAddressOf());
+	ctx->DrawTextLayout(poss[index], icons[index].Get(), textBrush.Get());
 }
 
 void TitleBar::onPaint(void* e)

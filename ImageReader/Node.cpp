@@ -101,19 +101,6 @@ bool Node::isVisible()
     return visual.IsVisible();
 }
 
-std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>, ComPtr<ID2D1DeviceContext>> Node::paintStart()
-{
-    auto s = surface.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
-    ComPtr<ID2D1DeviceContext> ctx;
-    POINT offset{};   // 物理像素
-    HRESULT hr = s->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(ctx.GetAddressOf()), &offset);
-    // 全程使用物理像素，不调 SetDpi
-    auto trans = D2D1::Matrix3x2F::Translation(static_cast<float>(offset.x), static_cast<float>(offset.y));
-    ctx->SetTransform(trans);
-    ctx->Clear(0);
-    return { s ,ctx };
-}
-
 void Node::sizeChange()
 {
     emit("sizeChange", this);

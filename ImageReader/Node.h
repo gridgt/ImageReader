@@ -30,7 +30,6 @@ public:
 	/// 从 node 向上到 stopAt（不含），收集祖先链表
 	/// </summary>
 	std::vector<Node*> pathUpTo(Node* stopAt);
-	std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>, ComPtr<ID2D1DeviceContext>> paintStart();
 public:
 	WindowBase* win;
 	std::string id;	

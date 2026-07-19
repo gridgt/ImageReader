@@ -17,6 +17,7 @@ ViewerImg::ViewerImg(WindowBase* win, const std::wstring& path)
 	node = win->root->createChild("viewer");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
+	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initSurface();
 	bitmap = D2D::get()->createBitmap(path);
 	onSize(nullptr);
@@ -33,7 +34,7 @@ void ViewerImg::init(WindowBase* win, const std::wstring& path)
 	}
 	else {
 		ins->bitmap = D2D::get()->createBitmap(path);
-		ins->paint();
+		ins->node->paint();
 	}
 }
 ViewerImg* ViewerImg::get()
@@ -47,21 +48,19 @@ void ViewerImg::onSize(void* e)
 	node->setPosSize(0.f, y, win->w, h);
 	pos.x = 0;
 	pos.y = 0;
-	paint();
+	node->paint();
 }
 
 void ViewerImg::onDown(void* e)
 {
 }
 
-void ViewerImg::paint()
+void ViewerImg::onPaint(void* e)
 {
-	auto [s, d2d] = node->paintStart();
-	if (bitmap.Get()) {
-		d2d->DrawImage(bitmap.Get(),pos, // targetOffset
-			D2D1_INTERPOLATION_MODE_LINEAR, // interpolationMode
-			D2D1_COMPOSITE_MODE_SOURCE_OVER // compositeMode
-		);
-	}
-	s->EndDraw();
+	auto tuplePtr = static_cast<std::tuple<Node*, ID2D1DeviceContext*>*>(e);
+	auto ctx = std::get<1>(*tuplePtr);
+	ctx->DrawImage(bitmap.Get(), pos, // targetOffset
+		D2D1_INTERPOLATION_MODE_LINEAR, // interpolationMode}
+		D2D1_COMPOSITE_MODE_SOURCE_OVER // compositeMode
+	);
 }
