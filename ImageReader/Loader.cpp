@@ -171,13 +171,15 @@ winrt::Windows::Foundation::IAsyncAction Loader::read()
 		//	<< "score: " << boxes[i].score << std::endl;
 		auto path = d2d->createPath(boxes[i].points);
 		pathes.push_back(std::move(path));
-		//auto wstr = Util::convertToWStr(lines[i].text);
+		auto wstr = Util::convertToWStr(lines[i].text);
+		log(wstr);
 		//writeConsoleW(L"Recognized Text: ");
 		//writeConsoleW(wstr);
 		//writeConsoleW(L"\n");
 		for (size_t j = 0; j < lines[i].anchor_count; j++)
 		{
 			auto anchors = lines[i].anchors[j];
+			log(L"pos:{}",anchors);
 			auto a = 1;
 			//writeConsoleW(std::to_wstring(lines[i].anchors[j]));
 			//writeConsoleW(L" ");
