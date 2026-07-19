@@ -16,11 +16,11 @@ private:
 	void onLeave(void* e);
 	void onDown(void* e);
 	void paint(Node* btn);
-	void paintBar();
+	void onPaint(void* e);
 	void onMaximize();
 	void onRestore();
 private:
-	Node* bar;
+	Node* node;
 	ComPtr<IDWriteTextLayout> title;
 	D2D1_POINT_2F titlePos;
 	std::vector<Node*> btns;

@@ -16,6 +16,7 @@ public:
 	Node* findLeafByPos(float x, float y);
 	void hide();
 	void show();
+	void paint();
 	void traverse(std::function<void(Node*)> visit);
 	void setBackgroundColor(const ColorA& color);
 	bool isVisible();

@@ -54,6 +54,9 @@
     <ClCompile Include="Loader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ViewerImg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -90,6 +93,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewerImg.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

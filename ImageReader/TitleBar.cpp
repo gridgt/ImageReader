@@ -11,9 +11,10 @@ TitleBar::TitleBar(WindowBase* win)
 	win->on("maximize", [this](void* ptr) { this->onMaximize(); });
 	win->on("restore", [this](void* ptr) { this->onRestore(); });
 	auto d2d = D2D::get();
-	bar = win->root->createChild("titleBar");
-	bar->on("sizeChange", [this](void* e) {this->onBarSize(e);});
-	bar->initSurface();
+	node = win->root->createChild("titleBar");
+	node->on("sizeChange", [this](void* e) {this->onBarSize(e);});
+	node->on("paint", [this](void* e) {this->onPaint(e);});
+	node->initSurface();
 	title = d2d->createTextLayout(win->title, FLT_MAX, FLT_MAX);
 
 	HCURSOR handCursor = LoadCursor(nullptr, IDC_HAND);
@@ -21,7 +22,7 @@ TitleBar::TitleBar(WindowBase* win)
 	for (size_t i = 0; i < 3; i++)
 	{
 		auto id = std::format("btn{}", i);
-		auto btn = bar->createChild(id);
+		auto btn = node->createChild(id);
 		btn->on("sizeChange", [this](void* e) {this->onSize(e);});
 		btn->on("mouseEnter", [this](void* e) {this->onEnter(e);});
 		btn->on("mouseLeave", [this](void* e) {this->onLeave(e);});
@@ -47,15 +48,15 @@ TitleBar::TitleBar(WindowBase* win)
 
 void TitleBar::onBarSize(void* e)
 {
-	auto& dpi = bar->win->dpi;
+	auto& dpi = node->win->dpi;
 	auto h{ 30.f * dpi };
-	bar->setPosSize(0.f, 0.f, (float)(bar->win->w), h);
+	node->setPosSize(0.f, 0.f, (float)(node->win->w), h);
 	title->SetFontSize(13.f * dpi, { 0,INT_MAX });
 	DWRITE_TEXT_METRICS metrics;
 	title->GetMetrics(&metrics);
 	titlePos.x = 12 * dpi;
 	titlePos.y = (h - metrics.height) / 2;
-	paintBar();
+	node->paint();
 }
 
 TitleBar::~TitleBar()
@@ -155,18 +156,18 @@ void TitleBar::paint(Node* btn)
 	s->EndDraw();
 }
 
-void TitleBar::paintBar()
+void TitleBar::onPaint(void* e)
 {
-	auto [s, d2d] = bar->paintStart();
-	auto size = bar->surface.Size();
+	auto tuplePtr = static_cast<std::tuple<Node*, ID2D1DeviceContext*>*>(e);
+	auto ctx = std::get<1>(*tuplePtr);
+	auto size = node->surface.Size();
 	D2D1_RECT_F r = { 0,0,size.Width,size.Height };
 	ComPtr<ID2D1SolidColorBrush> bgBrush;
-	d2d->CreateSolidColorBrush(ColorA(0xEEEEEEFF).getD2DColor(), bgBrush.GetAddressOf());
-	d2d->FillRectangle(r, bgBrush.Get());
+	ctx->CreateSolidColorBrush(ColorA(0xEEEEEEFF).getD2DColor(), bgBrush.GetAddressOf());
+	ctx->FillRectangle(r, bgBrush.Get());
 	ComPtr<ID2D1SolidColorBrush> textBrush;
-	d2d->CreateSolidColorBrush(ColorA(0x666666FF).getD2DColor(), textBrush.GetAddressOf());
-	d2d->DrawTextLayout(titlePos, title.Get(), textBrush.Get());
-	s->EndDraw();
+	ctx->CreateSolidColorBrush(ColorA(0x666666FF).getD2DColor(), textBrush.GetAddressOf());
+	ctx->DrawTextLayout(titlePos, title.Get(), textBrush.Get());
 }
 
 void TitleBar::onMaximize()

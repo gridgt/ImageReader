@@ -68,6 +68,21 @@ void Node::show()
     visual.IsVisible(true);
 }
 
+void Node::paint()
+{
+    auto s = surface.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
+    ComPtr<ID2D1DeviceContext> ctx;
+    POINT offset{};   // 物理像素
+    HRESULT hr = s->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(ctx.GetAddressOf()), &offset);
+    // 全程使用物理像素，不调 SetDpi
+    auto trans = D2D1::Matrix3x2F::Translation(static_cast<float>(offset.x), static_cast<float>(offset.y));
+    ctx->SetTransform(trans);
+    ctx->Clear(0);
+    auto arg = std::make_tuple<Node*, ID2D1DeviceContext*>(this, ctx.Get());
+    emit("paint", &arg);
+    s->EndDraw();
+}
+
 void Node::traverse(std::function<void(Node*)> visit)
 {
     visit(this);
@@ -88,15 +103,15 @@ bool Node::isVisible()
 
 std::pair<winrt::impl::com_ref<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>, ComPtr<ID2D1DeviceContext>> Node::paintStart()
 {
-    auto surfaceInterop = surface.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
-    ComPtr<ID2D1DeviceContext> d2d;
+    auto s = surface.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
+    ComPtr<ID2D1DeviceContext> ctx;
     POINT offset{};   // 物理像素
-    HRESULT hr = surfaceInterop->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(d2d.GetAddressOf()), &offset);
+    HRESULT hr = s->BeginDraw(nullptr, __uuidof(ID2D1DeviceContext), reinterpret_cast<void**>(ctx.GetAddressOf()), &offset);
     // 全程使用物理像素，不调 SetDpi
     auto trans = D2D1::Matrix3x2F::Translation(static_cast<float>(offset.x), static_cast<float>(offset.y));
-    d2d->SetTransform(trans);
-    d2d->Clear(0);
-    return { surfaceInterop ,d2d };
+    ctx->SetTransform(trans);
+    ctx->Clear(0);
+    return { s ,ctx };
 }
 
 void Node::sizeChange()

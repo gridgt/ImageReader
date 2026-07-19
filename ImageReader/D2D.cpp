@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "D2D.h"
+#include <wincodec.h>
 static std::unique_ptr<D2D> d2d;
 D2D::D2D()
 {
@@ -75,6 +76,7 @@ void D2D::initDevice()
 	if (FAILED(hr)) {
 		return;
 	}
+	hr = d2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE,deviceContext.GetAddressOf());
 }
 D2D::~D2D()
 {
@@ -120,4 +122,41 @@ void D2D::setEllipsis(IDWriteTextLayout* layout, const float& maxW,const float& 
 	hr = layout->SetTrimming(&trimming, pInlineObject.Get());
 	layout->SetMaxWidth(maxW);
 	layout->SetMaxHeight(maxH);
+}
+
+ComPtr<ID2D1Bitmap> D2D::createBitmap(const std::wstring& imgPath)
+{
+	ComPtr<IWICImagingFactory> wicFactory;
+	auto hr = CoCreateInstance(
+		CLSID_WICImagingFactory,
+		NULL,
+		CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(&wicFactory)
+	);
+	ComPtr<IWICBitmapDecoder> decoder;
+	hr = wicFactory->CreateDecoderFromFilename(imgPath.data(), nullptr,// 不指定特定解码器，让 WIC 自动匹配
+		GENERIC_READ,                     // 读取权限
+		WICDecodeMetadataCacheOnLoad,     // 加载时缓存元数据
+		&decoder
+	);
+	ComPtr<IWICBitmapFrameDecode> frame = nullptr;
+	hr = decoder->GetFrame(0, &frame);
+
+	ComPtr<IWICFormatConverter> converter = nullptr;
+	hr = wicFactory->CreateFormatConverter(&converter);
+	hr = converter->Initialize(
+		frame.Get(),
+		GUID_WICPixelFormat32bppPBGRA,
+		WICBitmapDitherTypeNone,
+		NULL,
+		0.f,
+		WICBitmapPaletteTypeMedianCut
+	);
+	ComPtr<ID2D1Bitmap> bitmap;
+	hr = deviceContext->CreateBitmapFromWicBitmap(
+		converter.Get(),
+		nullptr, // 使用默认位图属性
+		&bitmap
+	);
+	return bitmap;
 }

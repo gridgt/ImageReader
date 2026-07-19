@@ -4,16 +4,22 @@
 #include "WindowMain.h"
 #include "D2D.h"
 #include "Node.h"
+#include "tinyocr.h"
+#include <iostream>
+#include <fstream>
+#include <wincodec.h>
+#include "ViewerImg.h"
 
 static std::unique_ptr<Loader> ins;
 
 Loader::Loader(WindowBase* win)
 {
 	auto d2d = D2D::get();
-	loader = win->root->createChild("loader");
-	loader->on("sizeChange", [this](void* e) {this->onSize(e);});
-	loader->on("mouseDown", [this](void* e) {this->onDown(e);});
-	loader->initSurface();
+	node = win->root->createChild("loader");
+	node->on("sizeChange", [this](void* e) {this->onSize(e);});
+	node->on("mouseDown", [this](void* e) {this->onDown(e);});
+	node->on("paint", [this](void* e) {this->onPaint(e);});
+	node->initSurface();
 	text = d2d->createTextLayout(L"拖拽/点击加载图像", FLT_MAX, FLT_MAX);
 }
 
@@ -34,29 +40,63 @@ void Loader::onSize(void* e)
 {
 	auto win = WindowMain::get();
 	auto y{ 30.f * win->dpi }, h{ win->h - y - 22 * win->dpi };
-	loader->setPosSize(0.f, y, win->w, h);
+	node->setPosSize(0.f, y, win->w, h);
 	text->SetFontSize(26.f * win->dpi, {0,INT_MAX});
 	DWRITE_TEXT_METRICS metrics;
 	text->GetMetrics(&metrics);
 	textPos.x = (win->w - metrics.width) / 2;
 	textPos.y = (h - metrics.height) / 2;
-	paint();
+	node->paint();
 }
 
 void Loader::onDown(void* e)
 {
-	auto path = getFilePath();
+	auto imgPath = getFilePath();
+	if (imgPath.empty()) {
+		return;
+	}
+	node->hide();
+	ViewerImg::init(WindowMain::get(), imgPath);
+	return;
+
+	auto data = getFileData(imgPath);
+	if (data.empty()) {
+		return;
+	}
+	auto engine = tinyocr_engine_create();
+	tinyocr_ocr_model_paths_t paths = {
+	"./models/PP-OCRv6_tiny_det.param",
+	"./models/PP-OCRv6_tiny_det.bin",
+	"./models/PP-OCRv6_tiny_rec.param",
+	"./models/PP-OCRv6_tiny_rec.bin",
+	"./models/PP-OCRv6_vocab_tiny.txt",
+	"./models/PP-LCNet_x1_0_textline_ori.param",
+	"./models/PP-LCNet_x1_0_textline_ori.bin"
+	};
+	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
+		tinyocr_engine_destroy(engine);
+		return;
+	}
+	tinyocr_text_box_t* boxes = nullptr;
+	int box_count = 0;
+	tinyocr_text_line_t* lines = nullptr;
+	int line_count = 0;
+	if (tinyocr_engine_recognize_buffer(engine, data.data(), (int)data.size(), &boxes, &box_count, &lines, &line_count) != 0)
+	{
+		tinyocr_engine_destroy(engine);
+		return;
+	}
 	auto a = 1;
 }
 
-void Loader::paint()
+void Loader::onPaint(void* e)
 {
-	auto [s, d2d] = loader->paintStart();
+	auto tuplePtr = static_cast<std::tuple<Node*, ID2D1DeviceContext*>*>(e);
+	auto ctx = std::get<1>(*tuplePtr);
 	ComPtr<ID2D1SolidColorBrush> textBrush;
 	ColorA color(0xAAAAAAff);
-	d2d->CreateSolidColorBrush(color.getD2DColor(), textBrush.GetAddressOf());
-	d2d->DrawTextLayout(textPos, text.Get(), textBrush.Get());
-	s->EndDraw();
+	ctx->CreateSolidColorBrush(color.getD2DColor(), textBrush.GetAddressOf());
+	ctx->DrawTextLayout(textPos, text.Get(), textBrush.Get());
 }
 
 std::wstring Loader::getFilePath()
@@ -97,4 +137,20 @@ std::wstring Loader::getFilePath()
 	pItem->Release();
 	fileOpen->Release();
 	return result;
+}
+
+std::vector<unsigned char> Loader::getFileData(const std::wstring& filePath)
+{
+	std::vector<unsigned char> imgData;
+	auto ifs = std::ifstream(filePath, std::ios::binary);
+	if (!ifs.is_open()) {
+		return imgData;
+	}
+	ifs.seekg(0, std::ios::end);
+	size_t fileSize = ifs.tellg();
+	ifs.seekg(0, std::ios::beg);
+	imgData.resize(fileSize);
+	ifs.read(reinterpret_cast<char*>(imgData.data()), fileSize);
+	ifs.close();
+	return imgData;
 }
