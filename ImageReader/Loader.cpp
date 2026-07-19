@@ -4,11 +4,12 @@
 #include "WindowMain.h"
 #include "D2D.h"
 #include "Node.h"
-#include "tinyocr.h"
 #include <iostream>
 #include <fstream>
 #include <wincodec.h>
 #include "ViewerImg.h"
+#include "Util.h"
+#include "App.h"
 
 static std::unique_ptr<Loader> ins;
 
@@ -25,6 +26,7 @@ Loader::Loader(WindowBase* win)
 
 Loader::~Loader()
 {
+	tinyocr_engine_destroy(engine);
 }
 
 void Loader::init(WindowBase* win)
@@ -51,42 +53,14 @@ void Loader::onSize(void* e)
 
 void Loader::onDown(void* e)
 {
-	auto imgPath = getFilePath();
+	imgPath = getFilePath();
 	if (imgPath.empty()) {
 		return;
 	}
 	node->hide();
 	ViewerImg::init(WindowMain::get(), imgPath);
-	return;
-
-	auto data = getFileData(imgPath);
-	if (data.empty()) {
-		return;
-	}
-	auto engine = tinyocr_engine_create();
-	tinyocr_ocr_model_paths_t paths = {
-	"./models/PP-OCRv6_tiny_det.param",
-	"./models/PP-OCRv6_tiny_det.bin",
-	"./models/PP-OCRv6_tiny_rec.param",
-	"./models/PP-OCRv6_tiny_rec.bin",
-	"./models/PP-OCRv6_vocab_tiny.txt",
-	"./models/PP-LCNet_x1_0_textline_ori.param",
-	"./models/PP-LCNet_x1_0_textline_ori.bin"
-	};
-	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
-		tinyocr_engine_destroy(engine);
-		return;
-	}
-	tinyocr_text_box_t* boxes = nullptr;
-	int box_count = 0;
-	tinyocr_text_line_t* lines = nullptr;
-	int line_count = 0;
-	if (tinyocr_engine_recognize_buffer(engine, data.data(), (int)data.size(), &boxes, &box_count, &lines, &line_count) != 0)
-	{
-		tinyocr_engine_destroy(engine);
-		return;
-	}
-	auto a = 1;
+	//initEngine();
+	read();
 }
 
 void Loader::onPaint(void* e)
@@ -153,4 +127,82 @@ std::vector<unsigned char> Loader::getFileData(const std::wstring& filePath)
 	ifs.read(reinterpret_cast<char*>(imgData.data()), fileSize);
 	ifs.close();
 	return imgData;
+}
+
+winrt::Windows::Foundation::IAsyncAction Loader::read()
+{
+	co_await winrt::resume_background();
+	auto engine = tinyocr_engine_create();
+	tinyocr_ocr_model_paths_t paths = {
+	"./models/PP-OCRv6_tiny_det.param",
+	"./models/PP-OCRv6_tiny_det.bin",
+	"./models/PP-OCRv6_tiny_rec.param",
+	"./models/PP-OCRv6_tiny_rec.bin",
+	"./models/PP-OCRv6_vocab_tiny.txt",
+	"./models/PP-LCNet_x1_0_textline_ori.param",
+	"./models/PP-LCNet_x1_0_textline_ori.bin"
+	};
+	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
+		tinyocr_engine_destroy(engine);
+		co_return;
+	}
+	auto data = getFileData(imgPath);
+	if (data.empty()) {
+		co_return;
+	}
+	tinyocr_text_box_t* boxes = nullptr;
+	int box_count = 0;
+	tinyocr_text_line_t* lines = nullptr;
+	int line_count = 0;
+	if (tinyocr_engine_recognize_buffer(engine, data.data(), (int)data.size(), &boxes, &box_count, &lines, &line_count) != 0)
+	{
+		tinyocr_engine_destroy(engine);
+		co_return;
+	}	
+	std::vector<ComPtr<ID2D1PathGeometry>> pathes;
+	auto d2d = D2D::get();
+	for (int i = 0; i < box_count; i++) {
+		//std::cout << "Box " << i << ": points("
+		//	<< boxes[i].points[0] << "," << boxes[i].points[1] << "; "
+		//	<< boxes[i].points[2] << "," << boxes[i].points[3] << "; "
+		//	<< boxes[i].points[4] << "," << boxes[i].points[5] << "; "
+		//	<< boxes[i].points[6] << "," << boxes[i].points[7] << "), "
+		//	<< "isVertical: " << boxes[i].is_vertical << ", "
+		//	<< "score: " << boxes[i].score << std::endl;
+		auto path = d2d->createPath(boxes[i].points);
+		pathes.push_back(std::move(path));
+		//auto wstr = Util::convertToWStr(lines[i].text);
+		//writeConsoleW(L"Recognized Text: ");
+		//writeConsoleW(wstr);
+		//writeConsoleW(L"\n");
+		for (size_t j = 0; j < lines[i].anchor_count; j++)
+		{
+			auto anchors = lines[i].anchors[j];
+			auto a = 1;
+			//writeConsoleW(std::to_wstring(lines[i].anchors[j]));
+			//writeConsoleW(L" ");
+		}
+		//writeConsoleW(L"\n");
+	}
+	co_await winrt::resume_foreground(App::get()->dq);
+	ViewerImg::get()->setPathes(pathes);
+}
+
+void Loader::initEngine()
+{
+	if (!engine) return;
+	engine = tinyocr_engine_create();
+	tinyocr_ocr_model_paths_t paths = {
+	"./models/PP-OCRv6_tiny_det.param",
+	"./models/PP-OCRv6_tiny_det.bin",
+	"./models/PP-OCRv6_tiny_rec.param",
+	"./models/PP-OCRv6_tiny_rec.bin",
+	"./models/PP-OCRv6_vocab_tiny.txt",
+	"./models/PP-LCNet_x1_0_textline_ori.param",
+	"./models/PP-LCNet_x1_0_textline_ori.bin"
+	};
+	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
+		tinyocr_engine_destroy(engine);
+		return;
+	}
 }

@@ -10,6 +10,7 @@ public:
 	ComPtr<IDWriteTextLayout> createTextLayout(const std::wstring& text, const float& w, const float& h);
 	void setEllipsis(IDWriteTextLayout* layout,const float& maxW, const float& maxH);
 	ComPtr<ID2D1Bitmap> createBitmap(const std::wstring& imgPath);
+	ComPtr<ID2D1PathGeometry> createPath(const float* points);
 private:
 	D2D();
 	void initFont();

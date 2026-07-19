@@ -15,6 +15,7 @@ private:
 	void onEnter(void* e);
 	void onLeave(void* e);
 	void onDown(void* e);
+	void onCursor(void* e);
 	void onBtnPaint(void* e);
 	void onPaint(void* e);
 	void onMaximize();

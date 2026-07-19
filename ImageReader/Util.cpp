@@ -23,4 +23,12 @@ bool Util::isWin11()
     return false;
 }
 
-
+std::wstring Util::convertToWStr(const char* str)
+{
+    if (!str) return std::wstring();
+    int count = MultiByteToWideChar(CP_UTF8, 0, str, -1, 0, 0);
+    if (count == 0) return std::wstring();
+    std::vector<wchar_t> buffer(count);
+    MultiByteToWideChar(CP_UTF8, 0, str, -1, buffer.data(), count);
+    return std::wstring(buffer.data(), buffer.size() - 1);
+}

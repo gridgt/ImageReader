@@ -160,3 +160,18 @@ ComPtr<ID2D1Bitmap> D2D::createBitmap(const std::wstring& imgPath)
 	);
 	return bitmap;
 }
+
+ComPtr<ID2D1PathGeometry> D2D::createPath(const float* points)
+{
+	ComPtr<ID2D1PathGeometry> path;
+	d2dFactory->CreatePathGeometry(path.GetAddressOf());
+	ComPtr<ID2D1GeometrySink> sink;
+	path->Open(sink.GetAddressOf());	
+	sink->BeginFigure({ points[0], points[1] }, D2D1_FIGURE_BEGIN_FILLED);
+	sink->AddLine({ points[2], points[3] });
+	sink->AddLine({ points[4], points[5] });
+	sink->AddLine({ points[6], points[7] });
+	sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+	sink->Close();
+	return path;
+}

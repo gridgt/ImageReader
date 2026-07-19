@@ -16,8 +16,6 @@ TitleBar::TitleBar(WindowBase* win)
 	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initSurface();
 	title = d2d->createTextLayout(win->title, FLT_MAX, FLT_MAX);
-
-	HCURSOR handCursor = LoadCursor(nullptr, IDC_HAND);
 	std::wstring code;
 	for (size_t i = 0; i < 3; i++)
 	{
@@ -27,9 +25,9 @@ TitleBar::TitleBar(WindowBase* win)
 		btn->on("mouseEnter", [this](void* e) {this->onEnter(e);});
 		btn->on("mouseLeave", [this](void* e) {this->onLeave(e);});
 		btn->on("mouseDown", [this](void* e) {this->onDown(e);});
+		btn->on("cursor", [this](void* e) {this->onCursor(e);});
 		btn->on("paint", [this](void* e) {this->onBtnPaint(e);});
 		btn->initSurface();
-		btn->cursor = handCursor;
 		btns.push_back(btn);
 		if (i == 0) {
 			code = L"\ue6e8";
@@ -126,6 +124,13 @@ void TitleBar::onDown(void* e)
 	else if (index == 0) {
 		ShowWindow(btn->win->hwnd, SW_MINIMIZE);
 	}
+}
+
+void TitleBar::onCursor(void* e)
+{
+	SetCursor(LoadCursor(nullptr, IDC_HAND));
+	auto flag = static_cast<bool*>(e);
+	*flag = true;
 }
 
 void TitleBar::onBtnPaint(void* e)

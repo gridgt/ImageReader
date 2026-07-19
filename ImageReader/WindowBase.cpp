@@ -156,13 +156,23 @@ void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
 
 BOOL WindowBase::setCursor()
 {
+    //for (auto* n = nodeHover; n; n = n->parent) {
+    //    if (n->cursor) {
+    //        ::SetCursor(n->cursor);
+    //        return TRUE;
+    //    }
+    //}
+    //::SetCursor(LoadCursor(nullptr, IDC_ARROW));
+    bool flag = false;
     for (auto* n = nodeHover; n; n = n->parent) {
-        if (n->cursor) {
-            ::SetCursor(n->cursor);
-            return TRUE;
+        n->emit("cursor",&flag);
+        if (flag) {
+            break;
         }
     }
-    ::SetCursor(LoadCursor(nullptr, IDC_ARROW));
+    if (!flag) {
+        SetCursor(LoadCursor(nullptr, IDC_ARROW));
+    }
     return TRUE;
 }
 
@@ -263,9 +273,6 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     else if (msg == WM_DPICHANGED) {
         self->dpiChange(wParam, lParam);
     }
-    else if (msg == WM_SYSCOMMAND) {
-
-    }
     else if (msg == WM_SIZE) { 
         self->sizeChange(wParam, lParam);
         return 0;
@@ -287,6 +294,10 @@ void WindowBase::mouseMove(const float& x, const float& y)
         tme.dwFlags = TME_LEAVE;
         tme.hwndTrack = hwnd;
         TrackMouseEvent(&tme);
+    } 
+    {
+        auto arg = std::make_tuple(x, y);
+        emit("mouseMove", &arg);
     }
     auto hit = root->findLeafByPos(x, y);
     if (hit == nodeHover) {        

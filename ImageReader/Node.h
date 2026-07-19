@@ -30,6 +30,7 @@ public:
 	/// 从 node 向上到 stopAt（不含），收集祖先链表
 	/// </summary>
 	std::vector<Node*> pathUpTo(Node* stopAt);
+	void sizeChange();
 public:
 	WindowBase* win;
 	std::string id;	
@@ -48,14 +49,12 @@ public:
 	Composition::SpriteVisual visual{ nullptr };
 	std::vector<std::unique_ptr<Node>> children;
 	Composition::CompositionDrawingSurface surface{ nullptr };
-	HCURSOR cursor{ nullptr };   // nullptr = 继承父节点/窗口默认
 	bool stopEventPopup{false};
 protected:
 protected:
 	float x, y, w, h;
 	float absX, absY, absW, absH;
 private:
-	void sizeChange();
 private:
 	Node* parent{nullptr};
 };
