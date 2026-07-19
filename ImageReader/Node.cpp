@@ -105,7 +105,6 @@ void Node::sizeChange()
 {
     emit("sizeChange", this);
     if (parent) {
-        // visual.Offset / visual.Size 是物理像素
         auto pos = visual.Offset();
         absX = parent->absX + pos.x;
         absY = parent->absY + pos.y;
@@ -114,7 +113,6 @@ void Node::sizeChange()
         absH = size.y;
     }
     else {
-        // root：win->w/h 是物理像素
         absX = x;
         absY = y;
         absW = win->w;

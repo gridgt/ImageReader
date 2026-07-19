@@ -13,6 +13,7 @@ static std::unique_ptr<ViewerImg> ins;
 
 ViewerImg::ViewerImg(WindowBase* win, const std::wstring& path)
 {
+	bitmap = D2D::get()->createBitmap(path);
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
 	auto d2d = D2D::get();
 	node = win->root->createChild("viewer");
@@ -21,8 +22,7 @@ ViewerImg::ViewerImg(WindowBase* win, const std::wstring& path)
 	node->on("cursor", [this](void* e) {this->onCursor(e);});
 	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initSurface();
-	bitmap = D2D::get()->createBitmap(path);
-	node->sizeChange();
+	node->sizeChange();//后添加的元素必须自己触发一次
 }
 
 ViewerImg::~ViewerImg()
@@ -72,6 +72,7 @@ void ViewerImg::onSize(void* e)
 
 void ViewerImg::onDown(void* e)
 {
+	isMouseDown = true;
 }
 
 void ViewerImg::onMove(void* e)
@@ -91,6 +92,9 @@ void ViewerImg::onMove(void* e)
 			break;
 		}
 	}
+	if (isMouseDown) {
+
+	}
 }
 
 void ViewerImg::onPaint(void* e)
@@ -106,10 +110,6 @@ void ViewerImg::onPaint(void* e)
 	ComPtr<ID2D1SolidColorBrush> bgBrush;
 	ColorA color(0xAA228866);
 	ctx->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
-
-	// Path geometries are in the bitmap's original coordinate space.
-	// Apply the same scale + translation as the bitmap so they align.
-	// Order matters: first scale around origin, then translate by pos.
 	D2D1_MATRIX_3X2_F oldTransform;
 	ctx->GetTransform(&oldTransform);
 	auto transform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(pos.x, pos.y);

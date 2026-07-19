@@ -19,7 +19,7 @@ private:
 private:
 	D2D1_POINT_2F pos;
 	float scale{1.0f};
-	bool isHover{false};
+	bool isHover{ false }, isMouseDown{false};
 	Node* node;
 	ComPtr<ID2D1Bitmap> bitmap;
 	std::vector<ComPtr<ID2D1PathGeometry>> pathes;

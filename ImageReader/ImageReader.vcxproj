@@ -119,7 +119,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shcore.lib;dwmapi.lib;windowsapp.lib;Shlwapi.lib;D:\project\TinyOCR\x64\$(Configuration)\TinyOCR.lib;D:\sdk\LiteOCR\build\ncnn\src\$(Configuration)\ncnnd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Shcore.lib;dwmapi.lib;windowsapp.lib;Shlwapi.lib;D:\project\TinyOCR\x64\$(Configuration)\TinyOCR.lib;D:\sdk\ncnn\build\src\$(Configuration)\ncnnd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -143,7 +143,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shcore.lib;dwmapi.lib;windowsapp.lib;Shlwapi.lib;D:\project\TinyOCR\x64\$(Configuration)\TinyOCR.lib;D:\sdk\LiteOCR\build\ncnn\src\$(Configuration)\ncnn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Shcore.lib;dwmapi.lib;windowsapp.lib;Shlwapi.lib;D:\project\TinyOCR\x64\$(Configuration)\TinyOCR.lib;D:\sdk\ncnn\build\src\$(Configuration)\ncnn.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>

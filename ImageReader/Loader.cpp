@@ -184,6 +184,9 @@ winrt::Windows::Foundation::IAsyncAction Loader::read()
 		}
 		//writeConsoleW(L"\n");
 	}
+	tinyocr_free_text_boxes(boxes, box_count);
+	tinyocr_free_text_lines(lines, line_count);
+	tinyocr_engine_destroy(engine);
 	co_await winrt::resume_foreground(App::get()->dq);
 	ViewerImg::get()->setPathes(pathes);
 }
