@@ -9,6 +9,11 @@ public:
 	static void init(WindowBase* win);
 	static ViewerText* get();
 	void setText(const std::vector<std::wstring>& texts);
+	/// <summary>
+	/// 外部（如 ViewerImg）同步选区。传入负值等同于清空选区。
+	/// startBox/endBox 与 setText 时的下标一致；startChar/endChar 是各自 layout 内的字符位置。
+	/// </summary>
+	void setSelection(int startBox, int startChar, int endBox, int endChar);
 private:
 	ViewerText(WindowBase* win);
 	void onSize(void* e);

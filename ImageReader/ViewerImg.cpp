@@ -79,6 +79,7 @@ void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, co
 		}
 		charLines[i] = lines;
 	}
+	syncSelectionToText();
 	node->paint();
 }
 void ViewerImg::onSize(void* e)
@@ -109,6 +110,7 @@ void ViewerImg::onDown(void* e)
 	isMouseDown = true;
 	if (selStartBox >= 0) {
 		selStartBox = selStartChar = selEndBox = selEndChar = -1;
+		syncSelectionToText();
 		node->paint();
 	}
 	auto tuplePtr = static_cast<std::tuple<float, float, bool, Node*>*>(e);
@@ -129,6 +131,7 @@ void ViewerImg::onDown(void* e)
 		selEndBox = last->first;
 		selEndChar = static_cast<int>(last->second.size()) - 1;
 		isMouseDown = false; // 双击后不进入拖拽扩选模式
+		syncSelectionToText();
 		node->paint();
 		return;
 	}
@@ -139,6 +142,7 @@ void ViewerImg::onDown(void* e)
 			selStartChar = charIdx;
 			selEndBox = boxIdx;
 			selEndChar = charIdx;
+			syncSelectionToText();
 			return;
 		}
 	}
@@ -173,6 +177,7 @@ void ViewerImg::onMove(void* e)
 			if (boxIdx != selEndBox || charIdx != selEndChar) {
 				selEndBox = boxIdx;
 				selEndChar = charIdx;
+				syncSelectionToText();
 				node->paint();
 			}
 		}
@@ -305,4 +310,30 @@ void ViewerImg::paintAssist(ID2D1DeviceContext* ctx)
 			ctx->DrawLine(pair.first, pair.second, borderBrush.Get(), node->win->dpi);
 		}
 	}
+}
+
+void ViewerImg::syncSelectionToText()
+{
+	auto text = ViewerText::get();
+	if (!text) return;
+	if (selStartBox < 0 || selEndBox < 0) {
+		text->setSelection(-1, -1, -1, -1);
+		return;
+	}
+	// 与 onPaint 相同的规范化 + 单 caret 展开成一个字符的规则，保持视觉一致
+	int sBox = selStartBox, sChar = selStartChar;
+	int eBox = selEndBox, eChar = selEndChar;
+	if (sBox > eBox || (sBox == eBox && sChar > eChar)) {
+		std::swap(sBox, eBox);
+		std::swap(sChar, eChar);
+	}
+	if (sBox == eBox && sChar == eChar) {
+		auto it = charLines.find(sBox);
+		if (it != charLines.end() && it->second.size() >= 2) {
+			int lastIdx = static_cast<int>(it->second.size()) - 1;
+			if (sChar < lastIdx) eChar = sChar + 1;
+			else sChar = eChar - 1;
+		}
+	}
+	text->setSelection(sBox, sChar, eBox, eChar);
 }

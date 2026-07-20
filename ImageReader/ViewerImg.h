@@ -22,6 +22,10 @@ private:
 	/// </summary>
 	bool hitTest(float wx, float wy, int& boxIdx, int& charIdx);
 	void paintAssist(ID2D1DeviceContext* ctx);
+	/// <summary>
+	/// 把当前选区同步到 ViewerText（选区无效时清空 ViewerText 选区）
+	/// </summary>
+	void syncSelectionToText();
 private:
 	D2D1_POINT_2F pos;
 	float scale{1.0f};

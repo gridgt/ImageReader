@@ -70,6 +70,19 @@ void ViewerText::setText(const std::vector<std::wstring>& texts)
 	selStartBox = selStartChar = selEndBox = selEndChar = -1;
 	node->paint();
 }
+void ViewerText::setSelection(int startBox, int startChar, int endBox, int endChar)
+{
+	// 只在真的变化时重绘，避免拖拽时每次 mouseMove 都跑一次 paint
+	if (startBox == selStartBox && startChar == selStartChar &&
+		endBox == selEndBox && endChar == selEndChar) {
+		return;
+	}
+	selStartBox = startBox;
+	selStartChar = startChar;
+	selEndBox = endBox;
+	selEndChar = endChar;
+	node->paint();
+}
 void ViewerText::onSize(void* e)
 {
 	auto win = WindowMain::get();
