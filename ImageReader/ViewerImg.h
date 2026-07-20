@@ -33,5 +33,7 @@ private:
 	// 字符 j 被选中当且仅当 min(startChar,endChar) <= j < max(startChar,endChar)
 	int selStartBox{ -1 }, selStartChar{ -1 };
 	int selEndBox{ -1 }, selEndChar{ -1 };
+	// 上一次 mouseDown 的时间戳（GetTickCount64），用于双击判定
+	ULONGLONG lastDownTick{ 0 };
 };
 

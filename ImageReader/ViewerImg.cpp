@@ -50,7 +50,6 @@ void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, co
 	charLines.clear();
 	selStartBox = selStartChar = selEndBox = selEndChar = -1;
 	auto d2d = D2D::get();
-	log(L"[setPathes] box count={}", boxPoints.size());
 	for (size_t i = 0; i < boxPoints.size(); i++)
 	{
 		auto& boxArr = boxPoints.at(i);
@@ -62,24 +61,12 @@ void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, co
 		auto minX = std::min({ boxArr[0], boxArr[2], boxArr[4], boxArr[6] });
 		auto maxY = std::max({ boxArr[1], boxArr[3], boxArr[5], boxArr[7] });
 		auto minY = std::min({ boxArr[1], boxArr[3], boxArr[5], boxArr[7] });
-		log(L"[setPathes] box#{} box=[({},{}) ({},{}) ({},{}) ({},{})] minX={} maxX={} minY={} maxY={} anchorN={}",
-			i,
-			boxArr[0], boxArr[1], boxArr[2], boxArr[3], boxArr[4], boxArr[5], boxArr[6], boxArr[7],
-			minX, maxX, minY, maxY, pointArr.size());
-		{
-			std::wstring anchors;
-			for (size_t k = 0; k < pointArr.size(); k++) {
-				anchors += std::format(L"{}{}", (k ? L"," : L""), pointArr[k]);
-			}
-			log(L"[setPathes] box#{} anchors=[{}]", i, anchors);
-		}
 		// 头部补一条位于 minX 的线，作为“第 0 个字符的左边界”
 		// 之后 lines[j] 表示字符 j 的左边界、lines[j+1] 表示字符 j 的右边界
 		lines.push_back({ { minX, minY },{ minX, maxY } });
 		if (pointArr.size() > 0) {
 			auto maxPoint = pointArr[pointArr.size() - 1];
 			auto perVal = (maxX - minX) / maxPoint;
-			log(L"[setPathes] box#{} maxPoint={} perVal={}", i, maxPoint, perVal);
 			for (size_t i = 0; i < pointArr.size(); i++)
 			{
 				auto x = pointArr[i] * perVal + minX;
@@ -88,13 +75,6 @@ void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, co
 		}
 		else {
 			lines.push_back({ { maxX, minY },{ maxX, maxY } });
-		}
-		{
-			std::wstring xs;
-			for (size_t k = 0; k < lines.size(); k++) {
-				xs += std::format(L"{}{}", (k ? L"," : L""), lines[k].first.x);
-			}
-			log(L"[setPathes] box#{} line-xs=[{}]", i, xs);
 		}
 		charLines[i] = lines;
 	}
@@ -131,8 +111,23 @@ void ViewerImg::onDown(void* e)
 	}
 	auto tuplePtr = static_cast<std::tuple<float, float, bool, Node*>*>(e);
 	auto [x, y, isRight, nodePtr] = *tuplePtr;
-	log(L"[onDown] wx={} wy={} isRight={} isHover={}", x, y, isRight, isHover);
 	if (isRight) {
+		lastDownTick = 0;
+		return;
+	}
+	// 双击：两次左键 mouseDown 时间差 < 系统双击间隔，则选中所有文本
+	auto now = GetTickCount64();
+	bool isDoubleClick = (lastDownTick != 0) && (now - lastDownTick <= GetDoubleClickTime());
+	lastDownTick = isDoubleClick ? 0 : now; // 消费掉这次配对，避免三击继续被视为双击
+	if (isDoubleClick && !charLines.empty()) {
+		auto first = charLines.begin();
+		auto last = std::prev(charLines.end());
+		selStartBox = first->first;
+		selStartChar = 0;
+		selEndBox = last->first;
+		selEndChar = static_cast<int>(last->second.size()) - 1;
+		isMouseDown = false; // 双击后不进入拖拽扩选模式
+		node->paint();
 		return;
 	}
 	if (isHover) {
@@ -142,10 +137,8 @@ void ViewerImg::onDown(void* e)
 			selStartChar = charIdx;
 			selEndBox = boxIdx;
 			selEndChar = charIdx;
-			log(L"[onDown] selStart set box={} char={}", boxIdx, charIdx);
 			return;
 		}
-		log(L"[onDown] hitTest failed while isHover=true");
 	}
 }
 
@@ -175,14 +168,10 @@ void ViewerImg::onMove(void* e)
 		int boxIdx = -1, charIdx = -1;
 		if (hitTest(x, y, boxIdx, charIdx)) {
 			if (boxIdx != selEndBox || charIdx != selEndChar) {
-				log(L"[onMove] sel update box {}->{} char {}->{}", selEndBox, boxIdx, selEndChar, charIdx);
 				selEndBox = boxIdx;
 				selEndChar = charIdx;
 				node->paint();
 			}
-		}
-		else {
-			log(L"[onMove] hitTest failed wx={} wy={}", x, y);
 		}
 	}
 }
@@ -230,7 +219,7 @@ void ViewerImg::onPaint(void* e)
 		}
 		for (int i = sBox; i <= eBox; i++) {
 			auto it = charLines.find(i);
-			if (it == charLines.end() || it->second.empty()) continue;
+			if (it == charLines.end() || it->second.size() < 2) continue;
 			auto& lines = it->second;
 			int lastIdx = static_cast<int>(lines.size()) - 1;
 			int a = (i == sBox) ? sChar : 0;
@@ -238,7 +227,12 @@ void ViewerImg::onPaint(void* e)
 			if (a > b) std::swap(a, b);
 			a = std::clamp(a, 0, lastIdx);
 			b = std::clamp(b, 0, lastIdx);
-			if (a == b) continue; // 没有字符被覆盖
+			// a==b 时，选区退化为一个 caret 位置 —— 涂当前 caret 所指的那个字符
+			// 用 lines[a] 与 lines[a+1] 作为该字符的左右边界，末尾时向左取一格
+			if (a == b) {
+				if (a < lastIdx) b = a + 1;
+				else a = b - 1;
+			}
 			float x0 = lines[a].first.x;
 			float x1 = lines[b].first.x;
 			float y0 = lines[a].first.y;
@@ -267,8 +261,6 @@ bool ViewerImg::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	// 窗口坐标 -> 图像坐标
 	float ix = (wx - pos.x) / scale;
 	float iy = (wy - pos.y - nodePos.y) / scale;
-	log(L"[hitTest] wx={} wy={} nodeOffY={} pos=({},{}) scale={} -> ix={} iy={}",
-		wx, wy, nodePos.y, pos.x, pos.y, scale, ix, iy);
 	// 找到 y 方向最近的 box：优先包含 iy 的行；y 距离相同则用 x 距离决胜
 	// （同一行可能有多个横向排布的 box）
 	int bestBox = -1;
@@ -313,7 +305,5 @@ bool ViewerImg::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	else if (ix > lines.back().first.x) bestIdx = static_cast<int>(lines.size()) - 1;
 	boxIdx = bestBox;
 	charIdx = bestIdx;
-	log(L"[hitTest] -> box={} char={} (lineN={}, front.x={}, back.x={}, bestXDist={})",
-		boxIdx, charIdx, lines.size(), lines.front().first.x, lines.back().first.x, bestXDist);
 	return true;
 }

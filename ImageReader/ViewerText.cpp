@@ -132,10 +132,10 @@ void ViewerText::onPaint(void* e)
 	ctx->CreateSolidColorBrush(ColorA(0x333333FF).getD2DColor(), brush.GetAddressOf());
 
 	ComPtr<ID2D1SolidColorBrush> borderBrush;
-	ctx->CreateSolidColorBrush(ColorA(0xCCCCCCFF).getD2DColor(), borderBrush.GetAddressOf());
+	ctx->CreateSolidColorBrush(ColorA(0xDDDDDDFF).getD2DColor(), borderBrush.GetAddressOf());
 
 	auto size = node->visual.Size();
-	ctx->DrawLine({ 0.f,0.f }, { 0.f,size.y }, borderBrush.Get(), node->win->dpi);
+	ctx->DrawLine({ 0.f,0.f }, { 0.f,size.y }, borderBrush.Get(), node->win->dpi*1.5);
 	for (size_t i = 0; i < textLayouts.size(); i++)
 	{
 		auto& layout = textLayouts[i];
@@ -145,11 +145,9 @@ void ViewerText::onPaint(void* e)
 
 void ViewerText::onCursor(void* e)
 {
-	if (isHover) {
-		SetCursor(LoadCursor(nullptr, IDC_IBEAM));
-		auto flag = static_cast<bool*>(e);
-		*flag = true;
-	}
+	SetCursor(LoadCursor(nullptr, IDC_IBEAM));
+	auto flag = static_cast<bool*>(e);
+	*flag = true;
 }
 
 bool ViewerText::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
