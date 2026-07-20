@@ -16,7 +16,7 @@ ViewerImg::ViewerImg(WindowBase* win, const std::wstring& path)
 	bitmap = D2D::get()->createBitmap(path);
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
 	auto d2d = D2D::get();
-	node = win->root->createChild("viewer");
+	node = win->root->createChild("viewerImg");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
 	node->on("mouseUp", [this](void* e) {this->onUp(e);});
@@ -48,28 +48,53 @@ void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, co
 {
 	pathes.clear();
 	charLines.clear();
-	clearSelection();
+	selStartBox = selStartChar = selEndBox = selEndChar = -1;
 	auto d2d = D2D::get();
+	log(L"[setPathes] box count={}", boxPoints.size());
 	for (size_t i = 0; i < boxPoints.size(); i++)
 	{
 		auto& boxArr = boxPoints.at(i);
 		pathes.push_back(d2d->createPath(boxArr));
 
 		auto& pointArr = charPoints.at(i);
-		auto maxPoint = pointArr[pointArr.size() - 1];
+		std::vector<std::pair<D2D1_POINT_2F, D2D1_POINT_2F>> lines;
 		auto maxX = std::max({ boxArr[0], boxArr[2], boxArr[4], boxArr[6] });
 		auto minX = std::min({ boxArr[0], boxArr[2], boxArr[4], boxArr[6] });
 		auto maxY = std::max({ boxArr[1], boxArr[3], boxArr[5], boxArr[7] });
 		auto minY = std::min({ boxArr[1], boxArr[3], boxArr[5], boxArr[7] });
-		auto perVal = (maxX - minX) / maxPoint;
-		std::vector<std::pair<D2D1_POINT_2F, D2D1_POINT_2F>> lines;
+		log(L"[setPathes] box#{} box=[({},{}) ({},{}) ({},{}) ({},{})] minX={} maxX={} minY={} maxY={} anchorN={}",
+			i,
+			boxArr[0], boxArr[1], boxArr[2], boxArr[3], boxArr[4], boxArr[5], boxArr[6], boxArr[7],
+			minX, maxX, minY, maxY, pointArr.size());
+		{
+			std::wstring anchors;
+			for (size_t k = 0; k < pointArr.size(); k++) {
+				anchors += std::format(L"{}{}", (k ? L"," : L""), pointArr[k]);
+			}
+			log(L"[setPathes] box#{} anchors=[{}]", i, anchors);
+		}
 		// 头部补一条位于 minX 的线，作为“第 0 个字符的左边界”
 		// 之后 lines[j] 表示字符 j 的左边界、lines[j+1] 表示字符 j 的右边界
 		lines.push_back({ { minX, minY },{ minX, maxY } });
-		for (size_t i = 0; i < pointArr.size(); i++)
+		if (pointArr.size() > 0) {
+			auto maxPoint = pointArr[pointArr.size() - 1];
+			auto perVal = (maxX - minX) / maxPoint;
+			log(L"[setPathes] box#{} maxPoint={} perVal={}", i, maxPoint, perVal);
+			for (size_t i = 0; i < pointArr.size(); i++)
+			{
+				auto x = pointArr[i] * perVal + minX;
+				lines.push_back({ { x, minY },{ x, maxY } });
+			}
+		}
+		else {
+			lines.push_back({ { maxX, minY },{ maxX, maxY } });
+		}
 		{
-			auto x = pointArr[i] * perVal+minX;
-			lines.push_back({ { x, minY },{ x, maxY } });
+			std::wstring xs;
+			for (size_t k = 0; k < lines.size(); k++) {
+				xs += std::format(L"{}{}", (k ? L"," : L""), lines[k].first.x);
+			}
+			log(L"[setPathes] box#{} line-xs=[{}]", i, xs);
 		}
 		charLines[i] = lines;
 	}
@@ -78,7 +103,7 @@ void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, co
 void ViewerImg::onSize(void* e)
 {
 	auto win = WindowMain::get();
-	auto y{ 30.f * win->dpi }, h{ win->h - y - 22 * win->dpi }, w{ win->w };
+	auto y{ 30.f * win->dpi }, h{ win->h - y - 22 * win->dpi }, w{ win->w-360.f };
 	node->setPosSize(0.f, y, w, h);
 	auto bitmapSize = bitmap->GetSize();
 	float bmpW = bitmapSize.width;
@@ -100,35 +125,27 @@ void ViewerImg::onSize(void* e)
 void ViewerImg::onDown(void* e)
 {
 	isMouseDown = true;
+	if (selStartBox >= 0) {
+		selStartBox = selStartChar = selEndBox = selEndChar = -1;
+		node->paint();
+	}
 	auto tuplePtr = static_cast<std::tuple<float, float, bool, Node*>*>(e);
 	auto [x, y, isRight, nodePtr] = *tuplePtr;
+	log(L"[onDown] wx={} wy={} isRight={} isHover={}", x, y, isRight, isHover);
 	if (isRight) {
 		return;
 	}
-	// 只在按下位置命中某个 path（文本框）时才启动选区
-	auto nodePos = node->visual.Offset();
-	auto transform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(pos.x, pos.y + nodePos.y);
-	bool onText = false;
-	for (auto& path : pathes) {
-		BOOL contains = FALSE;
-		path->FillContainsPoint({ x, y }, transform, &contains);
-		if (contains) { onText = true; break; }
-	}
-	bool hadSelection = (selStartBox >= 0);
-	if (onText) {
+	if (isHover) {
 		int boxIdx = -1, charIdx = -1;
 		if (hitTest(x, y, boxIdx, charIdx)) {
 			selStartBox = boxIdx;
 			selStartChar = charIdx;
 			selEndBox = boxIdx;
 			selEndChar = charIdx;
-			node->paint();
+			log(L"[onDown] selStart set box={} char={}", boxIdx, charIdx);
 			return;
 		}
-	}
-	if (hadSelection) {
-		clearSelection();
-		node->paint();
+		log(L"[onDown] hitTest failed while isHover=true");
 	}
 }
 
@@ -158,10 +175,14 @@ void ViewerImg::onMove(void* e)
 		int boxIdx = -1, charIdx = -1;
 		if (hitTest(x, y, boxIdx, charIdx)) {
 			if (boxIdx != selEndBox || charIdx != selEndChar) {
+				log(L"[onMove] sel update box {}->{} char {}->{}", selEndBox, boxIdx, selEndChar, charIdx);
 				selEndBox = boxIdx;
 				selEndChar = charIdx;
 				node->paint();
 			}
+		}
+		else {
+			log(L"[onMove] hitTest failed wx={} wy={}", x, y);
 		}
 	}
 }
@@ -246,20 +267,32 @@ bool ViewerImg::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	// 窗口坐标 -> 图像坐标
 	float ix = (wx - pos.x) / scale;
 	float iy = (wy - pos.y - nodePos.y) / scale;
-	// 找到 y 方向最近的 box：优先包含 iy 的行；否则按到中心距离取最近
+	log(L"[hitTest] wx={} wy={} nodeOffY={} pos=({},{}) scale={} -> ix={} iy={}",
+		wx, wy, nodePos.y, pos.x, pos.y, scale, ix, iy);
+	// 找到 y 方向最近的 box：优先包含 iy 的行；y 距离相同则用 x 距离决胜
+	// （同一行可能有多个横向排布的 box）
 	int bestBox = -1;
-	float bestDist = FLT_MAX;
+	float bestYDist = FLT_MAX;
+	float bestXDist2 = FLT_MAX;
 	for (auto& kv : charLines) {
 		if (kv.second.empty()) continue;
 		float minY = kv.second.front().first.y;
 		float maxY = kv.second.front().second.y;
 		if (minY > maxY) std::swap(minY, maxY);
-		float dist;
-		if (iy >= minY && iy <= maxY) dist = 0.f;
-		else if (iy < minY) dist = minY - iy;
-		else dist = iy - maxY;
-		if (dist < bestDist) {
-			bestDist = dist;
+		float yDist;
+		if (iy >= minY && iy <= maxY) yDist = 0.f;
+		else if (iy < minY) yDist = minY - iy;
+		else yDist = iy - maxY;
+		float bMinX = kv.second.front().first.x;
+		float bMaxX = kv.second.back().first.x;
+		if (bMinX > bMaxX) std::swap(bMinX, bMaxX);
+		float xDist;
+		if (ix >= bMinX && ix <= bMaxX) xDist = 0.f;
+		else if (ix < bMinX) xDist = bMinX - ix;
+		else xDist = ix - bMaxX;
+		if (yDist < bestYDist || (yDist == bestYDist && xDist < bestXDist2)) {
+			bestYDist = yDist;
+			bestXDist2 = xDist;
 			bestBox = kv.first;
 		}
 	}
@@ -280,10 +313,7 @@ bool ViewerImg::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	else if (ix > lines.back().first.x) bestIdx = static_cast<int>(lines.size()) - 1;
 	boxIdx = bestBox;
 	charIdx = bestIdx;
+	log(L"[hitTest] -> box={} char={} (lineN={}, front.x={}, back.x={}, bestXDist={})",
+		boxIdx, charIdx, lines.size(), lines.front().first.x, lines.back().first.x, bestXDist);
 	return true;
-}
-
-void ViewerImg::clearSelection()
-{
-	selStartBox = selStartChar = selEndBox = selEndChar = -1;
 }

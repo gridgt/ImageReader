@@ -8,6 +8,7 @@
 #include <fstream>
 #include <wincodec.h>
 #include "ViewerImg.h"
+#include "ViewerText.h"
 #include "Util.h"
 #include "App.h"
 
@@ -53,14 +54,15 @@ void Loader::onSize(void* e)
 
 void Loader::onDown(void* e)
 {
-	imgPath = getFilePath();
+	auto imgPath = getFilePath();
 	if (imgPath.empty()) {
 		return;
 	}
 	node->hide();
-	ViewerImg::init(WindowMain::get(), imgPath);
-	//initEngine();
-	read();
+	auto win = WindowMain::get();
+	ViewerImg::init(win, imgPath);
+	ViewerText::init(win);
+	read(imgPath);
 }
 
 void Loader::onPaint(void* e)
@@ -129,7 +131,7 @@ std::vector<unsigned char> Loader::getFileData(const std::wstring& filePath)
 	return imgData;
 }
 
-winrt::Windows::Foundation::IAsyncAction Loader::read()
+winrt::Windows::Foundation::IAsyncAction Loader::read(std::wstring imgPath)
 {
 	std::map<int, std::vector<float>> boxPoints;
 	std::map<int, std::vector<float>> charPoints;
@@ -180,23 +182,5 @@ winrt::Windows::Foundation::IAsyncAction Loader::read()
 	tinyocr_engine_destroy(engine);
 	co_await winrt::resume_foreground(App::get()->dq);
 	ViewerImg::get()->setPathes(boxPoints, charPoints);
-}
-
-void Loader::initEngine()
-{
-	if (!engine) return;
-	engine = tinyocr_engine_create();
-	tinyocr_ocr_model_paths_t paths = {
-	"./models/PP-OCRv6_tiny_det.param",
-	"./models/PP-OCRv6_tiny_det.bin",
-	"./models/PP-OCRv6_tiny_rec.param",
-	"./models/PP-OCRv6_tiny_rec.bin",
-	"./models/PP-OCRv6_vocab_tiny.txt",
-	"./models/PP-LCNet_x1_0_textline_ori.param",
-	"./models/PP-LCNet_x1_0_textline_ori.bin"
-	};
-	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
-		tinyocr_engine_destroy(engine);
-		return;
-	}
+	ViewerText::get()->setText(boxTexts);
 }

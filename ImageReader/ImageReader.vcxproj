@@ -166,6 +166,7 @@
     <ClCompile Include="TitleBar.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="ViewerImg.cpp" />
+    <ClCompile Include="ViewerText.cpp" />
     <ClCompile Include="WindowBase.cpp" />
     <ClCompile Include="WindowMain.cpp" />
   </ItemGroup>
@@ -181,6 +182,7 @@
     <ClInclude Include="TitleBar.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="ViewerImg.h" />
+    <ClInclude Include="ViewerText.h" />
     <ClInclude Include="WindowBase.h" />
     <ClInclude Include="WindowMain.h" />
   </ItemGroup>
