@@ -42,7 +42,6 @@ protected:
 	virtual void onHidden();
 	virtual LRESULT onHitTest(const float& x, const float& y) { return HTCLIENT; };
 	virtual void onMouseWheel(const float& x, const float& y, const short& delta) {};
-	virtual void onKeyDown(const UINT& key) {};
 	virtual void onKeyUp() {};
 	virtual void onChar(const UINT& ch) {};
 	virtual void onTimer(const UINT& timerId) {};
@@ -60,6 +59,7 @@ private:
 	void mouseLeave();
 	void mouseDown(const float& x, const float& y, bool isRight);
 	void mouseUp(const float& x, const float& y, bool isRight);
+	void keyDown(const UINT& key);
 	void paint();
 	void dpiChange(WPARAM wParam, LPARAM lParam);
 	void sizeChange(WPARAM wParam, LPARAM lParam);

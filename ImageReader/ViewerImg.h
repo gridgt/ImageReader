@@ -9,6 +9,12 @@ public:
 	static void init(WindowBase* win,const std::wstring& path);
 	static ViewerImg* get();
 	void setPathes(const std::map<int, std::vector<float>>& boxPoints,const std::map<int, std::vector<float>>& charPoints);
+	/// <summary>
+	/// 外部（如 ViewerText）同步选区。传入负值等同于清空选区。
+	/// startBox/endBox 与 charLines 的 key 一致；startChar/endChar 是各自 box 内的“分隔线索引”，
+	/// 等价于 caret 字符位置（字符 j 被选中当且仅当 min(sChar,eChar) <= j < max(sChar,eChar)）。
+	/// </summary>
+	void setSelection(int startBox, int startChar, int endBox, int endChar);
 private:
 	ViewerImg(WindowBase* win, const std::wstring& path);
 	void onSize(void* e);

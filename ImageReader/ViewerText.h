@@ -22,10 +22,15 @@ private:
 	void onMove(void* e);
 	void onPaint(void* e);
 	void onCursor(void* e);
+	void onKey(void* e);
 	/// <summary>
 	/// 将窗口坐标转换为图像坐标下最近的 box + 分隔线索引
 	/// </summary>
 	bool hitTest(float wx, float wy, int& boxIdx, int& charIdx);
+	/// <summary>
+	/// 把当前选区同步到 ViewerImg（选区无效时清空 ViewerImg 选区）
+	/// </summary>
+	void syncSelectionToImg();
 private:
 	D2D1_POINT_2F pos;
 	bool isHover{ false }, isMouseDown{false};
@@ -34,6 +39,7 @@ private:
 	std::vector<D2D1_POINT_2F> textPoss;
 	std::vector<UINT32> textLens;    // 每个 layout 的字符数（供 HitTestTextRange 做区间截断）
 	std::vector<float> textHeights;  // 每个 layout 的高度（供 hitTest 按 y 找块）
+	std::vector<std::wstring> texts; // 原始文本，供复制到剪贴板
 	// 文本选区：selStartChar/selEndChar 是该块内的“字符位置”（即光标位置），
 	// 字符 j 被选中当且仅当 min(startChar,endChar) <= j < max(startChar,endChar)
 	int selStartBox{ -1 }, selStartChar{ -1 };

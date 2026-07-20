@@ -253,7 +253,7 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     else if (msg == WM_KEYDOWN) {
-        self->onKeyDown(wParam);
+        self->keyDown(wParam);
     }
     else if (msg == WM_KEYUP) {
         self->onKeyUp();
@@ -370,17 +370,12 @@ void WindowBase::mouseUp(const float& x, const float& y, bool isRight)
 {
     auto arg = std::make_tuple(x, y, isRight);
     emit("mouseUp", &arg);
-    //if (!nodeHover) return;
-    //auto path = nodeHover->pathUpTo(nullptr);
-    //for (auto* node : path) {
-    //    node->stopEventPopup = false;
-    //    auto arg = std::make_tuple(x, y, isRight, node);
-    //    node->emit("mouseUp", &arg);
-    //    if (node->stopEventPopup) {
-    //        node->stopEventPopup = false;
-    //        break;
-    //    }
-    //}
+}
+
+void WindowBase::keyDown(const UINT& key)
+{
+    int keyVal = key;
+    emit("keyDown",&keyVal);
 }
 
 void WindowBase::dpiChange(WPARAM wParam, LPARAM lParam)

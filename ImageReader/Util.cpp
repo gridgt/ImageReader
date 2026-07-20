@@ -32,3 +32,24 @@ std::wstring Util::convertToWStr(const char* str)
     MultiByteToWideChar(CP_UTF8, 0, str, -1, buffer.data(), count);
     return std::wstring(buffer.data(), buffer.size() - 1);
 }
+
+void Util::setTextToClipboard(const std::wstring& text)
+{
+    if (!OpenClipboard(NULL)) return;
+    EmptyClipboard();
+    size_t length = (text.size() + 1) * sizeof(wchar_t);
+    HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, length);
+    if (hGlobal == NULL) {
+        CloseClipboard();
+        return;
+    }
+    auto pGlobal = (wchar_t*)GlobalLock(hGlobal);
+    if (pGlobal == NULL) {
+        CloseClipboard();
+        return;
+    }
+    memcpy(pGlobal, text.data(), length);
+    GlobalUnlock(hGlobal);
+    SetClipboardData(CF_UNICODETEXT, hGlobal);
+    CloseClipboard();
+}

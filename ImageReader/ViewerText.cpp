@@ -1,9 +1,11 @@
 ﻿#include "pch.h"
 #include "ViewerText.h"
+#include "ViewerImg.h"
 #include "WindowBase.h"
 #include "WindowMain.h"
 #include "D2D.h"
 #include "Node.h"
+#include "Util.h"
 #include "tinyocr.h"
 #include <iostream>
 #include <fstream>
@@ -15,6 +17,7 @@ ViewerText::ViewerText(WindowBase* win)
 {
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
 	win->on("mouseUp", [this](void* e) {this->onUp(e);});
+	win->on("keyDown", [this](void* e) {this->onKey(e);});
 	auto d2d = D2D::get();
 	node = win->root->createChild("viewerText");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
@@ -48,6 +51,7 @@ void ViewerText::setText(const std::vector<std::wstring>& texts)
 	textPoss.clear();
 	textLens.clear();
 	textHeights.clear();
+	this->texts = texts;
 	auto size = node->visual.Size();
 	auto padding = 12.f * node->win->dpi;
 	auto curHeight{ 8.f * node->win->dpi };
@@ -68,6 +72,7 @@ void ViewerText::setText(const std::vector<std::wstring>& texts)
 		curHeight += metrics.height; //行间距
 	}
 	selStartBox = selStartChar = selEndBox = selEndChar = -1;
+	syncSelectionToImg();
 	node->paint();
 }
 void ViewerText::setSelection(int startBox, int startChar, int endBox, int endChar)
@@ -83,6 +88,13 @@ void ViewerText::setSelection(int startBox, int startChar, int endBox, int endCh
 	selEndChar = endChar;
 	node->paint();
 }
+void ViewerText::syncSelectionToImg()
+{
+	auto img = ViewerImg::get();
+	if (!img) return;
+	// 索引语义在两个 Viewer 之间一一对应，直接透传（含 -1 的“清空”状态）
+	img->setSelection(selStartBox, selStartChar, selEndBox, selEndChar);
+}
 void ViewerText::onSize(void* e)
 {
 	auto win = WindowMain::get();
@@ -97,6 +109,7 @@ void ViewerText::onDown(void* e)
 	isMouseDown = true;
 	if (selStartBox >= 0) {
 		selStartBox = selStartChar = selEndBox = selEndChar = -1;
+		syncSelectionToImg();
 		node->paint();
 	}
 	auto tuplePtr = static_cast<std::tuple<float, float, bool, Node*>*>(e);
@@ -110,6 +123,7 @@ void ViewerText::onDown(void* e)
 		selStartChar = charIdx;
 		selEndBox = boxIdx;
 		selEndChar = charIdx;
+		syncSelectionToImg();
 	}
 }
 
@@ -131,6 +145,7 @@ void ViewerText::onMove(void* e)
 			if (boxIdx != selEndBox || charIdx != selEndChar) {
 				selEndBox = boxIdx;
 				selEndChar = charIdx;
+				syncSelectionToImg();
 				node->paint();
 			}
 		}
@@ -205,6 +220,35 @@ void ViewerText::onCursor(void* e)
 	SetCursor(LoadCursor(nullptr, IDC_IBEAM));
 	auto flag = static_cast<bool*>(e);
 	*flag = true;
+}
+
+void ViewerText::onKey(void* e)
+{
+	auto key = *static_cast<UINT*>(e);
+	bool isCtrlDown = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+	if (isCtrlDown && key == 'C') {
+		if (selStartBox < 0 || selEndBox < 0) return;
+		int sBox = selStartBox, sChar = selStartChar;
+		int eBox = selEndBox, eChar = selEndChar;
+		if (sBox > eBox || (sBox == eBox && sChar > eChar)) {
+			std::swap(sBox, eBox);
+			std::swap(sChar, eChar);
+		}
+		std::wstring str;
+		for (int i = sBox; i <= eBox; i++) {
+			if (i < 0 || i >= static_cast<int>(texts.size())) continue;
+			int len = static_cast<int>(texts[i].size());
+			if (len <= 0) continue;
+			int a = (i == sBox) ? sChar : 0;
+			int b = (i == eBox) ? eChar : len;
+			a = std::clamp(a, 0, len);
+			b = std::clamp(b, 0, len);
+			if (a >= b) continue;
+			if (!str.empty()) str += L"\r\n"; // 跨块之间加换行，粘贴到编辑器/Excel 更自然
+			str.append(texts[i], a, b - a);
+		}
+		if (!str.empty()) Util::setTextToClipboard(str);
+	}
 }
 
 bool ViewerText::hitTest(float wx, float wy, int& boxIdx, int& charIdx)

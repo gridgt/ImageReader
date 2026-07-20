@@ -337,3 +337,16 @@ void ViewerImg::syncSelectionToText()
 	}
 	text->setSelection(sBox, sChar, eBox, eChar);
 }
+
+void ViewerImg::setSelection(int startBox, int startChar, int endBox, int endChar)
+{
+	if (startBox == selStartBox && startChar == selStartChar &&
+		endBox == selEndBox && endChar == selEndChar) {
+		return;
+	}
+	selStartBox = startBox;
+	selStartChar = startChar;
+	selEndBox = endBox;
+	selEndChar = endChar;
+	node->paint();
+}
