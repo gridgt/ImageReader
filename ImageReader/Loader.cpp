@@ -131,16 +131,19 @@ std::vector<unsigned char> Loader::getFileData(const std::wstring& filePath)
 
 winrt::Windows::Foundation::IAsyncAction Loader::read()
 {
+	std::map<int, std::vector<float>> boxPoints;
+	std::map<int, std::vector<float>> charPoints;
+	std::vector<std::wstring> boxTexts;
 	co_await winrt::resume_background();
 	auto engine = tinyocr_engine_create();
 	tinyocr_ocr_model_paths_t paths = {
-	"./models/PP-OCRv6_tiny_det.param",
-	"./models/PP-OCRv6_tiny_det.bin",
-	"./models/PP-OCRv6_tiny_rec.param",
-	"./models/PP-OCRv6_tiny_rec.bin",
-	"./models/PP-OCRv6_vocab_tiny.txt",
-	"./models/PP-LCNet_x1_0_textline_ori.param",
-	"./models/PP-LCNet_x1_0_textline_ori.bin"
+		"./models/PP-OCRv6_tiny_det.param",
+		"./models/PP-OCRv6_tiny_det.bin",
+		"./models/PP-OCRv6_tiny_rec.param",
+		"./models/PP-OCRv6_tiny_rec.bin",
+		"./models/PP-OCRv6_vocab_tiny.txt",
+		"./models/PP-LCNet_x1_0_textline_ori.param",
+		"./models/PP-LCNet_x1_0_textline_ori.bin"
 	};
 	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
 		tinyocr_engine_destroy(engine);
@@ -158,39 +161,25 @@ winrt::Windows::Foundation::IAsyncAction Loader::read()
 	{
 		tinyocr_engine_destroy(engine);
 		co_return;
-	}	
-	std::vector<ComPtr<ID2D1PathGeometry>> pathes;
-	auto d2d = D2D::get();
+	}
 	for (int i = 0; i < box_count; i++) {
-		//std::cout << "Box " << i << ": points("
-		//	<< boxes[i].points[0] << "," << boxes[i].points[1] << "; "
-		//	<< boxes[i].points[2] << "," << boxes[i].points[3] << "; "
-		//	<< boxes[i].points[4] << "," << boxes[i].points[5] << "; "
-		//	<< boxes[i].points[6] << "," << boxes[i].points[7] << "), "
-		//	<< "isVertical: " << boxes[i].is_vertical << ", "
-		//	<< "score: " << boxes[i].score << std::endl;
-		auto path = d2d->createPath(boxes[i].points);
-		pathes.push_back(std::move(path));
+		auto& box = boxes[i];
+		boxPoints.insert({ i,{box.points[0],box.points[1],box.points[2],box.points[3],box.points[4],box.points[5],box.points[6],box.points[7]} });
 		auto wstr = Util::convertToWStr(lines[i].text);
-		log(wstr);
-		//writeConsoleW(L"Recognized Text: ");
-		//writeConsoleW(wstr);
-		//writeConsoleW(L"\n");
+		boxTexts.push_back(wstr);
+		std::vector<float> anchors;
 		for (size_t j = 0; j < lines[i].anchor_count; j++)
 		{
-			auto anchors = lines[i].anchors[j];
-			log(L"pos:{}",anchors);
-			auto a = 1;
-			//writeConsoleW(std::to_wstring(lines[i].anchors[j]));
-			//writeConsoleW(L" ");
+			auto& line = lines[i];
+			anchors.push_back(line.anchors[j]);
 		}
-		//writeConsoleW(L"\n");
+		charPoints.insert({ i,anchors });
 	}
 	tinyocr_free_text_boxes(boxes, box_count);
 	tinyocr_free_text_lines(lines, line_count);
 	tinyocr_engine_destroy(engine);
 	co_await winrt::resume_foreground(App::get()->dq);
-	ViewerImg::get()->setPathes(pathes);
+	ViewerImg::get()->setPathes(boxPoints, charPoints);
 }
 
 void Loader::initEngine()

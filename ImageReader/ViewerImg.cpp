@@ -43,9 +43,31 @@ ViewerImg* ViewerImg::get()
 {
 	return ins.get();
 }
-void ViewerImg::setPathes(const std::vector<ComPtr<ID2D1PathGeometry>>& pathes)
+void ViewerImg::setPathes(const std::map<int, std::vector<float>>& boxPoints, const std::map<int, std::vector<float>>& charPoints)
 {
-	this->pathes = pathes;
+	pathes.clear();
+	charLines.clear();
+	auto d2d = D2D::get();
+	for (size_t i = 0; i < boxPoints.size(); i++)
+	{
+		auto& boxArr = boxPoints.at(i);
+		pathes.push_back(d2d->createPath(boxArr));
+
+		auto& pointArr = charPoints.at(i);
+		auto maxPoint = pointArr[pointArr.size() - 1];
+		auto maxX = std::max({ boxArr[0], boxArr[2], boxArr[4], boxArr[6] });
+		auto minX = std::min({ boxArr[0], boxArr[2], boxArr[4], boxArr[6] });
+		auto maxY = std::max({ boxArr[1], boxArr[3], boxArr[5], boxArr[7] });
+		auto minY = std::min({ boxArr[1], boxArr[3], boxArr[5], boxArr[7] });
+		auto perVal = (maxX - minX) / maxPoint;
+		std::vector<std::pair<D2D1_POINT_2F, D2D1_POINT_2F>> lines;
+		for (size_t i = 0; i < pointArr.size(); i++)
+		{
+			auto x = pointArr[i] * perVal+minX;
+			lines.push_back({ { x, minY },{ x, maxY } });
+		}
+		charLines[i] = lines;
+	}
 	node->paint();
 }
 void ViewerImg::onSize(void* e)
@@ -80,8 +102,8 @@ void ViewerImg::onMove(void* e)
 	auto tuplePtr = static_cast<std::tuple<float,float>*>(e);
 	auto [x, y] = *tuplePtr;
 	auto win = WindowMain::get();
-	float nodeY = 30.f * win->dpi;
-	auto transform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(pos.x, pos.y + nodeY);
+	auto nodePos = node->visual.Offset();
+	auto transform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(pos.x, pos.y + nodePos.y);
 	isHover = false;
 	for (auto& path : pathes)
 	{
@@ -108,15 +130,24 @@ void ViewerImg::onPaint(void* e)
 	ctx->DrawBitmap(bitmap.Get(),dstRect,1.0f,D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
 	if (pathes.empty()) return;
 	ComPtr<ID2D1SolidColorBrush> bgBrush;
-	ColorA color(0xAA228866);
+	ColorA color(0xAA228822);
 	ctx->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
+	ComPtr<ID2D1SolidColorBrush> borderBrush;
+	ColorA color2(0x2288AA88);
+	ctx->CreateSolidColorBrush(color2.getD2DColor(), borderBrush.GetAddressOf());
 	D2D1_MATRIX_3X2_F oldTransform;
 	ctx->GetTransform(&oldTransform);
 	auto transform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(pos.x, pos.y);
 	ctx->SetTransform(transform * oldTransform);
-	for (auto& path:pathes)
+	for (size_t i = 0; i < pathes.size(); i++)
 	{
+		auto& path = pathes[i];
 		ctx->FillGeometry(path.Get(), bgBrush.Get());
+		for (size_t j = 0; j < charLines[i].size(); j++)
+		{
+			auto& pair = charLines[i][j];
+			ctx->DrawLine(pair.first, pair.second, borderBrush.Get(), node->win->dpi);
+		}
 	}
 	ctx->SetTransform(oldTransform);
 }

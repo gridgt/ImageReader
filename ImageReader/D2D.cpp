@@ -161,7 +161,7 @@ ComPtr<ID2D1Bitmap> D2D::createBitmap(const std::wstring& imgPath)
 	return bitmap;
 }
 
-ComPtr<ID2D1PathGeometry> D2D::createPath(const float* points)
+ComPtr<ID2D1PathGeometry> D2D::createPath(const std::vector<float>& points)
 {
 	ComPtr<ID2D1PathGeometry> path;
 	d2dFactory->CreatePathGeometry(path.GetAddressOf());
