@@ -34,6 +34,7 @@ public:
 	float dpi{ 1.0 };
 	HWND hwnd{ nullptr };
 	std::wstring title;
+	Node* nodeHover{ nullptr };
 	Composition::Compositor compositor;
 	std::unique_ptr<Node> root;
 protected:
@@ -67,7 +68,6 @@ private:
 	void positionChange(const int& x, const int& y);
 private:
 	Composition::Desktop::DesktopWindowTarget winTarget{ nullptr };	
-	Node* nodeHover{nullptr};
 	bool isMouseIn{ false }, wasMaximized{false};
 };
 

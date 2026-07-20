@@ -35,7 +35,8 @@ public:
 	void sizeChange();
 public:
 	WindowBase* win;
-	std::string id;	
+	std::string id;
+	float absX, absY, absW, absH;
 	/// <summary>
 	/// 1. 将子元素的锚点设置为其自身的中心点 (0.5, 0.5)
 	/// childVisual.AnchorPoint = new Vector2(0.5f, 0.5f);
@@ -55,7 +56,6 @@ public:
 protected:
 protected:
 	float x, y, w, h;
-	float absX, absY, absW, absH;
 private:
 private:
 	Node* parent{nullptr};

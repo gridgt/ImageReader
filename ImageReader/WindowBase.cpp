@@ -156,20 +156,8 @@ void WindowBase::createNativeWindow(const DWORD& exStyle, const DWORD& style)
 
 BOOL WindowBase::setCursor()
 {
-    //for (auto* n = nodeHover; n; n = n->parent) {
-    //    if (n->cursor) {
-    //        ::SetCursor(n->cursor);
-    //        return TRUE;
-    //    }
-    //}
-    //::SetCursor(LoadCursor(nullptr, IDC_ARROW));
     bool flag = false;
-    for (auto* n = nodeHover; n; n = n->parent) {
-        n->emit("cursor",&flag);
-        if (flag) {
-            break;
-        }
-    }
+    emit("cursor", &flag);
     if (!flag) {
         SetCursor(LoadCursor(nullptr, IDC_ARROW));
     }
@@ -300,6 +288,9 @@ void WindowBase::mouseMove(const float& x, const float& y)
     auto hit = root->findLeafByPos(x, y);
     if (hit == nodeHover) {        
         return;// 没有变化，什么都不做
+    }
+    if (!hit) {
+        return;
     }
     auto lca = hit->findLCA(nodeHover); //找最近公共祖先
     if (nodeHover) {

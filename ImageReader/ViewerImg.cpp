@@ -17,11 +17,11 @@ ViewerImg::ViewerImg(WindowBase* win, const std::wstring& path)
 	bitmap = D2D::get()->createBitmap(path);
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
 	win->on("mouseUp", [this](void* e) {this->onUp(e);});
+	win->on("cursor", [this](void* e) {this->onCursor(e);});
 	auto d2d = D2D::get();
 	node = win->root->createChild("viewerImg");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
-	node->on("cursor", [this](void* e) {this->onCursor(e);});
 	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initSurface();
 	node->sizeChange();//后添加的元素必须自己触发一次

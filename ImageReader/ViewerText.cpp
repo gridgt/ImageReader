@@ -18,10 +18,10 @@ ViewerText::ViewerText(WindowBase* win)
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
 	win->on("mouseUp", [this](void* e) {this->onUp(e);});
 	win->on("keyDown", [this](void* e) {this->onKey(e);});
+	win->on("cursor", [this](void* e) {this->onCursor(e);});
 	node = win->root->createChildScroller("viewerText");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
-	node->on("cursor", [this](void* e) {this->onCursor(e);});
 	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initContentSurface();
 	node->sizeChange();//后添加的元素必须自己触发一次
@@ -92,7 +92,12 @@ void ViewerText::syncSelectionToImg()
 {
 	auto img = ViewerImg::get();
 	if (!img) return;
-	// 索引语义在两个 Viewer 之间一一对应，直接透传（含 -1 的“清空”状态）
+	// 纯 caret（没有真选中字符）不透传，避免 ViewerImg 侧“a==b 展开成一格”而
+	// 出现“ViewerText 什么都没涂、ViewerImg 却有一个字符高亮”的不对称
+	if (selStartBox == selEndBox && selStartChar == selEndChar) {
+		img->setSelection(-1, -1, -1, -1);
+		return;
+	}
 	img->setSelection(selStartBox, selStartChar, selEndBox, selEndChar);
 }
 void ViewerText::onSize(void* e)
@@ -105,6 +110,7 @@ void ViewerText::onSize(void* e)
 
 void ViewerText::onDown(void* e)
 {
+	if (node->isHoverScroller || !isHover) return;
 	SetCapture(node->win->hwnd);
 	isMouseDown = true;
 	if (selStartBox >= 0) {
@@ -118,7 +124,7 @@ void ViewerText::onDown(void* e)
 		return;
 	}
 	int boxIdx = -1, charIdx = -1;
-	if (hitTest(x, y, boxIdx, charIdx)) {
+	if (hitTest(x, y+node->scrollY, boxIdx, charIdx)) {
 		selStartBox = boxIdx;
 		selStartChar = charIdx;
 		selEndBox = boxIdx;
@@ -137,11 +143,19 @@ void ViewerText::onMove(void* e)
 {
 	auto tuplePtr = static_cast<std::tuple<float,float>*>(e);
 	auto [x, y] = *tuplePtr;
+	auto padding = 12.f * node->win->dpi;
+	auto size = node->visual.Size();
+	if (x > node->absX + padding && x<node->absX + size.x - padding && y>node->absY && y < node->absY + size.y) {
+		isHover = true;
+	}
+	else {
+		isHover = false;
+	}
 	auto win = WindowMain::get();
 	auto nodePos = node->visual.Offset();
 	if (isMouseDown && selStartBox >= 0) {
 		int boxIdx = -1, charIdx = -1;
-		if (hitTest(x, y, boxIdx, charIdx)) {
+		if (hitTest(x, y + node->scrollY, boxIdx, charIdx)) {
 			if (boxIdx != selEndBox || charIdx != selEndChar) {
 				selEndBox = boxIdx;
 				selEndChar = charIdx;
@@ -169,7 +183,7 @@ void ViewerText::onPaint(void* e)
 	ComPtr<ID2D1SolidColorBrush> selBrush;
 	ctx->CreateSolidColorBrush(ColorA(0x66AAFF88).getD2DColor(), selBrush.GetAddressOf());
 
-	auto size = node->visual.Size();
+	auto size = node->visualContent.Size();
 	ctx->DrawLine({ 0.f,0.f }, { 0.f,size.y }, borderBrush.Get(), node->win->dpi*1.5);
 
 	// 先绘制选中背景（放在文本下方，避免遮挡文字）
@@ -217,9 +231,11 @@ void ViewerText::onPaint(void* e)
 
 void ViewerText::onCursor(void* e)
 {
-	SetCursor(LoadCursor(nullptr, IDC_IBEAM));
-	auto flag = static_cast<bool*>(e);
-	*flag = true;
+	if (isHover) {
+		SetCursor(LoadCursor(nullptr, IDC_IBEAM));
+		auto flag = static_cast<bool*>(e);
+		*flag = true;
+	}
 }
 
 void ViewerText::onKey(void* e)

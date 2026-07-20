@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "TitleBar.h"
 #include "WindowBase.h"
+#include "WindowMain.h"
 #include "D2D.h"
 #include "Node.h"
 
@@ -10,6 +11,7 @@ TitleBar::TitleBar(WindowBase* win)
 {
 	win->on("maximize", [this](void* ptr) { this->onMaximize(); });
 	win->on("restore", [this](void* ptr) { this->onRestore(); });
+	win->on("cursor", [this](void* e) {this->onCursor(e);});
 	auto d2d = D2D::get();
 	node = win->root->createChild("titleBar");
 	node->on("sizeChange", [this](void* e) {this->onBarSize(e);});
@@ -25,7 +27,6 @@ TitleBar::TitleBar(WindowBase* win)
 		btn->on("mouseEnter", [this](void* e) {this->onEnter(e);});
 		btn->on("mouseLeave", [this](void* e) {this->onLeave(e);});
 		btn->on("mouseDown", [this](void* e) {this->onDown(e);});
-		btn->on("cursor", [this](void* e) {this->onCursor(e);});
 		btn->on("paint", [this](void* e) {this->onBtnPaint(e);});
 		btn->initSurface();
 		btns.push_back(btn);
@@ -128,9 +129,12 @@ void TitleBar::onDown(void* e)
 
 void TitleBar::onCursor(void* e)
 {
-	SetCursor(LoadCursor(nullptr, IDC_HAND));
-	auto flag = static_cast<bool*>(e);
-	*flag = true;
+	auto nodeHover = WindowMain::get()->nodeHover;
+	if (nodeHover && nodeHover->id.starts_with("btn")) {
+		SetCursor(LoadCursor(nullptr, IDC_HAND));
+		auto flag = static_cast<bool*>(e);
+		*flag = true;
+	}
 }
 
 void TitleBar::onBtnPaint(void* e)

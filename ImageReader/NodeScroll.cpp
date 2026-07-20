@@ -18,6 +18,7 @@ NodeScroll::NodeScroll(WindowBase* win, const std::string& id) :Node(win,id)
     win->on("mouseMove", [this](void* e) {this->onMove(e);});
     win->on("mouseUp", [this](void* e) {this->onUp(e);});
     on("mouseDown", [this](void* e) {this->onDown(e);});
+    on("cursor", [this](void* e) {this->onCursor(e);});
 }
 
 NodeScroll::~NodeScroll()
@@ -35,6 +36,7 @@ void NodeScroll::setContentPosSize(const float& x, const float& y, const float& 
     surface.Resize({ static_cast<int>(w), static_cast<int>(h) });
     surfaceScroller.Resize({ static_cast<int>(sbW), static_cast<int>(size.y) });
     visualScroller.IsVisible(h > size.y);
+    paintScrollbar();    
 }
 
 void NodeScroll::initContentSurface()
@@ -114,6 +116,15 @@ void NodeScroll::onMove(void* e)
     }
 }
 
+void NodeScroll::onCursor(void* e)
+{
+    if (isHoverScroller) {
+        SetCursor(LoadCursor(nullptr, IDC_ARROW));
+        auto flag = static_cast<bool*>(e);
+        *flag = true;
+    }
+}
+
 bool NodeScroll::hasScroller()
 {
     if(!visual.IsVisible()) return false;
@@ -137,6 +148,8 @@ void NodeScroll::setScroll(float y)
 }
 void NodeScroll::paintScrollbar()
 {
+    if (!visualScroller.IsVisible()) return;
+
     auto s = surfaceScroller.as<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop>();
     ComPtr<ID2D1DeviceContext> ctx;
     POINT offset{};
