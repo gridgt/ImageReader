@@ -18,13 +18,12 @@ ViewerText::ViewerText(WindowBase* win)
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
 	win->on("mouseUp", [this](void* e) {this->onUp(e);});
 	win->on("keyDown", [this](void* e) {this->onKey(e);});
-	auto d2d = D2D::get();
-	node = win->root->createChild("viewerText");
+	node = win->root->createChildScroller("viewerText");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
 	node->on("cursor", [this](void* e) {this->onCursor(e);});
 	node->on("paint", [this](void* e) {this->onPaint(e);});
-	node->initSurface();
+	node->initContentSurface();
 	node->sizeChange();//后添加的元素必须自己触发一次
 }
 
@@ -73,6 +72,7 @@ void ViewerText::setText(const std::vector<std::wstring>& texts)
 	}
 	selStartBox = selStartChar = selEndBox = selEndChar = -1;
 	syncSelectionToImg();
+	node->setContentPosSize(0,0,size.x,curHeight);
 	node->paint();
 }
 void ViewerText::setSelection(int startBox, int startChar, int endBox, int endChar)

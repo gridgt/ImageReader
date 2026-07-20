@@ -247,9 +247,7 @@ LRESULT WindowBase::winProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     else if (msg == WM_MOUSEWHEEL) {
-        POINT pt{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        ScreenToClient(hwnd, &pt);
-        self->onMouseWheel(static_cast<float>(pt.x), static_cast<float>(pt.y), (short)HIWORD(wParam));
+        self->mouseWheel(wParam, lParam);
         return 0;
     }
     else if (msg == WM_KEYDOWN) {
@@ -370,6 +368,14 @@ void WindowBase::mouseUp(const float& x, const float& y, bool isRight)
 {
     auto arg = std::make_tuple(x, y, isRight);
     emit("mouseUp", &arg);
+}
+
+void WindowBase::mouseWheel(WPARAM wParam, LPARAM lParam)
+{
+    POINT pt{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+    ScreenToClient(hwnd, &pt);
+    auto arg = std::make_tuple(pt, (short)HIWORD(wParam));
+    emit("mouseWheel", &arg);
 }
 
 void WindowBase::keyDown(const UINT& key)

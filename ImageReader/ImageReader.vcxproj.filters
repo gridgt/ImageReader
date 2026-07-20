@@ -60,6 +60,9 @@
     <ClCompile Include="ViewerText.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="NodeScroll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -102,6 +105,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ViewerText.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeScroll.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

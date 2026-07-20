@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "pch.h"
-#include "Node.h"
+#include "NodeScroll.h"
 class WindowBase;
 class ViewerText
 {
@@ -34,7 +34,7 @@ private:
 private:
 	D2D1_POINT_2F pos;
 	bool isHover{ false }, isMouseDown{false};
-	Node* node;
+	NodeScroll* node;
 	std::vector<ComPtr<IDWriteTextLayout>> textLayouts;
 	std::vector<D2D1_POINT_2F> textPoss;
 	std::vector<UINT32> textLens;    // 每个 layout 的字符数（供 HitTestTextRange 做区间截断）

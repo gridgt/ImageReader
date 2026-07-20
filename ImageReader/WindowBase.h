@@ -59,6 +59,7 @@ private:
 	void mouseLeave();
 	void mouseDown(const float& x, const float& y, bool isRight);
 	void mouseUp(const float& x, const float& y, bool isRight);
+	void mouseWheel(WPARAM wParam, LPARAM lParam);
 	void keyDown(const UINT& key);
 	void paint();
 	void dpiChange(WPARAM wParam, LPARAM lParam);

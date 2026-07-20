@@ -3,6 +3,7 @@
 #include "Event.h"
 #include "ColorA.h"
 class WindowBase;
+class NodeScroll;
 class Node:public Event
 {
 	friend class WindowBase;
@@ -10,6 +11,7 @@ public:
 	Node(WindowBase* win, const std::string& id = "");
 	virtual ~Node();
 	Node* createChild(const std::string& id = "");
+	NodeScroll* createChildScroller(const std::string& id = "");
 	void initSurface();
 	void setPosSize(const float& x, const float& y, const float& w, const float& h);
 	bool isPosIn(float x, float y);
