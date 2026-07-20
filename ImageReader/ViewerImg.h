@@ -21,6 +21,7 @@ private:
 	/// 将窗口坐标转换为图像坐标下最近的 box + 分隔线索引
 	/// </summary>
 	bool hitTest(float wx, float wy, int& boxIdx, int& charIdx);
+	void paintAssist(ID2D1DeviceContext* ctx);
 private:
 	D2D1_POINT_2F pos;
 	float scale{1.0f};

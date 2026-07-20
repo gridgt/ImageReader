@@ -368,17 +368,19 @@ void WindowBase::mouseDown(const float& x, const float& y, bool isRight)
 
 void WindowBase::mouseUp(const float& x, const float& y, bool isRight)
 {
-    if (!nodeHover) return;
-    auto path = nodeHover->pathUpTo(nullptr);
-    for (auto* node : path) {
-        node->stopEventPopup = false;
-        auto arg = std::make_tuple(x, y, isRight, node);
-        node->emit("mouseUp", &arg);
-        if (node->stopEventPopup) {
-            node->stopEventPopup = false;
-            break;
-        }
-    }
+    auto arg = std::make_tuple(x, y, isRight);
+    emit("mouseUp", &arg);
+    //if (!nodeHover) return;
+    //auto path = nodeHover->pathUpTo(nullptr);
+    //for (auto* node : path) {
+    //    node->stopEventPopup = false;
+    //    auto arg = std::make_tuple(x, y, isRight, node);
+    //    node->emit("mouseUp", &arg);
+    //    if (node->stopEventPopup) {
+    //        node->stopEventPopup = false;
+    //        break;
+    //    }
+    //}
 }
 
 void WindowBase::dpiChange(WPARAM wParam, LPARAM lParam)

@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "ViewerImg.h"
+#include "ViewerText.h"
 #include "WindowBase.h"
 #include "WindowMain.h"
 #include "D2D.h"
@@ -15,11 +16,11 @@ ViewerImg::ViewerImg(WindowBase* win, const std::wstring& path)
 {
 	bitmap = D2D::get()->createBitmap(path);
 	win->on("mouseMove", [this](void* e) {this->onMove(e);});
+	win->on("mouseUp", [this](void* e) {this->onUp(e);});
 	auto d2d = D2D::get();
 	node = win->root->createChild("viewerImg");
 	node->on("sizeChange", [this](void* e) {this->onSize(e);});
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
-	node->on("mouseUp", [this](void* e) {this->onUp(e);});
 	node->on("cursor", [this](void* e) {this->onCursor(e);});
 	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initSurface();
@@ -104,6 +105,7 @@ void ViewerImg::onSize(void* e)
 
 void ViewerImg::onDown(void* e)
 {
+	SetCapture(node->win->hwnd);
 	isMouseDown = true;
 	if (selStartBox >= 0) {
 		selStartBox = selStartChar = selEndBox = selEndChar = -1;
@@ -145,6 +147,7 @@ void ViewerImg::onDown(void* e)
 void ViewerImg::onUp(void* e)
 {
 	isMouseDown = false;
+	ReleaseCapture();
 }
 
 void ViewerImg::onMove(void* e)
@@ -180,36 +183,15 @@ void ViewerImg::onPaint(void* e)
 {
 	auto tuplePtr = static_cast<std::tuple<Node*, ID2D1DeviceContext*>*>(e);
 	auto ctx = std::get<1>(*tuplePtr);
-	D2D1_RECT_F dstRect = D2D1::RectF(pos.x, pos.y,
-		pos.x + bitmap->GetSize().width * scale,
-		pos.y + bitmap->GetSize().height * scale
-	);
+	D2D1_RECT_F dstRect{ pos.x, pos.y, pos.x + bitmap->GetSize().width * scale, pos.y + bitmap->GetSize().height * scale };
 	ctx->DrawBitmap(bitmap.Get(),dstRect,1.0f,D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
 	if (pathes.empty()) return;
-	ComPtr<ID2D1SolidColorBrush> bgBrush;
-	ColorA color(0xAA228822);
-	ctx->CreateSolidColorBrush(color.getD2DColor(), bgBrush.GetAddressOf());
-	ComPtr<ID2D1SolidColorBrush> borderBrush;
-	ColorA color2(0x2288AA88);
-	ctx->CreateSolidColorBrush(color2.getD2DColor(), borderBrush.GetAddressOf());
 	ComPtr<ID2D1SolidColorBrush> selBrush;
-	ColorA selColor(0x66AAFF88); // 半透明蓝色，选中高亮 (RRGGBBAA)
-	ctx->CreateSolidColorBrush(selColor.getD2DColor(), selBrush.GetAddressOf());
+	ctx->CreateSolidColorBrush(ColorA(0x66AAFF88).getD2DColor(), selBrush.GetAddressOf());
 	D2D1_MATRIX_3X2_F oldTransform;
 	ctx->GetTransform(&oldTransform);
 	auto transform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(pos.x, pos.y);
 	ctx->SetTransform(transform * oldTransform);
-	//for (size_t i = 0; i < pathes.size(); i++)
-	//{
-	//	auto& path = pathes[i];
-	//	ctx->FillGeometry(path.Get(), bgBrush.Get());
-	//	for (size_t j = 0; j < charLines[i].size(); j++)
-	//	{
-	//		auto& pair = charLines[i][j];
-	//		ctx->DrawLine(pair.first, pair.second, borderBrush.Get(), node->win->dpi);
-	//	}
-	//}
-	// 绘制选中区域
 	if (selStartBox >= 0 && selEndBox >= 0) {
 		int sBox = selStartBox, sChar = selStartChar;
 		int eBox = selEndBox, eChar = selEndChar;
@@ -227,8 +209,7 @@ void ViewerImg::onPaint(void* e)
 			if (a > b) std::swap(a, b);
 			a = std::clamp(a, 0, lastIdx);
 			b = std::clamp(b, 0, lastIdx);
-			// a==b 时，选区退化为一个 caret 位置 —— 涂当前 caret 所指的那个字符
-			// 用 lines[a] 与 lines[a+1] 作为该字符的左右边界，末尾时向左取一格
+			// a==b 时，选区退化为一个 caret 位置 —— 涂当前 caret 所指的那个字符 用 lines[a] 与 lines[a+1] 作为该字符的左右边界，末尾时向左取一格
 			if (a == b) {
 				if (a < lastIdx) b = a + 1;
 				else a = b - 1;
@@ -306,4 +287,22 @@ bool ViewerImg::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	boxIdx = bestBox;
 	charIdx = bestIdx;
 	return true;
+}
+
+void ViewerImg::paintAssist(ID2D1DeviceContext* ctx)
+{
+	ComPtr<ID2D1SolidColorBrush> bgBrush;
+	ctx->CreateSolidColorBrush(ColorA(0xAA228822).getD2DColor(), bgBrush.GetAddressOf());
+	ComPtr<ID2D1SolidColorBrush> borderBrush;
+	ctx->CreateSolidColorBrush(ColorA(0x2288AA88).getD2DColor(), borderBrush.GetAddressOf());
+	for (size_t i = 0; i < pathes.size(); i++)
+	{
+		auto& path = pathes[i];
+		ctx->FillGeometry(path.Get(), bgBrush.Get());
+		for (size_t j = 0; j < charLines[i].size(); j++)
+		{
+			auto& pair = charLines[i][j];
+			ctx->DrawLine(pair.first, pair.second, borderBrush.Get(), node->win->dpi);
+		}
+	}
 }

@@ -27,7 +27,9 @@ private:
 	Node* node;
 	std::vector<ComPtr<IDWriteTextLayout>> textLayouts;
 	std::vector<D2D1_POINT_2F> textPoss;
-	// 文本选区，Char 索引是 charLines[box] 中的“分隔线”索引，
+	std::vector<UINT32> textLens;    // 每个 layout 的字符数（供 HitTestTextRange 做区间截断）
+	std::vector<float> textHeights;  // 每个 layout 的高度（供 hitTest 按 y 找块）
+	// 文本选区：selStartChar/selEndChar 是该块内的“字符位置”（即光标位置），
 	// 字符 j 被选中当且仅当 min(startChar,endChar) <= j < max(startChar,endChar)
 	int selStartBox{ -1 }, selStartChar{ -1 };
 	int selEndBox{ -1 }, selEndChar{ -1 };
