@@ -23,7 +23,7 @@ Loader::Loader(WindowBase* win)
 	node->on("mouseDown", [this](void* e) {this->onDown(e);});
 	node->on("paint", [this](void* e) {this->onPaint(e);});
 	node->initSurface();
-	text = d2d->createTextLayout(L"拖拽/点击加载图像", FLT_MAX, FLT_MAX);
+	text = d2d->createTextLayout(L"点击加载图像", FLT_MAX, FLT_MAX);
 }
 
 Loader::~Loader()
@@ -147,19 +147,42 @@ winrt::Windows::Foundation::IAsyncAction Loader::read(std::wstring imgPath)
 	auto t0 = std::chrono::steady_clock::now();
 	co_await winrt::resume_background();
 	auto engine = tinyocr_engine_create();
-	tinyocr_ocr_model_paths_t paths = {
-		"./models/PP-OCRv6_tiny_det.param",
-		"./models/PP-OCRv6_tiny_det.bin",
-		"./models/PP-OCRv6_tiny_rec.param",
-		"./models/PP-OCRv6_tiny_rec.bin",
-		"./models/PP-OCRv6_vocab_tiny.txt",
-		"./models/PP-LCNet_x1_0_textline_ori.param",
-		"./models/PP-LCNet_x1_0_textline_ori.bin"
+
+	auto [detParam,detParamSize] = Util::getRes(L"PP-OCRv6_tiny_det.param");
+	auto [detBin, detBinSize] = Util::getRes(L"PP-OCRv6_tiny_det.bin");
+	auto [recParam, recParamSize] = Util::getRes(L"PP-OCRv6_tiny_rec.param");
+	auto [recBin, recBinSize] = Util::getRes(L"PP-OCRv6_tiny_rec.bin");
+	auto [txt, txtSize] = Util::getRes(L"PP-OCRv6_vocab_tiny.txt");
+
+	tinyocr_ocr_model_buffers_t buffers{
+		(const char*)detParam,
+		(const unsigned char*)detBin,
+		(const char*)recParam,
+		(const unsigned char*)recBin,
+		(const char*)txt,
+		NULL,
+		NULL
 	};
-	if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
+
+	if (tinyocr_engine_load_model_from_buffer(engine, &buffers, nullptr) != 0) {
 		tinyocr_engine_destroy(engine);
 		co_return;
 	}
+
+
+	//tinyocr_ocr_model_paths_t paths = {
+	//	"./models/PP-OCRv6_tiny_det.param",
+	//	"./models/PP-OCRv6_tiny_det.bin",
+	//	"./models/PP-OCRv6_tiny_rec.param",
+	//	"./models/PP-OCRv6_tiny_rec.bin",
+	//	"./models/PP-OCRv6_vocab_tiny.txt",
+	//	"./models/PP-LCNet_x1_0_textline_ori.param",
+	//	"./models/PP-LCNet_x1_0_textline_ori.bin"
+	//};
+	//if (tinyocr_engine_load_model(engine, &paths, nullptr) != 0) {
+	//	tinyocr_engine_destroy(engine);
+	//	co_return;
+	//}
 	auto data = getFileData(imgPath);
 	if (data.empty()) {
 		co_return;

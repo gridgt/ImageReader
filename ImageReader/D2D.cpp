@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "D2D.h"
+#include "Util.h"
 #include <wincodec.h>
 static std::unique_ptr<D2D> d2d;
 D2D::D2D()
@@ -27,17 +28,7 @@ void D2D::initFont()
 	factory5->CreateFontSetBuilder(&builder);
 	// 3. 将系统字体加入 Builder
 	builder->AddFontSet(sysFontSet.Get());
-	// 4. 加载资源中的字体
-	HRSRC hRes = FindResource(NULL, L"iconfont.ttf", RT_RCDATA);
-	if (!hRes) {
-		return;
-	}
-	HGLOBAL hData = LoadResource(NULL, hRes);
-	if (!hData) {
-		return;
-	}
-	void* pData = LockResource(hData);
-	DWORD size = SizeofResource(NULL, hRes);
+	auto [pData, size] = Util::getRes(L"iconfont.ttf");
 	ComPtr<IDWriteInMemoryFontFileLoader> loader;
 	dwriteFactory->CreateInMemoryFontFileLoader(loader.GetAddressOf());
 	dwriteFactory->RegisterFontFileLoader(loader.Get());

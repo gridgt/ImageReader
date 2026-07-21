@@ -54,8 +54,6 @@ void ViewerText::setText(const std::vector<std::wstring>& texts)
 	auto size = node->visual.Size();
 	auto padding = 12.f * node->win->dpi;
 	auto curHeight{ 8.f * node->win->dpi };
-	log(L"[setText] node.visual.Size=({},{}) padding={} layoutWidth={}",
-		size.x, size.y, padding, size.x - padding * 2);
 	for (size_t i = 0; i < texts.size(); i++)
 	{
 		auto& str = texts[i];
@@ -115,13 +113,7 @@ void ViewerText::onSize(void* e)
 		x = win->w - w;
 	}
 	float y{ 30.f * win->dpi }, h{ win->h - y - 22 * win->dpi };
-	log(L"[ViewerText::onSize] win=({},{}) dpi={} -> node x={} y={} w={} h={}",
-		win->w, win->h, win->dpi, x, y, w, h);
 	node->setPosSize(x, y, w, h);
-	log(L"[ViewerText::onSize] after setPosSize node absX={} absY={} absW={} absH={} visualOff=({},{}) visualSz=({},{})",
-		node->absX, node->absY, node->absW, node->absH,
-		node->visual.Offset().x, node->visual.Offset().y,
-		node->visual.Size().x, node->visual.Size().y);
 	setText(texts);
 }
 
@@ -140,22 +132,13 @@ void ViewerText::onDown(void* e)
 	if (isRight) {
 		return;
 	}
-	log(L"[ViewerText::onDown] wx={} wy={} scrollY={} nodeAbs=({},{}) visualOff=({},{}) visualSz=({},{})",
-		x, y, node->scrollY,
-		node->absX, node->absY,
-		node->visual.Offset().x, node->visual.Offset().y,
-		node->visual.Size().x, node->visual.Size().y);
 	int boxIdx = -1, charIdx = -1;
 	if (hitTest(x, y+node->scrollY, boxIdx, charIdx)) {
 		selStartBox = boxIdx;
 		selStartChar = charIdx;
 		selEndBox = boxIdx;
 		selEndChar = charIdx;
-		log(L"[ViewerText::onDown] hit -> box={} char={}", boxIdx, charIdx);
 		syncSelectionToImg();
-	}
-	else {
-		log(L"[ViewerText::onDown] hitTest missed");
 	}
 }
 
@@ -295,8 +278,6 @@ bool ViewerText::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	auto nodeOff = node->visual.Offset();
 	float lx = wx - nodeOff.x;
 	float ly = wy - nodeOff.y;
-	log(L"[hitTest] wx={} wy={} nodeOff=({},{}) -> lx={} ly={} layouts={}",
-		wx, wy, nodeOff.x, nodeOff.y, lx, ly, textLayouts.size());
 	// 按 y 找最近的文本块：先找严格包含 ly 的；若都不含，取 y 距离最近者
 	int bestBox = -1;
 	float bestDist = FLT_MAX;
@@ -313,8 +294,6 @@ bool ViewerText::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 		}
 	}
 	if (bestBox < 0) return false;
-	log(L"[hitTest] bestBox={} textPos=({},{}) height={} textLen={}",
-		bestBox, textPoss[bestBox].x, textPoss[bestBox].y, textHeights[bestBox], textLens[bestBox]);
 	// 在选中的 layout 内做 HitTestPoint，得到字符索引
 	// 越界的 ly 用块自身范围钳位，避免打到别的行
 	float localX = lx - textPoss[bestBox].x;
@@ -327,8 +306,6 @@ bool ViewerText::hitTest(float wx, float wy, int& boxIdx, int& charIdx)
 	// 命中字符前沿 -> 光标位于 textPosition；命中后沿 -> 光标位于 textPosition + 1
 	int pos = static_cast<int>(metrics.textPosition) + (isTrailing ? 1 : 0);
 	pos = std::clamp(pos, 0, static_cast<int>(textLens[bestBox]));
-	log(L"[hitTest] localX={} localY={} -> textPosition={} isTrailing={} pos={}",
-		localX, localY, metrics.textPosition, (int)isTrailing, pos);
 	boxIdx = bestBox;
 	charIdx = pos;
 	return true;

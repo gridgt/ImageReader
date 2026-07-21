@@ -53,3 +53,18 @@ void Util::setTextToClipboard(const std::wstring& text)
     SetClipboardData(CF_UNICODETEXT, hGlobal);
     CloseClipboard();
 }
+
+std::tuple<void*, DWORD> Util::getRes(const std::wstring& name)
+{
+    HRSRC hRes = FindResource(NULL, name.data(), RT_RCDATA);
+    if (!hRes) {
+        return std::make_tuple(nullptr,0);
+    }
+    HGLOBAL hData = LoadResource(NULL, hRes);
+    if (!hData) {
+        return std::make_tuple(nullptr, 0);
+    }
+    void* pData = LockResource(hData);
+    DWORD size = SizeofResource(NULL, hRes);
+    return std::make_tuple(pData, size);
+}

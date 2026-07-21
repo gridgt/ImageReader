@@ -181,9 +181,6 @@ std::wstring& WindowBase::getWinClsName()
         wcex.hIcon = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(100));  // 任务栏大图标
         wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(100));  // 标题栏小图标
         auto r = RegisterClassEx(&wcex);
-        if (r == 0) {
-            log(L"err:: reg window class error");
-        }
         return wcex.lpszClassName;
         }();
     return clsName;
