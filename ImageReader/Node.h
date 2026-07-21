@@ -33,6 +33,10 @@ public:
 	/// </summary>
 	std::vector<Node*> pathUpTo(Node* stopAt);
 	void sizeChange();
+	/// <summary>
+	/// 递归刷新 abs* 字段（不触发 sizeChange 事件、不调用 onSize 回调）
+	/// </summary>
+	void refreshAbsRecursive();
 public:
 	WindowBase* win;
 	std::string id;

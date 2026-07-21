@@ -6,6 +6,7 @@
 #include "Tip.h"
 #include "TitleBar.h"
 #include "Loader.h"
+#include "StatusBar.h"
 #include "WebSocket.h"
 
 namespace {
@@ -38,6 +39,7 @@ void WindowMain::onCreated()
     root->setBackgroundColor(0xFFFFFFFF);
     TitleBar::init(this);
     Loader::init(this);
+    StatusBar::init(this);
 }
 
 void WindowMain::onMinMaxInfo(MINMAXINFO* mmi)

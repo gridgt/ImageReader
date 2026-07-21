@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "pch.h"
 #include "Node.h"
 #include "tinyocr.h"
@@ -9,6 +9,10 @@ public:
 	~Loader();
 	static void init(WindowBase* win);
 	static Loader* get();
+	/// <summary>
+	/// 弹选择文件对话框，加载图像；与初始点击“拖拽/点击加载图像”提示的行为一致。
+	/// </summary>
+	void pickAndLoad();
 private:
 	Loader(WindowBase* win);
 	void onSize(void* e);

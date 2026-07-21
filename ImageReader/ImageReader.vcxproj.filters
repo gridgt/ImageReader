@@ -51,6 +51,9 @@
     <ClCompile Include="TitleBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="StatusBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="Loader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -96,6 +99,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TitleBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Loader.h">

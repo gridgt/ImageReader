@@ -9,6 +9,7 @@
 #include <wincodec.h>
 #include "ViewerImg.h"
 #include "ViewerText.h"
+#include "StatusBar.h"
 #include "Util.h"
 #include "App.h"
 
@@ -53,6 +54,11 @@ void Loader::onSize(void* e)
 }
 
 void Loader::onDown(void* e)
+{
+	pickAndLoad();
+}
+
+void Loader::pickAndLoad()
 {
 	auto imgPath = getFilePath();
 	if (imgPath.empty()) {
@@ -136,6 +142,9 @@ winrt::Windows::Foundation::IAsyncAction Loader::read(std::wstring imgPath)
 	std::map<int, std::vector<float>> boxPoints;
 	std::map<int, std::vector<float>> charPoints;
 	std::vector<std::wstring> boxTexts;
+	// 状态栏提示进入识别中；计时从这里开始（前台线程）
+	if (auto sb = StatusBar::get()) sb->showRecognizing();
+	auto t0 = std::chrono::steady_clock::now();
 	co_await winrt::resume_background();
 	auto engine = tinyocr_engine_create();
 	tinyocr_ocr_model_paths_t paths = {
@@ -181,6 +190,9 @@ winrt::Windows::Foundation::IAsyncAction Loader::read(std::wstring imgPath)
 	tinyocr_free_text_lines(lines, line_count);
 	tinyocr_engine_destroy(engine);
 	co_await winrt::resume_foreground(App::get()->dq);
+	auto t1 = std::chrono::steady_clock::now();
+	auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 	ViewerImg::get()->setPathes(boxPoints, charPoints);
 	ViewerText::get()->setText(boxTexts);
+	if (auto sb = StatusBar::get()) sb->showRecognizeDone(elapsedMs);
 }

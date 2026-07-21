@@ -14,9 +14,9 @@ public:
 	/// startBox/endBox 与 setText 时的下标一致；startChar/endChar 是各自 layout 内的字符位置。
 	/// </summary>
 	void setSelection(int startBox, int startChar, int endBox, int endChar);
+	void onSize(void* e);
 private:
 	ViewerText(WindowBase* win);
-	void onSize(void* e);
 	void onDown(void* e);
 	void onUp(void* e);
 	void onMove(void* e);

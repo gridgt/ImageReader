@@ -44,11 +44,47 @@ void Node::initSurface()
 void Node::setPosSize(const float& x, const float& y, const float& w, const float& h)
 {
 
-    visual.Offset({ x,y,0.f });
-    visual.Size({ w,h });
-    if (surface) {
-        surface.Resize({ static_cast<int>(w), static_cast<int>(h) }); //todo 尺寸没变就跳过
-    }
+	visual.Offset({ x,y,0.f });
+	visual.Size({ w,h });
+	if (surface) {
+		surface.Resize({ static_cast<int>(w), static_cast<int>(h) }); //todo 尺寸没变就跳过
+	}
+	// 同步刷新 abs 字段：hit-test / onMove 的 hover 判定依赖它，
+	// 之前只有 sizeChange() 走到这里，导致用户在 sizeChange 之外直接 setPosSize
+	// （如分隔栏拖拽）后 abs* 停留在旧值，选区/命中都错位。
+	if (parent) {
+		absX = parent->absX + x;
+		absY = parent->absY + y;
+	}
+	else {
+		absX = x;
+		absY = y;
+	}
+	absW = w;
+	absH = h;
+	// 子节点的 abs* 也要跟着走（子节点自己的 offset 相对本节点没变，但父的 abs 变了）
+	for (auto& child : children) {
+		child->refreshAbsRecursive();
+	}
+}
+
+void Node::refreshAbsRecursive()
+{
+	auto off = visual.Offset();
+	auto sz = visual.Size();
+	if (parent) {
+		absX = parent->absX + off.x;
+		absY = parent->absY + off.y;
+	}
+	else {
+		absX = off.x;
+		absY = off.y;
+	}
+	absW = sz.x;
+	absH = sz.y;
+	for (auto& child : children) {
+		child->refreshAbsRecursive();
+	}
 }
 
 bool Node::isPosIn(float x, float y)
