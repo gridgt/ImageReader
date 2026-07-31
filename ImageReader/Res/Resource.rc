@@ -2,7 +2,7 @@
 #include "winres.h"
 #undef APSTUDIO_READONLY_SYMBOLS
 // 100 ICON "logo.ico"
-iconfont.ttf RCDATA "iconfont.ttf"
+icon.ttf RCDATA "icon.ttf"
 PP-OCRv6_rec_tiny.onnx RCDATA "PP-OCRv6_rec_tiny.onnx"
 PP-OCRv6_det_tiny.onnx RCDATA "PP-OCRv6_det_tiny.onnx"
 

@@ -1,19 +1,30 @@
 ﻿#pragma once
-#include "WindowBase.h"
+#include <include/Ling.h>
 class TitleBar;
-class TitleBtn;
-class WindowMain : public WindowBase
+class StatusBar;
+class TextBox;
+class ImgViewer;
+class WindowMain : public Ling::WinBase
 {
 public:
 	~WindowMain();
 	static void init();
 	static WindowMain* get();
 public:
+	ImgViewer* imgViewer;
+	TextBox* textBox;
 private:
 	WindowMain();
 	void onCreated() override;
-	void onMinMaxInfo(MINMAXINFO* mmi) override;
-	LRESULT onHitTest(const float& x, const float& y) override;
+	LRESULT onHitTest(const POINT pos) override;
+	void onSetCursor(bool* flag);
+	void onDown(POINT pt, bool isRight);
+	void onMove(POINT pt);
+	void onUp(POINT pt);
 private:
+	TitleBar* titleBar;
+	StatusBar* statusBar;
+	Ling::Node* splitter;
+	bool isDragging{ false };
 };
 

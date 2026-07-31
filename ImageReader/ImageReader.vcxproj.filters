@@ -21,31 +21,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="App.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowBase.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="WindowMain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="D2D.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ColorA.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Node.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Tip.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Event.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TitleBar.cpp">
@@ -54,16 +30,10 @@
     <ClCompile Include="StatusBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Loader.cpp">
+    <ClCompile Include="ImgViewer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ViewerImg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ViewerText.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="NodeScroll.cpp">
+    <ClCompile Include="TextBox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,31 +41,7 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="App.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowBase.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="WindowMain.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="D2D.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ColorA.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Tip.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Event.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TitleBar.h">
@@ -104,30 +50,23 @@
     <ClInclude Include="StatusBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Loader.h">
+    <ClInclude Include="ImgViewer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ViewerImg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ViewerText.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeScroll.h">
+    <ClInclude Include="TextBox.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="iconfont.ttf" />
+    <Font Include="Res\icon.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resource.rc">
+    <ResourceCompile Include="Res\Resource.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xsd Include="todo.md">
-      <Filter>头文件</Filter>
-    </Xsd>
+    <None Include="Res\PP-OCRv6_rec_tiny.onnx" />
+    <None Include="Res\PP-OCRv6_det_tiny.onnx" />
   </ItemGroup>
 </Project>

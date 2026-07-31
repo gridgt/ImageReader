@@ -1,82 +1,103 @@
 ﻿#include "pch.h"
-#include "D2D.h"
-#include "Node.h"
 #include "WindowMain.h"
-#include "Util.h"
-#include "Tip.h"
 #include "TitleBar.h"
-#include "Loader.h"
-#include "StatusBar.h"
 #include "WebSocket.h"
+#include "ImgViewer.h"
+#include "TextBox.h"
+#include "StatusBar.h"
 
 namespace {
     static std::unique_ptr<WindowMain> ins;
 }
-WindowMain::WindowMain() :WindowBase()
+WindowMain::WindowMain() : Ling::WinBase()
 {
-    setTitle(L"图像文字识别工具");
+    setTitle(L"图像控件演示");
     setSize(800, 600);
-    setPosScreenCenter();
+    setCenter();
+    onDestroy.add([this] { Ling::App::get()->quit(); });
+    createNativeWindow();
 }
 
 WindowMain::~WindowMain()
 {
 }
+
 void WindowMain::init()
 {
+    Ling::init();
+    Ling::D2D::get()->addFonts({ L"icon.ttf" });
     auto ptr = new WindowMain();
     ins.reset(ptr);
-    ptr->createNativeWindow(0, WS_POPUP | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
-    ptr->enableShadow();
-    ptr->show();
 }
-WindowMain* WindowMain::get()
-{
-    return ins.get();
-}
+
 void WindowMain::onCreated()
 {
-    root->setBackgroundColor(0xFFFFFFFF);
-    TitleBar::init(this);
-    Loader::init(this);
-    StatusBar::init(this);
+    enableShadow();
+    body->setBg(0xFFFFFFFF);
+    body->setFlexDirection(Ling::FlexDirection::Column);
+    titleBar = body->makeChild<TitleBar>();
+    auto content = body->makeChild<Ling::Node>();
+    content->setFlexGrow(1.f);
+    content->setFlexDirection(Ling::FlexDirection::Row);
+    imgViewer = content->makeChild<ImgViewer>();
+    splitter = content->makeChild<Ling::Node>();
+    splitter->setHeightPercent(100.f);
+    splitter->setWidth(3.f);
+    splitter->setBg(0xeeeeeeFF);
+    textBox = content->makeChild<TextBox>();
+    textBox->setWidth(260.f);
+    statusBar = body->makeChild<StatusBar>();
+    onCursor.add([this](bool* flag) {this->onSetCursor(flag);});
+    onMouseDown.add([this](POINT pt, bool isRight) {this->onDown(pt,isRight);});
+    onMouseMove.add([this](POINT pt) {this->onMove(pt);});
+    onMouseUp.add([this](POINT pt,bool isRight) {this->onUp(pt);});
+    show();
 }
 
-void WindowMain::onMinMaxInfo(MINMAXINFO* mmi)
+LRESULT WindowMain::onHitTest(const POINT pos)
 {
-    RECT workAreaRect;
-    BOOL getWorkAreaSuccess = SystemParametersInfo(SPI_GETWORKAREA, 0, &workAreaRect, 0);
-    mmi->ptMaxPosition.x = workAreaRect.left;
-    mmi->ptMaxPosition.y = workAreaRect.top;
-    mmi->ptMaxSize.x = workAreaRect.right - workAreaRect.left;
-    mmi->ptMaxSize.y = workAreaRect.bottom - workAreaRect.top;
-    mmi->ptMinTrackSize.x = 500; 
-    mmi->ptMinTrackSize.y = 360;
-}
-
-
-LRESULT WindowMain::onHitTest(const float& x, const float& y)
-{
-    const float border = 4 * dpi;        // 拖动边框宽度（逻辑 4px）
-    const float captionH = 30 * dpi;     // 标题栏高度（逻辑 30px）
-    const float btnsW = 102 * dpi;       // 右上角按钮总宽
-    bool left   = x < border;
-    bool right  = x >= w - border;
-    bool top    = y < border;
-    bool bottom = y >= h - border;
-    // 四个角优先
-    if (top && left)     return HTTOPLEFT;
-    if (top && right)    return HTTOPRIGHT;
-    if (bottom && left)  return HTBOTTOMLEFT;
-    if (bottom && right) return HTBOTTOMRIGHT;
-    // 四条边
-    if (left)   return HTLEFT;
-    if (right)  return HTRIGHT;
-    if (top)    return HTTOP;
-    if (bottom) return HTBOTTOM;
-    // 标题栏拖动区（避开右上角按钮）
-    if (y < captionH && x < w - btnsW) {
-        return HTCAPTION;
+    POINT pt = pos;
+    ScreenToClient(hwnd, &pt);
+    if (!isMaximized) {
+        auto result = borderHitTest(pt);
+        if (result != HTCLIENT) return result;
     }
-    return HTCLIENT;
+    return titleBar->hitCaption(pt);
+}
+
+void WindowMain::onSetCursor(bool* flag)
+{
+    POINT pt;
+    GetCursorPos(&pt);
+    ScreenToClient(hwnd, &pt);
+    if (!splitter->isPosIn(pt)) return;
+    *flag = true;
+    SetCursor(LoadCursor(nullptr, IDC_SIZEWE));
+}
+
+void WindowMain::onDown(POINT pt, bool isRight)
+{
+    if (isRight) return;
+    if (!splitter->isPosIn(pt)) return;
+    // 落在 splitter 上：开始拖拽
+    isDragging = true;
+    SetCapture(hwnd);
+}
+
+void WindowMain::onMove(POINT pt)
+{
+    if (!isDragging) return;
+    if (pt.x < 200) return;
+    auto textBoxW{ (w - pt.x) / dpi };
+    if (textBoxW < 120) return;
+
+    textBox->setWidth((w-pt.x)/dpi);
+    refresh();
+}
+
+void WindowMain::onUp(POINT pt)
+{
+    if (!isDragging) return;
+    isDragging = false;
+    ReleaseCapture();
 }
