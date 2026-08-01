@@ -124,9 +124,10 @@ void ImgViewer::drawRects(ID2D1DeviceContext* ctx, POINT surfaceOffset)
 
 	D2D1_MATRIX_3X2_F oldTransform;
 	ctx->GetTransform(&oldTransform);
-	auto imgTransform = D2D1::Matrix3x2F::Translation(dx, dy) * D2D1::Matrix3x2F::Scale(scale, scale);
+	// D2D 是行向量约定：A * B 表示「先 A 再 B」。原图坐标 -> 先等比缩放 -> 再平移居中 -> 最后叠加 surface tile offset
+	auto imgTransform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(dx, dy);
 	auto surfaceT = D2D1::Matrix3x2F::Translation((float)surfaceOffset.x, (float)surfaceOffset.y);
-	ctx->SetTransform(surfaceT * imgTransform);
+	ctx->SetTransform(imgTransform * surfaceT);
 
 	// 懒创建半透明画刷（淡绿色，alpha 0.35）—— 设备相关资源，第一次 paint 时建一次即可
 	if (!overlayBrush) {

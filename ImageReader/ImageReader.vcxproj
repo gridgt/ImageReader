@@ -126,8 +126,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shcore.lib;dwmapi.lib;windowsapp.lib;Shlwapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_world470.lib;zlib.lib;ittnotify.lib;ade.lib;quirc.lib;ippicvmt.lib;ippiw.lib;user32.lib;gdi32.lib;advapi32.lib;ole32.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv-4.7.0\build\install\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_core4150.lib;ippicvmt.lib;ippiw.lib;ipphal.lib;opencv_imgproc4150.lib;zlib.lib;ittnotify.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -152,8 +152,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shcore.lib;dwmapi.lib;windowsapp.lib;Shlwapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_world470.lib;zlib.lib;ittnotify.lib;ade.lib;quirc.lib;ippicvmt.lib;ippiw.lib;user32.lib;gdi32.lib;advapi32.lib;ole32.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv-4.7.0\build\install\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_core4150.lib;ippicvmt.lib;ippiw.lib;ipphal.lib;opencv_imgproc4150.lib;zlib.lib;ittnotify.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
