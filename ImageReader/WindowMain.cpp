@@ -11,15 +11,11 @@ namespace {
 }
 WindowMain::WindowMain() : Ling::WinBase()
 {
-    setTitle(L"图像控件演示");
+    setTitle(L"图像识别工具");
     setSize(800, 600);
     setCenter();
     onDestroy.add([this] { Ling::App::get()->quit(); });
-	onSizeChanged.add([this] { 
-        
-
-        scrollerBox->setHeight(h/dpi- 30 - 28);
-        });
+	onSizeChanged.add([this] {  scrollerBox->setHeight(h/dpi- 30 - 28); });
     createNativeWindow();
 }
 
@@ -74,10 +70,15 @@ void WindowMain::onSelectionChanged()
 
 void WindowMain::onKey(UINT vk)
 {
-    if (vk != 'C') return;
     if ((GetKeyState(VK_CONTROL) & 0x8000) == 0) return;
-    auto text = imgViewer->getDoc()->getSelectedText();
-    if (!text.empty()) Ling::Util::setTextToClipboard(text);
+    auto doc = imgViewer->getDoc();
+    if (vk == 'C') {
+        auto text = doc->getSelectedText();
+        if (!text.empty()) Ling::Util::setTextToClipboard(text);
+    }
+    else if (vk == 'A') {
+        if (doc->selectAll()) doc->notifyChanged();
+    }
 }
 
 LRESULT WindowMain::onHitTest(const POINT pos)

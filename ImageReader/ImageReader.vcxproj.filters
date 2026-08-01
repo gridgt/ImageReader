@@ -36,6 +36,9 @@
     <ClCompile Include="TextBox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="OcrDoc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -54,6 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TextBox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OcrDoc.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

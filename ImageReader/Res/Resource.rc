@@ -1,15 +1,15 @@
 ﻿#define APSTUDIO_READONLY_SYMBOLS
 #include "winres.h"
 #undef APSTUDIO_READONLY_SYMBOLS
-// 100 ICON "logo.ico"
+1 ICON "logo.ico"
 icon.ttf RCDATA "icon.ttf"
 PP-OCRv6_rec_tiny.onnx RCDATA "PP-OCRv6_rec_tiny.onnx"
 PP-OCRv6_det_tiny.onnx RCDATA "PP-OCRv6_det_tiny.onnx"
 
 // 配置可执行文件产品信息
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 2,4,24,0
-PRODUCTVERSION 2,4,24,0
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
 FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
 FILEFLAGS 0x1L
@@ -25,13 +25,13 @@ BEGIN
 		BLOCK "080404b0"
 		BEGIN
 			VALUE "CompanyName", "LiuXiaoLun"
-			VALUE "FileDescription", "Calendar"
-			VALUE "FileVersion", "2.4.24.0"
-			VALUE "InternalName", "Calendar.exe"
-			VALUE "LegalCopyright", "Copyright (C) LiuXiaoLun 2023-2026"
-			VALUE "OriginalFilename", "Calendar.exe"
-			VALUE "ProductName", "Calendar"
-			VALUE "ProductVersion", "2.4.24.0"
+			VALUE "FileDescription", "ImageReader"
+			VALUE "FileVersion", "1.0.0.0"
+			VALUE "InternalName", "ImageReader.exe"
+			VALUE "LegalCopyright", "Copyright (C) LiuXiaoLun 2026"
+			VALUE "OriginalFilename", "ImageReader.exe"
+			VALUE "ProductName", "ImageReader"
+			VALUE "ProductVersion", "1.0.0.0"
 		END
 		END
 		BLOCK "VarFileInfo"

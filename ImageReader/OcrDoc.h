@@ -58,6 +58,8 @@ public:
 	void setFocus(const TextPos& pos) { focus = pos; }
 	const TextPos& getFocus() const { return focus; }
 	void clearSelection() { anchor = focus = TextPos{}; }
+	// 全选。返回 false 表示没有可选内容（未识别 / 识别结果为空）。
+	bool selectAll();
 	bool hasSelection() const { return !(anchor == focus); }
 	// 归一化后的 [begin, end)
 	void getOrdered(TextPos& begin, TextPos& end) const;

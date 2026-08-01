@@ -3,6 +3,8 @@
 #include "ImgViewer.h"
 #include "TextBox.h"
 #include "WindowMain.h"
+#include <chrono>
+#include <format>
 
 StatusBar::StatusBar(Ling::WinBase* win) :Ling::Node(win)
 {
@@ -34,6 +36,11 @@ StatusBar::~StatusBar()
 {
 }
 
+void StatusBar::setStatusText(const std::wstring& text)
+{
+	label->setText(text);
+}
+
 void StatusBar::onClick()
 {
 	auto imgPath = getFilePath();
@@ -41,7 +48,17 @@ void StatusBar::onClick()
 		return;
 	}
 	auto cur = dynamic_cast<WindowMain*>(win);
+	setStatusText(L"图像识别开始");
+	// setText 内部只是 InvalidateRect，真正重绘要等回到消息循环。而 loadImg 里的
+	// OCR 是同步的、要跑好几秒 —— 不在这里同步强制重绘一次的话，「识别开始」
+	// 永远不会出现在屏幕上，用户直接看到的就是结束后的耗时文本。
+	UpdateWindow(win->hwnd);
+
+	const auto t0 = std::chrono::steady_clock::now();
 	cur->imgViewer->loadImg(imgPath);
+	const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now() - t0).count();
+	setStatusText(std::format(L"图像识别耗时 {} 毫秒", ms));
 }
 
 std::wstring StatusBar::getFilePath()

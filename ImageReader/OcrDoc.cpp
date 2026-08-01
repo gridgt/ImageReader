@@ -92,6 +92,22 @@ void OcrDoc::loadResult(const tinyocr::Result& result)
 	}
 }
 
+bool OcrDoc::selectAll()
+{
+	// 找第一个/最后一个非空行。空行（OCR 识别出空文本）夹在两端时如果算进选区，
+	// hasSelection 会为 true 但两侧都画不出任何高亮，看起来像没反应。
+	int first = -1, last = -1;
+	for (int i = 0; i < (int)lines.size(); ++i) {
+		if (lines[i].text.empty()) continue;
+		if (first < 0) first = i;
+		last = i;
+	}
+	if (first < 0) return false;
+	anchor = TextPos{ first, 0 };
+	focus = TextPos{ last, (int)lines[last].text.size() };
+	return true;
+}
+
 void OcrDoc::getOrdered(TextPos& begin, TextPos& end) const
 {
 	if (focus < anchor) { begin = focus; end = anchor; }
