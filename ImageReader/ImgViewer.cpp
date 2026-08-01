@@ -116,41 +116,86 @@ void ImgViewer::drawBitmap(ID2D1DeviceContext* ctx)
 
 void ImgViewer::drawRects(ID2D1DeviceContext* ctx, POINT surfaceOffset)
 {
-	if (!ctx || rects.empty() || !bitmap) return;
-
-	// 字符框的坐标原图坐标系（与 bitmap 同尺度），要画到 surface 上需要套上同样的 「等比缩放 + 居中」变换；再加上 BeginDraw 给的 surface tile offset。
+	if (!ctx || !bitmap || !doc.hasSelection()) return;
+	// 字符框是原图坐标系（与 bitmap 同尺度），要画到 surface 上需要套上和 drawBitmap 完全相同的「等比缩放 + 居中」变换；再加 BeginDraw 给的 surface tile offset。
 	float scale, dx, dy;
 	getDrawParams(scale, dx, dy);
-
 	D2D1_MATRIX_3X2_F oldTransform;
 	ctx->GetTransform(&oldTransform);
 	// D2D 是行向量约定：A * B 表示「先 A 再 B」。原图坐标 -> 先等比缩放 -> 再平移居中 -> 最后叠加 surface tile offset
 	auto imgTransform = D2D1::Matrix3x2F::Scale(scale, scale) * D2D1::Matrix3x2F::Translation(dx, dy);
 	auto surfaceT = D2D1::Matrix3x2F::Translation((float)surfaceOffset.x, (float)surfaceOffset.y);
 	ctx->SetTransform(imgTransform * surfaceT);
-
-	// 懒创建半透明画刷（淡绿色，alpha 0.35）—— 设备相关资源，第一次 paint 时建一次即可
+	// 懒创建半透明画刷（淡绿色）—— 设备相关资源，第一次 paint 时建一次即可
 	if (!overlayBrush) {
-		ctx->CreateSolidColorBrush(Ling::Color(0x597ef766).getD2DColor(), overlayBrush.GetAddressOf());
+		ctx->CreateSolidColorBrush(Ling::Color(0x389e0d66).getD2DColor(), overlayBrush.GetAddressOf());
 	}
-	for (auto& path : rects) {
-		if (path) ctx->FillGeometry(path.Get(), overlayBrush.Get());
+	// 只画选中区间内的字符框
+	const auto& lines = doc.getLines();
+	for (int li = 0; li < (int)lines.size(); ++li) {
+		int b, e;
+		if (!doc.getLineRange(li, b, e)) continue;
+		const auto& geoms = lines[li].charGeoms;
+		for (int i = b; i < e && i < (int)geoms.size(); ++i) {
+			if (geoms[i]) ctx->FillGeometry(geoms[i].Get(), overlayBrush.Get());
+		}
 	}
-
 	// 还原 transform，避免影响后续绘制
 	ctx->SetTransform(oldTransform);
 }
 
+bool ImgViewer::toImagePos(POINT pt, float& px, float& py) const
+{
+	if (!bitmap) return false;
+	float scale, dx, dy;
+	getDrawParams(scale, dx, dy);
+	if (scale <= 0.f) return false;
+	// pt 是窗口坐标；先减去控件原点，再逆着 drawBitmap 的变换回到原图坐标
+	px = ((float)pt.x - x - dx) / scale;
+	py = ((float)pt.y - y - dy) / scale;
+	return true;
+}
+
+bool ImgViewer::isPosInImage(POINT pt) const
+{
+	if (!bitmap) return false;
+	float scale, dx, dy;
+	getDrawParams(scale, dx, dy);
+	const D2D1_SIZE_F sz = bitmap->GetSize();
+	const float lx = x + dx, ty = y + dy;
+	return pt.x >= lx && pt.x < lx + sz.width * scale
+		&& pt.y >= ty && pt.y < ty + sz.height * scale;
+}
+
 void ImgViewer::onDown(POINT pt, bool isRight)
 {
+	if (isRight || doc.empty()) return;
+	if (!isPosInImage(pt)) return;
+	float px, py;
+	if (!toImagePos(pt, px, py)) return;
+	doc.setAnchor(doc.hitTestImage(px, py));
+	selecting = true;
+	SetCapture(win->hwnd);
+	doc.notifyChanged();
 }
 
 void ImgViewer::onMove(POINT pt)
 {
+	if (!selecting) return;
+	float px, py;
+	if (!toImagePos(pt, px, py)) return;
+	// 拖拽中不再要求落在图内 —— 越界时 hitTestImage 会吸附到首/尾，和浏览器选文本的手感一致
+	auto pos = doc.hitTestImage(px, py);
+	if (pos == doc.getFocus()) return;   // 没跨到新字符就不重画
+	doc.setFocus(pos);
+	doc.notifyChanged();
 }
 
 void ImgViewer::onUp(POINT pt)
 {
+	if (!selecting) return;
+	selecting = false;
+	ReleaseCapture();
 }
 
 void ImgViewer::layout()
@@ -184,27 +229,8 @@ void ImgViewer::readImg(const uint8_t* data, UINT w, UINT h)
 
 	tinyocr::TinyOcr ocr(opts);
 	auto result = ocr.run(bgr.data(), w, h, 3);
-	auto d2d = Ling::D2D::get();
-	std::vector<std::wstring> lines;
-	for (size_t i = 0; i < result.lines.size(); ++i) {
-		const auto& L = result.lines[i];
-		auto text = Ling::Util::convertToWStr(L.text.c_str());
-		lines.push_back(text);
-		for (size_t j = 0; j < L.words.size(); ++j) {
-			const auto& W = L.words[j];
-			ComPtr<ID2D1PathGeometry> path;
-			d2d->d2dFactory->CreatePathGeometry(path.GetAddressOf());
-			ComPtr<ID2D1GeometrySink> sink;
-			path->Open(sink.GetAddressOf());
-			sink->BeginFigure({ W.box[0].x, W.box[0].y }, D2D1_FIGURE_BEGIN_FILLED);
-			sink->AddLine({ W.box[1].x, W.box[1].y });
-			sink->AddLine({ W.box[2].x, W.box[2].y });
-			sink->AddLine({ W.box[3].x, W.box[3].y });
-			sink->EndFigure(D2D1_FIGURE_END_CLOSED);
-			sink->Close();
-			rects.push_back(path);
-		}
-	}
+	// OcrDoc 负责把 word box 对齐到行文本的字符下标，并预建每字符的路径几何
+	doc.loadResult(result);
 	auto cur = dynamic_cast<WindowMain*>(win);
-	cur->textBox->loadText(lines);
+	cur->textBox->loadText(&doc);
 }

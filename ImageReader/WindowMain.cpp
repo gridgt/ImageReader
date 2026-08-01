@@ -52,13 +52,32 @@ void WindowMain::onCreated()
     scrollerBox = content->makeChild<Ling::ScrollerBox>();
     scrollerBox->setWidth(260.f);
     scrollerBox->setHeight(h / dpi - 30 - 28);
-    textBox = scrollerBox->makeChild<TextBox>();    
+    textBox = scrollerBox->makeChild<TextBox>();
     statusBar = body->makeChild<StatusBar>();
+    // 图像侧和文本侧共享 ImgViewer 持有的那份 OcrDoc，任一侧改了选区都从这里回灌两侧
+    imgViewer->getDoc()->onSelectionChanged = [this] { onSelectionChanged(); };
     onCursor.add([this](bool* flag) {this->onSetCursor(flag);});
     onMouseDown.add([this](POINT pt, bool isRight) {this->onDown(pt,isRight);});
     onMouseMove.add([this](POINT pt) {this->onMove(pt);});
     onMouseUp.add([this](POINT pt,bool isRight) {this->onUp(pt);});
+    onKeyDown.add([this](UINT vk) {this->onKey(vk);});
     show();
+}
+
+void WindowMain::onSelectionChanged()
+{
+    // 图像侧拖拽时把右侧列表滚到选区末端，让联动高亮可见
+    if (imgViewer->isSelecting()) textBox->scrollFocusIntoView();
+    imgViewer->redrawSelection();
+    textBox->redrawSelection();
+}
+
+void WindowMain::onKey(UINT vk)
+{
+    if (vk != 'C') return;
+    if ((GetKeyState(VK_CONTROL) & 0x8000) == 0) return;
+    auto text = imgViewer->getDoc()->getSelectedText();
+    if (!text.empty()) Ling::Util::setTextToClipboard(text);
 }
 
 LRESULT WindowMain::onHitTest(const POINT pos)
@@ -77,9 +96,18 @@ void WindowMain::onSetCursor(bool* flag)
     POINT pt;
     GetCursorPos(&pt);
     ScreenToClient(hwnd, &pt);
-    if (!splitter->isPosIn(pt)) return;
-    *flag = true;
-    SetCursor(LoadCursor(nullptr, IDC_SIZEWE));
+    if (splitter->isPosIn(pt) || isDragging) {
+        *flag = true;
+        SetCursor(LoadCursor(nullptr, IDC_SIZEWE));
+        return;
+    }
+    // 文本可选区域给 I-beam。拖拽中即使鼠标移出去了也保持 I-beam，
+    // 否则边缘自动滚动时光标会来回跳。
+    if (imgViewer->isSelecting() || textBox->isSelecting()
+        || imgViewer->isPosInImage(pt) || textBox->isPosInContent(pt)) {
+        *flag = true;
+        SetCursor(LoadCursor(nullptr, IDC_IBEAM));
+    }
 }
 
 void WindowMain::onDown(POINT pt, bool isRight)

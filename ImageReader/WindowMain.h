@@ -22,6 +22,10 @@ private:
 	void onDown(POINT pt, bool isRight);
 	void onMove(POINT pt);
 	void onUp(POINT pt);
+	void onKey(UINT vk);
+	// 选区变化：两侧各自重画自己的 surface。不走 refresh()，
+	// 避免拖拽每一帧都触发一次完整 yoga 布局。
+	void onSelectionChanged();
 private:
 	TitleBar* titleBar;
 	StatusBar* statusBar;
