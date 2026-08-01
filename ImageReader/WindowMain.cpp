@@ -15,6 +15,11 @@ WindowMain::WindowMain() : Ling::WinBase()
     setSize(800, 600);
     setCenter();
     onDestroy.add([this] { Ling::App::get()->quit(); });
+	onSizeChanged.add([this] { 
+        
+
+        scrollerBox->setHeight(h/dpi- 30 - 28);
+        });
     createNativeWindow();
 }
 
@@ -44,8 +49,10 @@ void WindowMain::onCreated()
     splitter->setHeightPercent(100.f);
     splitter->setWidth(3.f);
     splitter->setBg(0xeeeeeeFF);
-    textBox = content->makeChild<TextBox>();
-    textBox->setWidth(260.f);
+    scrollerBox = content->makeChild<Ling::ScrollerBox>();
+    scrollerBox->setWidth(260.f);
+    scrollerBox->setHeight(h / dpi - 30 - 28);
+    textBox = scrollerBox->makeChild<TextBox>();    
     statusBar = body->makeChild<StatusBar>();
     onCursor.add([this](bool* flag) {this->onSetCursor(flag);});
     onMouseDown.add([this](POINT pt, bool isRight) {this->onDown(pt,isRight);});
@@ -88,10 +95,9 @@ void WindowMain::onMove(POINT pt)
 {
     if (!isDragging) return;
     if (pt.x < 200) return;
-    auto textBoxW{ (w - pt.x) / dpi };
-    if (textBoxW < 120) return;
-
-    textBox->setWidth((w-pt.x)/dpi);
+    auto scrollerBoxW{ (w - pt.x) / dpi };
+    if (scrollerBoxW < 120) return;
+    scrollerBox->setWidth((w-pt.x)/dpi);
     refresh();
 }
 

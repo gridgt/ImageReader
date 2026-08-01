@@ -13,6 +13,9 @@ ImgViewer::ImgViewer(Ling::WinBase* win) :Ling::Node(win)
 {
 	setHeightPercent(100.f);
 	setFlexGrow(1.f);
+	win->onMouseDown.add([this](POINT pt, bool isRight) {this->onDown(pt, isRight);});
+	win->onMouseMove.add([this](POINT pt) {this->onMove(pt);});
+	win->onMouseUp.add([this](POINT pt, bool isRight) {this->onUp(pt);});
 }
 
 ImgViewer::~ImgViewer()
@@ -127,16 +130,26 @@ void ImgViewer::drawRects(ID2D1DeviceContext* ctx, POINT surfaceOffset)
 
 	// 懒创建半透明画刷（淡绿色，alpha 0.35）—— 设备相关资源，第一次 paint 时建一次即可
 	if (!overlayBrush) {
-		auto d2d = Ling::D2D::get();
-		ctx->CreateSolidColorBrush( D2D1::ColorF(0.20f, 0.85f, 0.30f, 0.35f), overlayBrush.GetAddressOf());
+		ctx->CreateSolidColorBrush(Ling::Color(0x597ef766).getD2DColor(), overlayBrush.GetAddressOf());
 	}
-
 	for (auto& path : rects) {
 		if (path) ctx->FillGeometry(path.Get(), overlayBrush.Get());
 	}
 
 	// 还原 transform，避免影响后续绘制
 	ctx->SetTransform(oldTransform);
+}
+
+void ImgViewer::onDown(POINT pt, bool isRight)
+{
+}
+
+void ImgViewer::onMove(POINT pt)
+{
+}
+
+void ImgViewer::onUp(POINT pt)
+{
 }
 
 void ImgViewer::layout()
@@ -171,17 +184,11 @@ void ImgViewer::readImg(const uint8_t* data, UINT w, UINT h)
 	tinyocr::TinyOcr ocr(opts);
 	auto result = ocr.run(bgr.data(), w, h, 3);
 	auto d2d = Ling::D2D::get();
-	std::vector<Microsoft::WRL::ComPtr<IDWriteTextLayout>> texts;
-
+	std::vector<std::wstring> lines;
 	for (size_t i = 0; i < result.lines.size(); ++i) {
-
 		const auto& L = result.lines[i];
 		auto text = Ling::Util::convertToWStr(L.text.c_str());
-		Microsoft::WRL::ComPtr<IDWriteTextLayout> textLayout;
-		d2d->dwriteFactory->CreateTextLayout(text.data(), (UINT32)text.length(), d2d->baseTextFormat.Get(), FLT_MAX, FLT_MAX, textLayout.ReleaseAndGetAddressOf());
-		textLayout->SetFontSize(14.f * win->dpi, { 0, INT_MAX });
-		texts.push_back(textLayout);
-
+		lines.push_back(text);
 		for (size_t j = 0; j < L.words.size(); ++j) {
 			const auto& W = L.words[j];
 			ComPtr<ID2D1PathGeometry> path;
@@ -197,7 +204,6 @@ void ImgViewer::readImg(const uint8_t* data, UINT w, UINT h)
 			rects.push_back(path);
 		}
 	}
-
 	auto cur = dynamic_cast<WindowMain*>(win);
-	cur->textBox->loadText(texts);
+	cur->textBox->loadText(lines);
 }

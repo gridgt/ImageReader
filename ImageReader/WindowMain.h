@@ -13,6 +13,7 @@ public:
 public:
 	ImgViewer* imgViewer;
 	TextBox* textBox;
+	Ling::ScrollerBox* scrollerBox;
 private:
 	WindowMain();
 	void onCreated() override;
