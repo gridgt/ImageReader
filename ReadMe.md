@@ -1,1 +1,1 @@
-![演示视频](./Doc/1.mp4)
+<video src="./Doc/video.mp4" controls width="640"></video>
