@@ -128,7 +128,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_core4150.lib;opencv_imgproc4150.lib;zlib.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build_slim\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -155,7 +155,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_core4150.lib;opencv_imgproc4150.lib;zlib.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build_slim\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
