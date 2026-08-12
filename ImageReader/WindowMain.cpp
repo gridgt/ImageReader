@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include <filesystem>
 #include "WindowMain.h"
 #include "TitleBar.h"
 #include "WebSocket.h"
@@ -11,7 +12,7 @@ namespace {
 }
 WindowMain::WindowMain() : Ling::WinBase()
 {
-    setTitle(L"图像识别工具");
+    setTitle(L"Image Reader");
     setSize(800, 600);
     setCenter();
     onDestroy.add([this] { Ling::App::get()->quit(); });
@@ -26,9 +27,28 @@ WindowMain::~WindowMain()
 void WindowMain::init()
 {
     Ling::init();
+    Ling::App::get()->initArgs();
     Ling::D2D::get()->addFonts({ L"icon.ttf" });
     auto ptr = new WindowMain();
     ins.reset(ptr);
+    // 窗口已经显示出来了，再去啃识别这件耗时的活，用户不会对着黑屏等
+    ins->loadImgFromArgs();
+}
+
+void WindowMain::loadImgFromArgs()
+{
+    std::wstring imgPath, delImage;
+    // Ling 的 initArgs 是把参数原样当 key 入表的，所以按子串认，有没有 -- 前缀都行
+    for (auto& [key, val] : Ling::App::get()->args) {
+        if (key.find(L"image-path") != std::wstring::npos) imgPath = val;
+        else if (key.find(L"del-image") != std::wstring::npos) delImage = val;
+    }
+    if (imgPath.empty() || !std::filesystem::exists(imgPath)) return;
+    if (!statusBar->loadImg(imgPath)) return;
+    if (delImage != L"true") return;
+    // 宿主传过来的是它的缓存图，读完就删，别占着用户的磁盘。删不掉也不打扰用户
+    std::error_code ec;
+    std::filesystem::remove(imgPath, ec);
 }
 
 void WindowMain::onCreated()

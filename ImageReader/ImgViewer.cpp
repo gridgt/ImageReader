@@ -22,28 +22,37 @@ ImgViewer::~ImgViewer()
 {
 }
 
-void ImgViewer::loadImg(const std::wstring& imgPath)
+bool ImgViewer::loadImg(const std::wstring& imgPath)
 {
 	ComPtr<IWICImagingFactory> wicFactory;
 	auto hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory));
+	if (FAILED(hr)) return false;
 	ComPtr<IWICBitmapDecoder> decoder;
 	hr = wicFactory->CreateDecoderFromFilename(imgPath.data(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder);
+	if (FAILED(hr)) return false;
 	ComPtr<IWICBitmapFrameDecode> frame = nullptr;
 	hr = decoder->GetFrame(0, &frame);
+	if (FAILED(hr)) return false;
 	ComPtr<IWICFormatConverter> converter = nullptr;
 	hr = wicFactory->CreateFormatConverter(&converter);
+	if (FAILED(hr)) return false;
 	hr = converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.f, WICBitmapPaletteTypeMedianCut);
+	if (FAILED(hr)) return false;
 
 	auto d2d = Ling::D2D::get();
 	hr = d2d->deviceContext->CreateBitmapFromWicBitmap(converter.Get(), nullptr, &bitmap);
+	if (FAILED(hr)) return false;
 
 	UINT w = 0, h = 0;
 	converter->GetSize(&w, &h);
+	if (w == 0 || h == 0) return false;
 	std::vector<uint8_t> bgra(static_cast<size_t>(w) * h * 4);
-	converter->CopyPixels(nullptr, w * 4, static_cast<UINT>(bgra.size()), bgra.data());
+	hr = converter->CopyPixels(nullptr, w * 4, static_cast<UINT>(bgra.size()), bgra.data());
+	if (FAILED(hr)) return false;
 
 	readImg(bgra.data(), w, h);
 	win->refresh();
+	return true;
 }
 
 void ImgViewer::paint()

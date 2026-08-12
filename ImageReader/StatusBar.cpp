@@ -20,8 +20,8 @@ StatusBar::StatusBar(Ling::WinBase* win) :Ling::Node(win)
     label->setMarginLeft(8.f);
 
     btn = makeChild<Ling::Button>();
-    btn->setText(L"加载图像");
-    btn->setWidth(68.f);
+    btn->setText(L"Load Image");
+    btn->setWidth(82.f);
     btn->setHeight(22.f);
     btn->setBg(0x85a5ffFF);
     btn->setHoverBg(0x597ef7FF);
@@ -47,18 +47,28 @@ void StatusBar::onClick()
 	if (imgPath.empty()) {
 		return;
 	}
+	loadImg(imgPath);
+}
+
+bool StatusBar::loadImg(const std::wstring& imgPath)
+{
 	auto cur = dynamic_cast<WindowMain*>(win);
-	setStatusText(L"图像识别开始");
+	setStatusText(L"Start Read");
 	// setText 内部只是 InvalidateRect，真正重绘要等回到消息循环。而 loadImg 里的
 	// OCR 是同步的、要跑好几秒 —— 不在这里同步强制重绘一次的话，「识别开始」
 	// 永远不会出现在屏幕上，用户直接看到的就是结束后的耗时文本。
 	UpdateWindow(win->hwnd);
 
 	const auto t0 = std::chrono::steady_clock::now();
-	cur->imgViewer->loadImg(imgPath);
+	auto success = cur->imgViewer->loadImg(imgPath);
 	const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::steady_clock::now() - t0).count();
-	setStatusText(std::format(L"图像识别耗时 {} 毫秒", ms));
+	if (!success) {
+		setStatusText(L"Load Image Error");
+		return false;
+	}
+	setStatusText(std::format(L"Use {} ms", ms));
+	return true;
 }
 
 std::wstring StatusBar::getFilePath()

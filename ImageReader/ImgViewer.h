@@ -8,7 +8,8 @@ class ImgViewer :public Ling::Node
 public:
 	ImgViewer(Ling::WinBase* win);
 	~ImgViewer();
-	void loadImg(const std::wstring& imgPath);
+	// 解码 + 识别，成功返回 true；路径不对或者图解不开都算失败
+	bool loadImg(const std::wstring& imgPath);
 	// 选区由 TextBox 改动后，主窗口调这里重画高亮
 	void redrawSelection() { paint(); }
 	// 鼠标是否落在实际绘制出的位图矩形内（居中留白不算）
