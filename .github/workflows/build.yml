@@ -37,15 +37,19 @@ jobs:
 
       # vcvars64: на windows-latest CMake не находит VS через vswhere
       # (runner-сервис), поэтому загружаем dev-окружение явно.
-      - name: Load MSVC dev environment
+      # Пин на VS2022: единый тулсет v143/14.44 (все проекты и onnxruntime),
+      # а не VS2026/v145 — избегаем несовместимости ABI и строгости 14.51.
+      - name: Load MSVC dev environment (VS2022)
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vs-install: C:\Program Files\Microsoft Visual Studio\2022\Enterprise
 
       - name: Cache onnxruntime static
         id: cache-ort
         uses: actions/cache@v5
         with:
           path: third_party/onnxruntime-static
-          key: onnxruntime-static-1.23.2-msvc2022
+          key: onnxruntime-static-1.23.2-vs2022-v2
 
       - name: Build onnxruntime static
         if: steps.cache-ort.outputs.cache-hit != 'true'
@@ -54,13 +58,20 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           git clone --branch v1.23.2 --single-branch https://github.com/microsoft/onnxruntime.git onnxruntime-src
-          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator Ninja --enable_msvc_static_runtime --compile_no_warning_as_error --parallel
+          # --target onnxruntime: собираем только саму статическую библиотеку
+          # (без тестовых exe) — детерминированный вывод onnxruntime.lib.
+          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator Ninja --enable_msvc_static_runtime --compile_no_warning_as_error --target onnxruntime --parallel
           New-Item -ItemType Directory -Force third_party/onnxruntime-static/include, third_party/onnxruntime-static/lib | Out-Null
           Copy-Item onnxruntime-src/include/onnxruntime/*.h third_party/onnxruntime-static/include/ -Force
           $cfg = Get-ChildItem -Recurse ort-build -Filter onnxruntime_config.h -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($cfg) { Copy-Item $cfg.FullName third_party/onnxruntime-static/include/ }
-          $lib = Get-ChildItem -Recurse ort-build -Filter onnxruntime.lib -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $lib) { throw "onnxruntime.lib not found in ort-build" }
+          $lib = Get-ChildItem -Recurse ort-build -Filter "onnxruntime.lib" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $lib) {
+            $found = Get-ChildItem -Recurse ort-build -Filter "*.lib" -ErrorAction SilentlyContinue |
+              Where-Object { $_.FullName -match 'ort-build[\\/]Release' -and $_.Name -notmatch 'gtest|gmock' } |
+              Select-Object -First 20
+            throw "onnxruntime.lib not found in ort-build. Candidates: $($found.Name -join '; ')"
+          }
           Copy-Item $lib.FullName third_party/onnxruntime-static/lib/
 
       # ---- OpenCV (статик, core+imgproc, /MT) из исходников ----
