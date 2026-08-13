@@ -54,7 +54,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           git clone --branch v1.23.2 --single-branch https://github.com/microsoft/onnxruntime.git onnxruntime-src
-          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator Ninja --enable_msvc_static_runtime --parallel
+          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator Ninja --enable_msvc_static_runtime --compile_no_warning_as_error --parallel
           New-Item -ItemType Directory -Force third_party/onnxruntime-static/include, third_party/onnxruntime-static/lib | Out-Null
           Copy-Item onnxruntime-src/include/onnxruntime/*.h third_party/onnxruntime-static/include/ -Force
           $cfg = Get-ChildItem -Recurse ort-build -Filter onnxruntime_config.h -ErrorAction SilentlyContinue | Select-Object -First 1
