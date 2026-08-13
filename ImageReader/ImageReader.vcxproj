@@ -135,7 +135,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;$(OpenCVLibs);windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>WindowsApp.lib;ws2_32.lib;advapi32.lib;bcrypt.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;$(OpenCVLibs);windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\$(OrtSdkDir)\lib;$(ProjectDir)..\third_party\$(OpenCVLibDir);$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
@@ -162,7 +162,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;$(OpenCVLibs);windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>WindowsApp.lib;ws2_32.lib;advapi32.lib;bcrypt.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;$(OpenCVLibs);windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\$(OrtSdkDir)\lib;$(ProjectDir)..\third_party\$(OpenCVLibDir);$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
