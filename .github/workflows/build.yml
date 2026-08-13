@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout (with submodules)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: true
           fetch-depth: 1
@@ -25,13 +25,13 @@ jobs:
       - name: Apply patches to submodules
         shell: pwsh
         run: |
-          git -C third_party/TinyOCR apply --verbose ci/patches/tinyocr.patch
-          git -C third_party/Ling apply --verbose ci/patches/ling.patch
+          git -C third_party/TinyOCR apply --verbose "$env:GITHUB_WORKSPACE/ci/patches/tinyocr.patch"
+          git -C third_party/Ling apply --verbose "$env:GITHUB_WORKSPACE/ci/patches/ling.patch"
 
       # Тяжёлые бинарники в git не кладём — скачиваем в CI (кэшируется).
       - name: Cache onnxruntime + opencv
         id: cache-sdk
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             third_party/onnxruntime
@@ -57,7 +57,7 @@ jobs:
           Remove-Item opencv.exe, third_party/opencv-extract -Recurse -Force
 
       - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       - name: Build Clipper2
         shell: pwsh
@@ -86,7 +86,7 @@ jobs:
           Copy-Item third_party/opencv/build/x64/vc16/bin/opencv_world4140.dll x64/Release/
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ImageReader-windows-x64
           path: |
