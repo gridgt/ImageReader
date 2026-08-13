@@ -1,0 +1,94 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 1
+
+      # Патчи к сабмодулям xland/TinyOCR и xland/Ling:
+      #   - toolset v145 -> v143 (runners имеют только VS2022/v143)
+      #   - include/библиотечные пути относительно проекта
+      #   - фикс lambda [chars] в Ling/include/Util.h
+      - name: Apply patches to submodules
+        shell: pwsh
+        run: |
+          git -C third_party/TinyOCR apply --verbose ci/patches/tinyocr.patch
+          git -C third_party/Ling apply --verbose ci/patches/ling.patch
+
+      # Тяжёлые бинарники в git не кладём — скачиваем в CI (кэшируется).
+      - name: Cache onnxruntime + opencv
+        id: cache-sdk
+        uses: actions/cache@v4
+        with:
+          path: |
+            third_party/onnxruntime
+            third_party/opencv
+          key: sdk-ort1.23.2-opencv4.14.0
+
+      - name: Download onnxruntime 1.23.2
+        if: steps.cache-sdk.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/microsoft/onnxruntime/releases/download/v1.23.2/onnxruntime-win-x64-1.23.2.zip" -OutFile ort.zip
+          7z x ort.zip -othird_party/ort-extract -y | Out-Null
+          Move-Item third_party/ort-extract/onnxruntime-win-x64-1.23.2 third_party/onnxruntime
+          Remove-Item ort.zip, third_party/ort-extract -Recurse -Force
+
+      - name: Download OpenCV 4.14.0
+        if: steps.cache-sdk.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/opencv/opencv/releases/download/4.14.0/opencv-4.14.0-windows.exe" -OutFile opencv.exe
+          7z x opencv.exe -othird_party/opencv-extract -y | Out-Null
+          Move-Item third_party/opencv-extract/opencv third_party/opencv
+          Remove-Item opencv.exe, third_party/opencv-extract -Recurse -Force
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Clipper2
+        shell: pwsh
+        run: msbuild third_party/TinyOCR/Clipper2/Clipper2.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\TinyOCR\"
+
+      - name: Build TinyOCR
+        shell: pwsh
+        run: msbuild third_party/TinyOCR/TinyOCR/TinyOCR.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\TinyOCR\"
+
+      - name: Build yoga
+        shell: pwsh
+        run: msbuild third_party/Ling/yoga/yoga.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\Ling\"
+
+      - name: Build Ling
+        shell: pwsh
+        run: msbuild third_party/Ling/Ling.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\Ling\"
+
+      - name: Build ImageReader
+        shell: pwsh
+        run: msbuild ImageReader/ImageReader.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\"
+
+      - name: Copy runtime DLLs next to exe
+        shell: pwsh
+        run: |
+          Copy-Item third_party/onnxruntime/lib/onnxruntime.dll, third_party/onnxruntime/lib/onnxruntime_providers_shared.dll x64/Release/
+          Copy-Item third_party/opencv/build/x64/vc16/bin/opencv_world4140.dll x64/Release/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImageReader-windows-x64
+          path: |
+            x64/Release/ImageReader.exe
+            x64/Release/*.dll

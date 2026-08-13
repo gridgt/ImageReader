@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -118,7 +118,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>D:\project\Ling;D:\project\TinyOCR;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\third_party\Ling;$(ProjectDir)..\third_party\TinyOCR;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -127,8 +127,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_core4150.lib;opencv_imgproc4150.lib;zlib.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_world4140.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\onnxruntime\lib;$(ProjectDir)..\third_party\opencv\build\x64\vc16\lib;$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -145,7 +145,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>D:\project\Ling;D:\project\TinyOCR;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\third_party\Ling;$(ProjectDir)..\third_party\TinyOCR;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -154,8 +154,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_core4150.lib;opencv_imgproc4150.lib;zlib.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\project\TinyOCR\x64\$(Configuration)\;D:\sdk\onnxruntime-v1.23.2-windows-vs2022-x64-static-mt\lib;D:\sdk\opencv\build\install\x64\vc18\staticlib;D:\project\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_world4140.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\onnxruntime\lib;$(ProjectDir)..\third_party\opencv\build\x64\vc16\lib;$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>

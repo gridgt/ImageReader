@@ -7,3 +7,8 @@
 **/Debug/**
 **/Release/**
 **/x64/**
+# SDK, качается в CI (actions/cache) и не коммитится
+/third_party/onnxruntime/
+/third_party/opencv/
+# дубликат активной rec-модели (активная — в ImageReader/Res/)
+/ocr_models/PP-OCRv5_eslav_rec_dict.onnx

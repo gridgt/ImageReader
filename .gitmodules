@@ -1,0 +1,6 @@
+[submodule "third_party/TinyOCR"]
+	path = third_party/TinyOCR
+	url = https://github.com/xland/TinyOCR.git
+[submodule "third_party/Ling"]
+	path = third_party/Ling
+	url = https://github.com/xland/Ling.git
