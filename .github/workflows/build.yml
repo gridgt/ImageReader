@@ -20,7 +20,8 @@ jobs:
 
       # Патчи к сабмодулям xland/TinyOCR и xland/Ling:
       #   - toolset v145 -> v143 (runners имеют только VS2022/v143)
-      #   - include/библиотечные пути относительно проекта
+      #   - include/библиотечные пути через MSBuild-свойства (локально динамика,
+      #     CI передаёт статику /p:...)
       #   - фикс lambda [chars] в Ling/include/Util.h
       - name: Apply patches to submodules
         shell: pwsh
@@ -28,33 +29,54 @@ jobs:
           git -C third_party/TinyOCR apply --verbose "$env:GITHUB_WORKSPACE/ci/patches/tinyocr.patch"
           git -C third_party/Ling apply --verbose "$env:GITHUB_WORKSPACE/ci/patches/ling.patch"
 
-      # Тяжёлые бинарники в git не кладём — скачиваем в CI (кэшируется).
-      - name: Cache onnxruntime + opencv
-        id: cache-sdk
+      # ---- onnxruntime (статик, /MT) из исходников ----
+      - name: Cache onnxruntime static
+        id: cache-ort
         uses: actions/cache@v5
         with:
-          path: |
-            third_party/onnxruntime
-            third_party/opencv
-          key: sdk-ort1.23.2-opencv4.14.0
+          path: third_party/onnxruntime-static
+          key: onnxruntime-static-1.23.2-msvc2022
 
-      - name: Download onnxruntime 1.23.2
-        if: steps.cache-sdk.outputs.cache-hit != 'true'
+      - name: Build onnxruntime static
+        if: steps.cache-ort.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/microsoft/onnxruntime/releases/download/v1.23.2/onnxruntime-win-x64-1.23.2.zip" -OutFile ort.zip
-          7z x ort.zip -othird_party/ort-extract -y | Out-Null
-          Move-Item third_party/ort-extract/onnxruntime-win-x64-1.23.2 third_party/onnxruntime
-          Remove-Item ort.zip, third_party/ort-extract -Recurse -Force
+          git clone --branch v1.23.2 --single-branch https://github.com/microsoft/onnxruntime.git onnxruntime-src
+          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator "Visual Studio 17 2022" --enable_msvc_static_runtime --parallel
+          New-Item -ItemType Directory -Force third_party/onnxruntime-static/include, third_party/onnxruntime-static/lib | Out-Null
+          Copy-Item onnxruntime-src/include/onnxruntime/*.h third_party/onnxruntime-static/include/ -Force
+          $cfg = Get-ChildItem -Recurse ort-build -Filter onnxruntime_config.h -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($cfg) { Copy-Item $cfg.FullName third_party/onnxruntime-static/include/ }
+          $lib = Get-ChildItem -Recurse ort-build -Filter onnxruntime.lib -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $lib) { throw "onnxruntime.lib not found in ort-build" }
+          Copy-Item $lib.FullName third_party/onnxruntime-static/lib/
 
-      - name: Download OpenCV 4.14.0
-        if: steps.cache-sdk.outputs.cache-hit != 'true'
+      # ---- OpenCV (статик, core+imgproc, /MT) из исходников ----
+      - name: Cache opencv static
+        id: cache-cv
+        uses: actions/cache@v5
+        with:
+          path: third_party/opencv-static
+          key: opencv-static-4.14.0-msvc2022
+
+      - name: Build opencv static
+        if: steps.cache-cv.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/opencv/opencv/releases/download/4.14.0/opencv-4.14.0-windows.exe" -OutFile opencv.exe
-          7z x opencv.exe -othird_party/opencv-extract -y | Out-Null
-          Move-Item third_party/opencv-extract/opencv third_party/opencv
-          Remove-Item opencv.exe, third_party/opencv-extract -Recurse -Force
+          Invoke-WebRequest -Uri "https://github.com/opencv/opencv/archive/refs/tags/4.14.0.tar.gz" -OutFile opencv.tar.gz
+          tar -xzf opencv.tar.gz
+          cmake -S opencv-4.14.0 -B opencv-build -G "Visual Studio 17 2022" -A x64 `
+            -DBUILD_LIST=core,imgproc -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF `
+            -DBUILD_PERF_TESTS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_opencv_apps=OFF `
+            -DBUILD_opencv_python_bindings_generator=OFF -DBUILD_opencv_java_bindings_generator=OFF `
+            -DWITH_IPP=OFF -DWITH_OPENCL=OFF -DWITH_LAPACK=OFF -DWITH_EIGEN=OFF `
+            -DWITH_ZLIB=OFF -DWITH_JPEG=OFF -DWITH_PNG=OFF -DWITH_TIFF=OFF -DWITH_WEBP=OFF `
+            -DWITH_ITT=OFF -DWITH_OPENMP=OFF -DWITH_PROTOBUF=OFF `
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded `
+            -DCMAKE_INSTALL_PREFIX="$env:GITHUB_WORKSPACE/third_party/opencv-static"
+          cmake --build opencv-build --config Release --parallel 4
+          cmake --install opencv-build --config Release
+          if (-not (Test-Path third_party/opencv-static/lib/opencv_core4140.lib)) { throw "opencv_core4140.lib not found" }
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v3
@@ -65,7 +87,7 @@ jobs:
 
       - name: Build TinyOCR
         shell: pwsh
-        run: msbuild third_party/TinyOCR/TinyOCR/TinyOCR.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\TinyOCR\"
+        run: msbuild third_party/TinyOCR/TinyOCR/TinyOCR.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\TinyOCR\" "/p:OpenCVIncDir=opencv-static\include" "/p:OrtIncDir=onnxruntime-static\include"
 
       - name: Build yoga
         shell: pwsh
@@ -75,20 +97,12 @@ jobs:
         shell: pwsh
         run: msbuild third_party/Ling/Ling.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\third_party\Ling\"
 
-      - name: Build ImageReader
+      - name: Build ImageReader (static link)
         shell: pwsh
-        run: msbuild ImageReader/ImageReader.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\"
+        run: msbuild ImageReader/ImageReader.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\" "/p:OrtSdkDir=onnxruntime-static" "/p:OpenCVLibDir=opencv-static\lib" "/p:OpenCVLibs=opencv_core4140.lib;opencv_imgproc4140.lib"
 
-      - name: Copy runtime DLLs next to exe
-        shell: pwsh
-        run: |
-          Copy-Item third_party/onnxruntime/lib/onnxruntime.dll, third_party/onnxruntime/lib/onnxruntime_providers_shared.dll x64/Release/
-          Copy-Item third_party/opencv/build/x64/vc16/bin/opencv_world4140.dll x64/Release/
-
-      - name: Upload artifact
+      - name: Upload artifact (single exe)
         uses: actions/upload-artifact@v5
         with:
-          name: ImageReader-windows-x64
-          path: |
-            x64/Release/ImageReader.exe
-            x64/Release/*.dll
+          name: ImageReader-windows-x64-static
+          path: x64/Release/ImageReader.exe

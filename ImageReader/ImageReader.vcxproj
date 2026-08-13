@@ -70,6 +70,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <!-- SDK: по умолчанию динамические (локальная сборка); CI передаёт статику:
+       /p:OrtSdkDir=onnxruntime-static /p:OpenCVLibDir=opencv-static\lib
+       /p:OpenCVLibs=opencv_core4140.lib;opencv_imgproc4140.lib -->
+  <PropertyGroup>
+    <OrtSdkDir Condition="'$(OrtSdkDir)'==''">onnxruntime</OrtSdkDir>
+    <OpenCVLibDir Condition="'$(OpenCVLibDir)'==''">opencv\build\x64\vc16\lib</OpenCVLibDir>
+    <OpenCVLibs Condition="'$(OpenCVLibs)'==''">opencv_world4140.lib</OpenCVLibs>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)$(Platform)\$(Configuration)Temp\</IntDir>
   </PropertyGroup>
@@ -127,8 +135,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_world4140.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\onnxruntime\lib;$(ProjectDir)..\third_party\opencv\build\x64\vc16\lib;$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;$(OpenCVLibs);windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\$(OrtSdkDir)\lib;$(ProjectDir)..\third_party\$(OpenCVLibDir);$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -154,8 +162,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;opencv_world4140.lib;windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\onnxruntime\lib;$(ProjectDir)..\third_party\opencv\build\x64\vc16\lib;$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;runtimeobject.lib;d3d11.lib;d2d1.lib;dwrite.lib;user32.lib;Shcore.lib;dwmapi.lib;TinyOCR.lib;Clipper2.lib;onnxruntime.lib;$(OpenCVLibs);windowscodecs.lib;Ling.lib;yoga.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\third_party\TinyOCR\x64\$(Configuration)\;$(ProjectDir)..\third_party\$(OrtSdkDir)\lib;$(ProjectDir)..\third_party\$(OpenCVLibDir);$(ProjectDir)..\third_party\Ling\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>

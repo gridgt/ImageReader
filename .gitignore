@@ -10,5 +10,14 @@
 # SDK, качается в CI (actions/cache) и не коммитится
 /third_party/onnxruntime/
 /third_party/opencv/
+# статические SDK (CI строит из исходников и кэширует)
+/third_party/onnxruntime-static/
+/third_party/opencv-static/
+# временные исходники/сборки SDK в CI
+/onnxruntime-src/
+/ort-build/
+/opencv-build/
+/opencv-4.14.0/
+/opencv.tar.gz
 # дубликат активной rec-модели (активная — в ImageReader/Res/)
 /ocr_models/PP-OCRv5_eslav_rec_dict.onnx
