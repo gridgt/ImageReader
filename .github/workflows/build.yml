@@ -48,6 +48,7 @@ jobs:
           key: onnxruntime-static-1.23.2-v2
 
       - name: Build onnxruntime static
+        id: build-ort
         if: steps.cache-ort.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
@@ -72,6 +73,15 @@ jobs:
           Remove-Item third_party/onnxruntime-static/liblist.rsp
           Write-Output "merged onnxruntime.lib: $((Get-Item third_party/onnxruntime-static/lib/onnxruntime.lib).Length) bytes"
 
+      # Явный save: actions/cache не сохраняет при падении джобы, поэтому кэшируем
+      # onnxruntime сразу после успешной сборки (до OpenCV и линковки).
+      - name: Save onnxruntime cache
+        if: steps.cache-ort.outputs.cache-hit != 'true' && steps.build-ort.outcome == 'success'
+        uses: actions/cache/save@v5
+        with:
+          path: third_party/onnxruntime-static
+          key: onnxruntime-static-1.23.2-v2
+
       # ---- OpenCV (статик, core+imgproc, /MT) из исходников ----
       - name: Cache opencv static
         id: cache-cv
@@ -81,6 +91,7 @@ jobs:
           key: opencv-static-4.14.0-msvc2022
 
       - name: Build opencv static
+        id: build-cv
         if: steps.cache-cv.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
@@ -108,7 +119,25 @@ jobs:
           cmake @cvArgs
           cmake --build opencv-build --config Release --parallel 4
           cmake --install opencv-build --config Release
-          if (-not (Test-Path third_party/opencv-static/lib/opencv_core4140.lib)) { throw "opencv_core4140.lib not found" }
+          # Статичные либы OpenCV собираются в build-дереве; имена могут различаться
+          # (opencv_core4140.lib / opencv_world4140.lib / без суффикса). Собираем все
+          # *.lib в lib/ и запоминаем реальные имена для линковки ImageReader.
+          $libDir = "third_party/opencv-static/lib"
+          New-Item -ItemType Directory -Force $libDir | Out-Null
+          Get-ChildItem -Recurse opencv-build -Filter "*.lib" -ErrorAction SilentlyContinue |
+            ForEach-Object { Copy-Item $_.FullName $libDir -Force }
+          $ocvLibs = (Get-ChildItem $libDir -Filter "*.lib" -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty Name) -join ';'
+          if (-not $ocvLibs) { throw "no *.lib produced by OpenCV build" }
+          $ocvLibs | Set-Content -NoNewline -Encoding ascii opencv_libs.txt
+          Write-Output "OpenCV libs: $ocvLibs"
+
+      - name: Save opencv cache
+        if: steps.cache-cv.outputs.cache-hit != 'true' && steps.build-cv.outcome == 'success'
+        uses: actions/cache/save@v5
+        with:
+          path: third_party/opencv-static
+          key: opencv-static-4.14.0-msvc2022
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v3
@@ -131,7 +160,9 @@ jobs:
 
       - name: Build ImageReader (static link)
         shell: pwsh
-        run: msbuild ImageReader/ImageReader.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\" "/p:OrtSdkDir=onnxruntime-static" "/p:OpenCVLibDir=opencv-static\lib" "/p:OpenCVLibs=opencv_core4140.lib;opencv_imgproc4140.lib"
+        run: |
+          $ocv = if (Test-Path opencv_libs.txt) { Get-Content opencv_libs.txt -Raw } else { "opencv_core4140.lib;opencv_imgproc4140.lib" }
+          msbuild ImageReader/ImageReader.vcxproj /m /nologo /p:Configuration=Release /p:Platform=x64 "/p:SolutionDir=${{ github.workspace }}\" "/p:OrtSdkDir=onnxruntime-static" "/p:OpenCVLibDir=opencv-static\lib" "/p:OpenCVLibs=$ocv"
 
       - name: Upload artifact (single exe)
         uses: actions/upload-artifact@v5
