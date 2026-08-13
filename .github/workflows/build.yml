@@ -30,6 +30,11 @@ jobs:
           git -C third_party/Ling apply --verbose "$env:GITHUB_WORKSPACE/ci/patches/ling.patch"
 
       # ---- onnxruntime (статик, /MT) из исходников ----
+      - name: Setup Python (для onnxruntime build.py)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Cache onnxruntime static
         id: cache-ort
         uses: actions/cache@v5
@@ -41,6 +46,8 @@ jobs:
         if: steps.cache-ort.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
           git clone --branch v1.23.2 --single-branch https://github.com/microsoft/onnxruntime.git onnxruntime-src
           python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator "Visual Studio 17 2022" --enable_msvc_static_runtime --parallel
           New-Item -ItemType Directory -Force third_party/onnxruntime-static/include, third_party/onnxruntime-static/lib | Out-Null
@@ -63,6 +70,8 @@ jobs:
         if: steps.cache-cv.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
           Invoke-WebRequest -Uri "https://github.com/opencv/opencv/archive/refs/tags/4.14.0.tar.gz" -OutFile opencv.tar.gz
           tar -xzf opencv.tar.gz
           cmake -S opencv-4.14.0 -B opencv-build -G "Visual Studio 17 2022" -A x64 `
