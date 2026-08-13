@@ -35,6 +35,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      # vcvars64: на windows-latest CMake не находит VS через vswhere
+      # (runner-сервис), поэтому загружаем dev-окружение явно.
+      - name: Load MSVC dev environment
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Cache onnxruntime static
         id: cache-ort
         uses: actions/cache@v5
@@ -49,7 +54,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           git clone --branch v1.23.2 --single-branch https://github.com/microsoft/onnxruntime.git onnxruntime-src
-          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator "Visual Studio 17 2022" --enable_msvc_static_runtime --parallel
+          python onnxruntime-src/tools/ci_build/build.py --config Release --build_dir ort-build --skip_tests --cmake_generator Ninja --enable_msvc_static_runtime --parallel
           New-Item -ItemType Directory -Force third_party/onnxruntime-static/include, third_party/onnxruntime-static/lib | Out-Null
           Copy-Item onnxruntime-src/include/onnxruntime/*.h third_party/onnxruntime-static/include/ -Force
           $cfg = Get-ChildItem -Recurse ort-build -Filter onnxruntime_config.h -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -74,7 +79,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           Invoke-WebRequest -Uri "https://github.com/opencv/opencv/archive/refs/tags/4.14.0.tar.gz" -OutFile opencv.tar.gz
           tar -xzf opencv.tar.gz
-          cmake -S opencv-4.14.0 -B opencv-build -G "Visual Studio 17 2022" -A x64 `
+          cmake -S opencv-4.14.0 -B opencv-build -G Ninja -DCMAKE_BUILD_TYPE=Release `
             -DBUILD_LIST=core,imgproc -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF `
             -DBUILD_PERF_TESTS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_opencv_apps=OFF `
             -DBUILD_opencv_python_bindings_generator=OFF -DBUILD_opencv_java_bindings_generator=OFF `
